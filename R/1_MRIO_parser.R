@@ -3,12 +3,14 @@
 # Parsing tables for one year can take a lot of time. Makes sure to unzip the folders beforehand.
 
 
-TIME <- 1995:2022
+
 
 # year <- 1995
 # Do you want to compile the technology matrix (A) only and/or the Leontief Inverse (set 0 or 1 respectively)
 parse_A <- 1
 parse_L <- 1
+
+# year <- 1990
 
 for(year in TIME)
 {
@@ -22,13 +24,13 @@ for(year in TIME)
                         ignore.case = T)
   
     # Get index and filename of transaction matrix in basic prices
-    i <- grep(str_c("T-Results_",year,"_059_Markup001"), files)
+    i <- grep(str_c("T-Results_",year,"_0",ver,"_Markup001"), files)
     
     # Load transaction matrix in basic prices
     T <- fread( str_c(path$rawMRIO, files[i]) )
     
     # Get index and filename of final demand matrix in basic prices
-    i <- grep(str_c("Y-Results_",year,"_059_Markup001"), files)
+    i <- grep(str_c("Y-Results_",year,"_0",ver,"_Markup001"), files)
     
     # Load transaction matrix in basic prices
     Y_raw <- fread( str_c(path$rawMRIO, files[i]) )

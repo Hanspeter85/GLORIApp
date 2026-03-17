@@ -11,15 +11,12 @@ SecConc <- read.xlsx( str_c("./input/", filename$labels), sheet = 8, colNames = 
 
 # Clean look-up table for unique sector list and sector aggregation:
 tmp <- SecConc %>% 
-  pivot_longer(cols = colnames(SecConc)[-1]) %>% 
+  pivot_longer(cols = -X1, names_to = "Sector_group") %>% 
   filter(value == 1) %>% 
-  select(X1, name) %>%
-  mutate(name = str_replace_all(name, "[.]", " ")) %>% 
-  `colnames<-`(c("Sector_names", "Sector_group")) 
+  select(-value) %>% 
+  mutate(Sector_group = str_replace_all(Sector_group, "[.]", " ")) 
 
-# Clean the aggregation matrix
-rownames(SecConc) <- SecConc$X1
-SecConc$X1 <- NULL
+colnames(tmp)[1] <- "Sector_names"
 
 ## Read unique lists and create labels
 unique <- list("region" = read.xlsx( str_c("./input/", filename$labels), sheet = 1, colNames = TRUE ),
@@ -29,6 +26,7 @@ unique <- list("region" = read.xlsx( str_c("./input/", filename$labels), sheet =
 
 # Add sector grouping to unique list
 unique$sector <- left_join(unique$sector, tmp, by = "Sector_names")
+tmp <- left_join(unique$sector, tmp, by = "Sector_names")
 
 # Add region groupings to unique list
 unique$region["World_region"] <- RegConco$world %>% 

@@ -7,9 +7,8 @@
 # Get concordance for material groups
 conco_mat <- read.xlsx("./input/concordance_material_groups.xlsx")
 
-TIME <- 1995:2022
 
-# year <- 1995
+year <-TIME[1]
 for(year in TIME)
 {
   print( str_c("Computing extension for ",year) )
@@ -29,6 +28,9 @@ for(year in TIME)
   
   Q <- as.matrix(Q)
   Q <- Q[,indices$ind]
+  
+  indices$ind %>% max()
+  Q %>% dim()
   
   # Select GWP100 vector (kilo tonnes CO2eq) from EDGAR database
   j <- unique$extension %>% 
