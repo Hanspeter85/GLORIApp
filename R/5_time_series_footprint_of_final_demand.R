@@ -1,14 +1,15 @@
 
 ## Set years of the time series and perform parsing
-TIME <- 1995:2020
+TIME <- c(1990,1995,2000,2005, 2010, 2015,2020)
 
-fd <- "Household final consumption"
+fd <- "Household final consumption P.3h"
 
 fd_index <- labels$parsed$Y %>% 
   filter(sector_name == fd) %>% 
   pull(index)
 
 result <- list()
+year <- TIME[1]
 
 for(year in TIME)
 {
@@ -30,7 +31,7 @@ for(year in TIME)
   # Load direct intensities
   Q <- fread( str_c(path$storeMRIOModel, year, "_Q.csv" ) )[,1:4] %>% 
     rowSums()
-
+sum(Q)
   # Calculate direct intensities
   f <- Q/x
   f[is.na(f)] <- 0  
@@ -51,4 +52,4 @@ for(year in TIME)
 FIN <- result %>% 
   bind_rows()
 
-write.xlsx(FIN, str_c(path$storeResults,"GLORIA_Material_Footprint_of_Households_1995-2020.xlsx"))
+write.xlsx(FIN, str_c(path$storeResults,"GLORIA_Material_Footprint_of_Households_1990-2020.xlsx"))

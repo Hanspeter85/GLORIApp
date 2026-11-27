@@ -26,6 +26,7 @@ filename <- list("labels" = str_c("GLORIA_ReadMe_0",ver,".xlsx"),
 # Load all labels, codes, concordances and other meta information including the agg function
 source("./R/0_create_labels.R")
 
+source("./R/5_time_series_footprint_of_final_demand.R")
 TIME <- 1990:2029
 
 # source("./R/5_time_series_footprint_of_final_demand.R")
