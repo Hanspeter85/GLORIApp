@@ -1,0 +1,165 @@
+region_code,region_acronym,region_name,world_region_7,development_group,income_group_worldbank,region_worldbank,world
+1,XAM,Rest of Americas,Latin America,Rest of Developing Latin America and Africa,Rest-of-world regions (mixed),Rest-of-world regions (mixed),World
+2,XEU,Rest of Europe,Europe,Developed economies,Rest-of-world regions (mixed),Rest-of-world regions (mixed),World
+3,XAF,Rest of Africa,Africa,Rest of Developing Latin America and Africa,Rest-of-world regions (mixed),Rest-of-world regions (mixed),World
+4,XAS,Rest of Asia-Pacific,Asia-Pacific,Rest of Developing Asia and Oceania,Rest-of-world regions (mixed),Rest-of-world regions (mixed),World
+5,AFG,Afghanistan,Asia-Pacific,LDC,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
+6,AGO,Angola,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+7,ALB,Albania,Europe,Developed economies,Upper middle income,Europe & Central Asia,World
+8,ARE,United Arab Emirates,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+9,ARG,Argentina,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+10,ARM,Armenia,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+11,AUS,Australia,Asia-Pacific,Developed economies,High income,East Asia & Pacific,World
+12,AUT,Austria,Europe,Developed economies,High income,Europe & Central Asia,World
+13,AZE,Azerbaijan,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+14,BDI,Burundi,Africa,LDC,Low income,Sub-Saharan Africa,World
+15,BEL,Belgium,Europe,Developed economies,High income,Europe & Central Asia,World
+16,BEN,Benin,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+17,BFA,Burkina Faso,Africa,LDC,Low income,Sub-Saharan Africa,World
+18,BGD,Bangladesh,Asia-Pacific,LDC,Lower middle income,South Asia,World
+19,BGR,Bulgaria,Europe,Developed economies,High income,Europe & Central Asia,World
+20,BHR,Bahrain,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+21,BHS,Bahamas,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
+22,BIH,Bosnia and Herzegovina,Europe,Developed economies,Upper middle income,Europe & Central Asia,World
+23,BLR,Belarus,EECCA,Developed economies,Upper middle income,Europe & Central Asia,World
+24,BLZ,Belize,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+25,BOL,Bolivia,Latin America,Rest of Developing Latin America and Africa,Lower middle income,Latin America & Caribbean,World
+26,BRA,Brazil,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+27,BRN,Brunei Darussalam,Asia-Pacific,Rest of Developing Asia and Oceania,High income,East Asia & Pacific,World
+28,BTN,Bhutan,Asia-Pacific,LDC,Lower middle income,South Asia,World
+29,BWA,Botswana,Africa,Rest of Developing Latin America and Africa,Upper middle income,Sub-Saharan Africa,World
+30,CAF,Central African Republic,Africa,LDC,Low income,Sub-Saharan Africa,World
+31,CAN,Canada,North America,Developed economies,High income,North America,World
+32,CHE,Switzerland,Europe,Developed economies,High income,Europe & Central Asia,World
+33,CHL,Chile,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
+34,CHN,China,Asia-Pacific,China,Upper middle income,East Asia & Pacific,World
+35,CIV,Cote d'Ivoire,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+36,CMR,Cameroon,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+37,COD,DR Congo,Africa,LDC,Low income,Sub-Saharan Africa,World
+38,COG,Rep Congo,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+39,COL,Colombia,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+40,CRI,Costa Rica,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
+41,CUB,Cuba,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+42,CYP,Cyprus,Europe,Developed economies,High income,Europe & Central Asia,World
+43,CZE,CSSR/Czech Republic (1990/1991),EECCA,Developed economies,High income,Europe & Central Asia,World
+44,DEU,Germany,Europe,Developed economies,High income,Europe & Central Asia,World
+45,DJI,Djibouti,Africa,LDC,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+46,DYE,DR Yemen (Aden),Middle East,Rest of Developing Asia and Oceania,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
+47,DNK,Denmark,Europe,Developed economies,High income,Europe & Central Asia,World
+48,DOM,Dominican Republic,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+49,DZA,Algeria,Africa,Rest of Developing Latin America and Africa,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+50,ECU,Ecuador,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+51,EGY,Egypt,Africa,Rest of Developing Latin America and Africa,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+52,ERI,Eritrea,Africa,LDC,Low income,Sub-Saharan Africa,World
+53,ESP,Spain,Europe,Developed economies,High income,Europe & Central Asia,World
+54,EST,Estonia,Europe,Developed economies,High income,Europe & Central Asia,World
+55,ETH,Ethiopia/DR Ethiopia (1992/1993),Africa,LDC,Low income,Sub-Saharan Africa,World
+56,FIN,Finland,Europe,Developed economies,High income,Europe & Central Asia,World
+57,FRA,France,Europe,Developed economies,High income,Europe & Central Asia,World
+58,GAB,Gabon,Africa,Rest of Developing Latin America and Africa,Upper middle income,Sub-Saharan Africa,World
+59,GBR,United Kingdom,Europe,Developed economies,High income,Europe & Central Asia,World
+60,GEO,Georgia,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+61,GHA,Ghana,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+62,GIN,Guinea,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+63,GMB,Gambia,Africa,LDC,Low income,Sub-Saharan Africa,World
+64,GNQ,Equatorial Guinea,Africa,Rest of Developing Latin America and Africa,Upper middle income,Sub-Saharan Africa,World
+65,GRC,Greece,Europe,Developed economies,High income,Europe & Central Asia,World
+66,GTM,Guatemala,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+67,HND,Honduras,Latin America,Rest of Developing Latin America and Africa,Lower middle income,Latin America & Caribbean,World
+68,HKG,Hong Kong,Asia-Pacific,Rest of Developing Asia and Oceania,High income,East Asia & Pacific,World
+69,HRV,Croatia,Europe,Developed economies,High income,Europe & Central Asia,World
+70,HTI,Haiti,Latin America,LDC,Lower middle income,Latin America & Caribbean,World
+71,HUN,Hungary,Europe,Developed economies,High income,Europe & Central Asia,World
+72,IDN,Indonesia,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+73,IND,India,Asia-Pacific,India,Lower middle income,South Asia,World
+74,IRL,Ireland,Europe,Developed economies,High income,Europe & Central Asia,World
+75,IRN,Iran,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+76,IRQ,Iraq,Middle East,Rest of Developing Asia and Oceania,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+77,ISL,Iceland,Europe,Developed economies,High income,Europe & Central Asia,World
+78,ISR,Israel,Europe,Developed economies,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+79,ITA,Italy,Europe,Developed economies,High income,Europe & Central Asia,World
+80,JAM,Jamaica,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+81,JOR,Jordan,Middle East,Rest of Developing Asia and Oceania,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+82,JPN,Japan,Asia-Pacific,Developed economies,High income,East Asia & Pacific,World
+83,KAZ,Kazakhstan,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+84,KEN,Kenya,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+85,KGZ,Kyrgyzstan,EECCA,Rest of Developing Asia and Oceania,Lower middle income,Europe & Central Asia,World
+86,KHM,Cambodia,Asia-Pacific,LDC,Lower middle income,East Asia & Pacific,World
+87,KOR,South Korea,Asia-Pacific,Developed economies,High income,East Asia & Pacific,World
+88,KWT,Kuwait,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+89,LAO,Laos,Asia-Pacific,LDC,Lower middle income,East Asia & Pacific,World
+90,LBN,Lebanon,Middle East,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+91,LBR,Liberia,Africa,LDC,Low income,Sub-Saharan Africa,World
+92,LBY,Libya,Africa,Rest of Developing Latin America and Africa,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+93,LKA,Sri Lanka,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,South Asia,World
+94,LTU,Lithuania,Europe,Developed economies,High income,Europe & Central Asia,World
+95,LUX,Luxembourg,Europe,Developed economies,High income,Europe & Central Asia,World
+96,LVA,Latvia,Europe,Developed economies,High income,Europe & Central Asia,World
+97,MAR,Morocco,Africa,Rest of Developing Latin America and Africa,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+98,MDA,Moldova,EECCA,Developed economies,Upper middle income,Europe & Central Asia,World
+99,MDG,Madagascar,Africa,LDC,Low income,Sub-Saharan Africa,World
+100,MEX,Mexico,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+101,MKD,Macedonia,Europe,Developed economies,Upper middle income,Europe & Central Asia,World
+102,MLI,Mali,Africa,LDC,Low income,Sub-Saharan Africa,World
+103,MLT,Malta,Europe,Developed economies,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+104,MMR,Myanmar,Asia-Pacific,LDC,Lower middle income,East Asia & Pacific,World
+105,MNG,Mongolia,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+106,MOZ,Mozambique,Africa,LDC,Low income,Sub-Saharan Africa,World
+107,MRT,Mauritania,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+108,MWI,Malawi,Africa,LDC,Low income,Sub-Saharan Africa,World
+109,MYS,Malaysia,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+110,NAM,Namibia,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+111,NER,Niger,Africa,LDC,Low income,Sub-Saharan Africa,World
+112,NGA,Nigeria,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
+113,NIC,Nicaragua,Latin America,Rest of Developing Latin America and Africa,Lower middle income,Latin America & Caribbean,World
+114,NLD,Netherlands,Europe,Developed economies,High income,Europe & Central Asia,World
+115,NOR,Norway,Europe,Developed economies,High income,Europe & Central Asia,World
+116,NPL,Nepal,Asia-Pacific,LDC,Lower middle income,South Asia,World
+117,NZL,New Zealand,Asia-Pacific,Developed economies,High income,East Asia & Pacific,World
+118,OMN,Oman,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+119,PAK,Pakistan,Asia-Pacific,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+120,PSE,Palestine,Middle East,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+121,PAN,Panama,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
+122,PER,Peru,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+123,PHL,Philippines,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+124,PNG,Papua New Guinea,Asia-Pacific,Rest of Developing Latin America and Africa,Lower middle income,East Asia & Pacific,World
+125,POL,Poland,Europe,Developed economies,High income,Europe & Central Asia,World
+126,PRK,North Korea,Asia-Pacific,Rest of Developing Asia and Oceania,Low income,East Asia & Pacific,World
+127,PRT,Portugal,Europe,Developed economies,High income,Europe & Central Asia,World
+128,PRY,Paraguay,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+129,QAT,Qatar,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+130,ROU,Romania,Europe,Developed economies,High income,Europe & Central Asia,World
+131,RUS,USSR/Russian Federation (1990/1991),EECCA,Developed economies,High income,Europe & Central Asia,World
+132,RWA,Rwanda,Africa,LDC,Low income,Sub-Saharan Africa,World
+133,SAU,Saudi Arabia,Middle East,Rest of Developing Asia and Oceania,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
+134,SDS,South Sudan,Africa,LDC,Low income,Sub-Saharan Africa,World
+135,SEN,Senegal,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+136,SGP,Singapore,Asia-Pacific,Rest of Developing Asia and Oceania,High income,East Asia & Pacific,World
+137,SLE,Sierra Leone,Africa,LDC,Low income,Sub-Saharan Africa,World
+138,SLV,El Salvador,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
+139,SOM,Somalia,Africa,LDC,Low income,Sub-Saharan Africa,World
+140,SRB,Yugoslavia/Serbia (1991/1992),EECCA,Developed economies,Upper middle income,Europe & Central Asia,World
+141,SDN,Sudan/North Sudan (2010/2011),Africa,LDC,Low income,Sub-Saharan Africa,World
+142,SVK,Slovakia,Europe,Developed economies,High income,Europe & Central Asia,World
+143,SVN,Slovenia,Europe,Developed economies,High income,Europe & Central Asia,World
+144,SWE,Sweden,Europe,Developed economies,High income,Europe & Central Asia,World
+145,SYR,Syria,Middle East,Rest of Developing Asia and Oceania,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
+146,TCD,Chad,Africa,LDC,Low income,Sub-Saharan Africa,World
+147,TGO,Togo,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+148,THA,Thailand,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+149,TJK,Tajikistan,EECCA,Rest of Developing Asia and Oceania,Lower middle income,Europe & Central Asia,World
+150,TKM,Turkmenistan,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+151,TUN,Tunisia,Africa,Rest of Developing Latin America and Africa,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+152,TUR,Turkey,Europe,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
+153,TZA,Tanzania,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+154,UGA,Uganda,Africa,LDC,Low income,Sub-Saharan Africa,World
+155,UKR,Ukraine,EECCA,Developed economies,Upper middle income,Europe & Central Asia,World
+156,URY,Uruguay,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
+157,USA,United States of America,North America,Developed economies,High income,North America,World
+158,UZB,Uzbekistan,EECCA,Rest of Developing Asia and Oceania,Lower middle income,Europe & Central Asia,World
+159,VEN,Venezuela,Latin America,Rest of Developing Latin America and Africa,Lower middle income,Latin America & Caribbean,World
+160,VNM,Viet Nam,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+161,YEM,Yemen Arab Republic/Yemen (1990/1991),Middle East,LDC,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
+162,ZAF,South Africa,Africa,Rest of Developing Latin America and Africa,Upper middle income,Sub-Saharan Africa,World
+163,ZMB,Zambia,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+164,ZWE,Zimbabwe,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World

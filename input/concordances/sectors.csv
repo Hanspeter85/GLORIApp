@@ -1,0 +1,121 @@
+sector_code,sector_name,isic_section,broad_sector,total
+1,Growing wheat,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+2,Growing maize,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+3,Growing cereals n.e.c,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+4,Growing leguminous crops and oil seeds,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+5,Growing rice,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+6,"Growing vegetables, roots, tubers","Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+7,Growing sugar beet and cane,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+8,Growing tobacco,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+9,Growing fibre crops,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+10,Growing crops n.e.c.,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+11,Growing grapes,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+12,Growing fruits and nuts,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+13,"Growing beverage crops (coffee, tea etc)","Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+14,"Growing spices, aromatic, drug and pharmaceutical crops","Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+15,Seeds and plant propagation,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+16,Raising of cattle,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+17,Raising of sheep and goats,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+18,Raising of swine/pigs,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+19,Raising of poultry,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+20,Raising of animals n.e.c.; services to agriculture,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+21,Forestry and logging,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+22,Fishing,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+23,Crustaceans and molluscs,"Agriculture, forestry and fishing","Agriculture, forestry, fishing",All sectors
+24,Hard coal,Mining and quarrying,Mining and quarrying,All sectors
+25,Lignite and peat,Mining and quarrying,Mining and quarrying,All sectors
+26,Petroleum extraction,Mining and quarrying,Mining and quarrying,All sectors
+27,Gas extraction,Mining and quarrying,Mining and quarrying,All sectors
+28,Iron ores,Mining and quarrying,Mining and quarrying,All sectors
+29,Uranium ores,Mining and quarrying,Mining and quarrying,All sectors
+30,Aluminium ore,Mining and quarrying,Mining and quarrying,All sectors
+31,Copper ores,Mining and quarrying,Mining and quarrying,All sectors
+32,Gold ores,Mining and quarrying,Mining and quarrying,All sectors
+33,Lead/zinc/silver ores,Mining and quarrying,Mining and quarrying,All sectors
+34,Nickel ores,Mining and quarrying,Mining and quarrying,All sectors
+35,Tin ores,Mining and quarrying,Mining and quarrying,All sectors
+36,Other non-ferrous ores,Mining and quarrying,Mining and quarrying,All sectors
+37,"Quarrying of stone, sand and clay",Mining and quarrying,Mining and quarrying,All sectors
+38,Chemical and fertilizer minerals,Mining and quarrying,Mining and quarrying,All sectors
+39,Extraction of salt,Mining and quarrying,Mining and quarrying,All sectors
+40,Mining and quarrying n.e.c.; services to mining,Mining and quarrying,Mining and quarrying,All sectors
+41,Beef meat,Manufacturing,Manufacturing,All sectors
+42,Sheep meat,Manufacturing,Manufacturing,All sectors
+43,Pork,Manufacturing,Manufacturing,All sectors
+44,Poultry meat,Manufacturing,Manufacturing,All sectors
+45,Other meat products,Manufacturing,Manufacturing,All sectors
+46,Fish products,Manufacturing,Manufacturing,All sectors
+47,Cereal products,Manufacturing,Manufacturing,All sectors
+48,Vegetable products,Manufacturing,Manufacturing,All sectors
+49,Fruit products,Manufacturing,Manufacturing,All sectors
+50,Food products and feeds n.e.c.,Manufacturing,Manufacturing,All sectors
+51,"Sugar refining; cocoa, chocolate and confectionery",Manufacturing,Manufacturing,All sectors
+52,Animal oils and fats,Manufacturing,Manufacturing,All sectors
+53,Vegetable oils and fats,Manufacturing,Manufacturing,All sectors
+54,Dairy products,Manufacturing,Manufacturing,All sectors
+55,Alcoholic and other  beverages,Manufacturing,Manufacturing,All sectors
+56,Tobacco products,Manufacturing,Manufacturing,All sectors
+57,Textiles and clothing,Manufacturing,Manufacturing,All sectors
+58,Leather and footwear,Manufacturing,Manufacturing,All sectors
+59,Sawmill products,Manufacturing,Manufacturing,All sectors
+60,Pulp and paper,Manufacturing,Manufacturing,All sectors
+61,Printing,Manufacturing,Manufacturing,All sectors
+62,Coke oven products,Manufacturing,Manufacturing,All sectors
+63,Refined petroleum products,Manufacturing,Manufacturing,All sectors
+64,Nitrogenous fertilizers,Manufacturing,Manufacturing,All sectors
+65,Non-nitrogenous and mixed fertilizers,Manufacturing,Manufacturing,All sectors
+66,Basic petrochemical products,Manufacturing,Manufacturing,All sectors
+67,Basic inorganic chemicals,Manufacturing,Manufacturing,All sectors
+68,Basic organic chemicals,Manufacturing,Manufacturing,All sectors
+69,Pharmaceuticals and medicinal products,Manufacturing,Manufacturing,All sectors
+70,"Dyes, paints, glues, detergents and other chemical products",Manufacturing,Manufacturing,All sectors
+71,Rubber products,Manufacturing,Manufacturing,All sectors
+72,Plastic products,Manufacturing,Manufacturing,All sectors
+73,Clay building materials,Manufacturing,Manufacturing,All sectors
+74,Glass and other ceramics n.e.c.,Manufacturing,Manufacturing,All sectors
+75,"Cement, lime and plaster products",Manufacturing,Manufacturing,All sectors
+76,Other non-metallic mineral products n.e.c.,Manufacturing,Manufacturing,All sectors
+77,Basic iron and steel,Manufacturing,Manufacturing,All sectors
+78,Basic aluminium,Manufacturing,Manufacturing,All sectors
+79,Basic Copper,Manufacturing,Manufacturing,All sectors
+80,Basic Gold,Manufacturing,Manufacturing,All sectors
+81,Basic lead/zinc/silver,Manufacturing,Manufacturing,All sectors
+82,Basic nickel,Manufacturing,Manufacturing,All sectors
+83,Basic tin,Manufacturing,Manufacturing,All sectors
+84,Basic non-ferrous metals n.e.c.,Manufacturing,Manufacturing,All sectors
+85,Fabricated metal products,Manufacturing,Manufacturing,All sectors
+86,Machinery and equipment,Manufacturing,Manufacturing,All sectors
+87,"Motor vehicles, trailers and semi-trailers",Manufacturing,Manufacturing,All sectors
+88,Other transport equipment,Manufacturing,Manufacturing,All sectors
+89,Repair and installation of machinery and equipment (service),Manufacturing,Manufacturing,All sectors
+90,Computers; electronic products; optical and precision instruments,Manufacturing,Manufacturing,All sectors
+91,Electrical equipment,Manufacturing,Manufacturing,All sectors
+92,Furniture and other manufacturing n.e.c,Manufacturing,Manufacturing,All sectors
+93,"Electric power generation, transmission and distribution","Electricity, gas, steam and air conditioning supply","Utilities (energy, water, waste)",All sectors
+94,Distribution of gaseous fuels through mains,"Electricity, gas, steam and air conditioning supply","Utilities (energy, water, waste)",All sectors
+95,"Water collection, treatment and supply; sewerage","Water supply; sewerage, waste management and remediation activities","Utilities (energy, water, waste)",All sectors
+96,"Waste collection, treatment, and disposal","Water supply; sewerage, waste management and remediation activities","Utilities (energy, water, waste)",All sectors
+97,Materials recovery,"Water supply; sewerage, waste management and remediation activities","Utilities (energy, water, waste)",All sectors
+98,Building construction,Construction,Construction,All sectors
+99,Civil engineering construction,Construction,Construction,All sectors
+100,Wholesale and retail trade; repair of motor vehicles and motorcycles,Wholesale and retail trade; repair of motor vehicles,Services,All sectors
+101,Road transport,Transportation and storage,Services,All sectors
+102,Rail transport,Transportation and storage,Services,All sectors
+103,Transport via pipeline,Transportation and storage,Services,All sectors
+104,Water transport,Transportation and storage,Services,All sectors
+105,Air transport,Transportation and storage,Services,All sectors
+106,Services to transport,Transportation and storage,Services,All sectors
+107,Postal and courier services,Transportation and storage,Services,All sectors
+108,Hospitality,Accommodation and food service activities,Services,All sectors
+109,Publishing,Information and communication,Services,All sectors
+110,Telecommunications,Information and communication,Services,All sectors
+111,Information services,Information and communication,Services,All sectors
+112,Finance and insurance,Financial and insurance activities,Services,All sectors
+113,Property and real estate,Real estate activities,Services,All sectors
+114,"Professional, scientific and technical services","Professional, scientific and technical activities",Services,All sectors
+115,Administrative services,Administrative and support services,Services,All sectors
+116,Government; social security; defence; public order,Public administration and defence; compulsory social security,Services,All sectors
+117,Education,Education,Services,All sectors
+118,Human health and social work activities,Human health and social work activities,Services,All sectors
+119,"Arts, entertainment and recreation","Arts, entertainment and recreation",Services,All sectors
+120,Other services,Other service activities,Services,All sectors

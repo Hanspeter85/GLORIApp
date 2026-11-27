@@ -1,9 +1,9 @@
-# Ignore large datafiles within this folder but not the folder itself
-
+# Only small, curated input files are versioned. Raw GLORIA data live outside
+# the repo (see config.R). Large pdfs are not versioned.
 *
-*/
 !.gitignore
-!GLORIA_164RegAgg.xlsx
+!*.xlsx
+!*.csv
+!concordances/
+!concordances/*.csv
 !GLORIA_ReleaseNotes_059.pdf
-!GLORIA_ReadMe_059.xlsx
-!concordance_material_groups.xlsx
