@@ -155,7 +155,7 @@ ui <- page_sidebar(
       "Result",
       uiOutput("description"),
       uiOutput("status"),
-      downloadButton("download", "Download csv", class = "btn-success mb-3"),
+      uiOutput("download_ui"),
       DT::DTOutput("table")
     ),
     nav_panel("Indicator explanations", DT::DTOutput("catalogue")),
@@ -267,6 +267,12 @@ server <- function(input, output, session) {
     res
   })
 
+  # The download button only appears once there is a result
+  output$download_ui <- renderUI({
+    result()
+    downloadButton("download", "Download csv", class = "btn-success mb-3")
+  })
+
   output$status <- renderUI({
     res <- result()
     div(class = "alert alert-info",
@@ -277,10 +283,10 @@ server <- function(input, output, session) {
   output$table <- DT::renderDT({
     res <- result_formatted()
     prev <- res[seq_len(min(nrow(res), 1000))]
-    # show numbers with 4 significant digits (the csv keeps full precision)
+    # preview rounded to 2 decimals with thousands separator (csv keeps full precision)
     num_cols <- which(vapply(prev, is.numeric, TRUE) & !names(prev) %in% "year")
     DT::datatable(prev, rownames = FALSE, options = list(pageLength = 25, scrollX = TRUE)) |>
-      DT::formatSignif(columns = num_cols, digits = 4)
+      DT::formatRound(columns = num_cols, digits = 2, mark = ",")
   })
 
   output$download <- downloadHandler(
