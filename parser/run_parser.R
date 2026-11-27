@@ -72,6 +72,8 @@ for (year in gloria_years) {
   res <- tryCatch(parse_year(year, meta, logfile),
                   error = function(e) {
                     log_msg(year, ": ERROR - ", conditionMessage(e), file = logfile)
+                    # remove half-unpacked files of this year (they are re-extracted next time)
+                    unlink(file.path(paths$unzip_tmp, year), recursive = TRUE)
                     NULL
                   })
   if (!is.null(res)) all_checks[[as.character(year)]] <- res

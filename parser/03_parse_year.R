@@ -84,8 +84,22 @@ prepare_year_files <- function(year) {
   # Case 1: the user has already unzipped everything into the raw folder
   if (n_found(paths$raw) == 5) return(paths$raw)
 
-  dir.create(out, recursive = TRUE, showWarnings = FALSE)
   year_token <- sprintf("(^|[^0-9])%d([^0-9]|$)", year)
+
+  # Before extracting anything: are all 5 tables of this year available in the
+  # (completely downloaded) zips? If not, stop here - otherwise half a year
+  # would be unpacked and waste disk space while the download is still running.
+  raw_zips <- list.files(paths$raw, "\\.zip$", recursive = TRUE, full.names = TRUE)
+  entries <- unlist(lapply(raw_zips, zip_contents))
+  tables <- unique(sub(".*_(T|Y|V|TQ|YQ)-Results_.*", "\\1",
+                       basename(entries[grepl(pat, basename(entries))])))
+  inner_year_zips <- any(grepl("\\.zip$", entries) & grepl(year_token, basename(entries)))
+  if (length(tables) < 5 && !inner_year_zips) {
+    stop("Raw data for ", year, " not (yet) complete: found tables ",
+         paste(sort(tables), collapse = ", "), " - is the download still running?")
+  }
+
+  dir.create(out, recursive = TRUE, showWarnings = FALSE)
   done_zips <- character(0)
   # Case 2: extract what is needed from the zip archives (repeat for inner zips)
   repeat {
