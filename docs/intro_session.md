@@ -8,7 +8,7 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 | Time | Block | Content |
 |---|---|---|
 | 0:00 | Why footprints? | Production- vs. consumption-based accounting, outsourcing of pressures |
-| 0:15 | GLORIA in 10 minutes | 164 regions, 120 sectors, 1990-2028, satellite accounts, where the data come from |
+| 0:15 | GLORIA in 10 minutes | 164 regions, 120 sectors, 1990-2029, satellite accounts, where the data come from |
 | 0:25 | Input-output logic | Supply chains, the Leontief inverse as "all supply-chain rounds at once" |
 | 0:35 | App walk-through | The 6 steps of the sidebar, result types, csv export |
 | 0:50 | Hands-on exercises | Exercises 1-5 below, in pairs |

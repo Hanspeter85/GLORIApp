@@ -34,7 +34,7 @@ gloria_version <- local({
 
 # Years to parse / years offered in the app. The parser replaces this by the
 # years it actually finds in the raw data.
-gloria_years <- 1990:2028
+gloria_years <- 1990:2029
 
 version_dir <- file.path(data_root, sprintf("v%02d", gloria_version))
 

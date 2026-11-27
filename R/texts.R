@@ -45,7 +45,7 @@ help_texts <- list(
     "source). Calculations with these rows are slower because the full Leontief inverse",
     "(1.5 GB per year) has to be loaded for some result types."),
   years = paste(
-    "1990-2028. Years after the latest available statistics are nowcasts/projections of",
+    "1990-2029. Years after the latest available statistics are nowcasts/projections of",
     "the GLORIA team and should be interpreted with care."),
   regions = paste(
     "Own grouping: a csv file with the columns 'region_acronym' and 'group' (e.g. EU27,",

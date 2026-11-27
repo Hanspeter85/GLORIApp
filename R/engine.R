@@ -181,6 +181,8 @@ calc_footprint_origin <- function(info, year, meta, sp) {
       d <- cbind(d, col_keys[, setNames(.SD, col_names)], value = qy[fd_sel])
       d <- d[, .(value = sum(value)), by = c(row_names, col_names)]
       res <- rbind(res, d, use.names = TRUE)
+      # without sector detail the direct emissions are added to the same origin row
+      res <- res[, .(value = sum(value)), by = c(row_names, col_names)]
     }
   }
   res
@@ -217,6 +219,7 @@ calc_production <- function(info, year, meta, sp) {
       d <- data.table(region = reg[fd_sel], value = qy[fd_sel])[, .(value = sum(value)), by = region]
       if (sp$by_sector) d[, sector := "Direct emissions of final users (households etc.)"]
       res <- rbind(res, d, use.names = TRUE)
+      res <- res[, .(value = sum(value)), by = setdiff(names(res), "value")]
     }
   }
   res

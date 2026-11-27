@@ -2,7 +2,7 @@
 
 A Shiny app that lets **non-experts** calculate footprints and trade-embodied
 indicators with the global multi-regional input-output database
-**GLORIA** (v60, 164 regions x 120 sectors, 1990-2028), plus a reusable parser
+**GLORIA** (v60, 164 regions x 120 sectors, 1990-2029), plus a reusable parser
 that turns the raw GLORIA release into analysis-ready data.
 
 Built on the earlier repository `GLORIA-MRIO_Parser` (scripts kept in `legacy/`).
@@ -12,7 +12,7 @@ What you can do in the app (no programming needed):
 - choose **indicators**: materials, greenhouse gases, air pollutants, land, energy,
   employment, water, biodiversity, value added, or any of the ~6 000 raw GLORIA
   satellite rows (expert mode)
-- choose **years** (1990-2028)
+- choose **years** (1990-2029)
 - aggregate **regions** (countries, 7 world regions, World Bank income groups and
   regions, development groups, or your own grouping via csv upload) and **sectors**
   (120 sectors, ISIC sections, 6 broad sectors, or your own grouping)
