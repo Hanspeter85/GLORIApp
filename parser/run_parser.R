@@ -49,6 +49,9 @@ if (!rebuild) {
 if (rebuild) source("parser/01_build_concordances.R")
 
 # --- Years: take those that are actually in the raw data ------------------------------
+# (years of zips that were already parsed and deleted are added back via the
+#  parsed folders; config.R's year range is the minimum expectation)
+expected_years <- sort(unique(c(gloria_years, detect_raw_years())))
 yrs <- detect_raw_years()
 if (length(yrs) > 0) gloria_years <- yrs
 log_msg("GLORIA v", gloria_version, ": years ", min(gloria_years), "-", max(gloria_years), file = logfile)
@@ -81,5 +84,24 @@ if (length(chk_files) > 0) {
   checks <- rbindlist(lapply(chk_files, fread))
   fwrite(checks, file.path(paths$parsed, "checks_all_years.csv"))
   print(checks)
+}
+
+# --- Step 5: remove all raw data once every year is parsed -------------------------------
+# Only the parsed tables are kept. ReadMe and release notes are kept as
+# documentation in parsed/meta. Everything can be downloaded again from Drive.
+all_done <- all(file.exists(file.path(paths$parsed, expected_years, "_DONE")))
+# never delete while a download is still running (rclone writes *.partial files)
+download_running <- length(list.files(paths$raw, "\\.partial$", recursive = TRUE)) > 0
+all_done <- all_done && !download_running
+if (isTRUE(parser_options$delete_raw_after_parse) && all_done && dir.exists(paths$raw)) {
+  docs <- list.files(paths$raw, sprintf("GLORIA_(ReadMe|ReleaseNotes)_0%d\\.(xlsx|pdf)$", gloria_version),
+                     recursive = TRUE, full.names = TRUE)
+  file.copy(docs, paths$meta, overwrite = TRUE)
+  unlink(paths$raw, recursive = TRUE)
+  unlink(paths$unzip_tmp, recursive = TRUE)
+  log_msg("All years parsed: raw data deleted (ReadMe/release notes kept in ", paths$meta, ")",
+          file = logfile)
+} else if (!all_done) {
+  log_msg("Not all years are parsed yet - raw data are kept. Run the parser again.", file = logfile)
 }
 log_msg("Parser finished.", file = logfile)

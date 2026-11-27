@@ -242,13 +242,13 @@ parse_year <- function(year, meta, logfile = NULL) {
   if (isTRUE(parser_options$delete_unzipped) && src != paths$raw) {
     unlink(src, recursive = TRUE)
   }
-  # Delete the big raw zip of this year (part I, a few GB) to save disk space.
-  # It can be downloaded again at any time with the update function.
-  # Only done when the checks look fine (L reproduces gross output).
+  # Delete the raw zips of this year (MRIO part I and satellite accounts) to
+  # save disk space. They can be downloaded again at any time with the update
+  # function. Only done when the checks look fine (L reproduces gross output).
   if (isTRUE(parser_options$delete_raw_after_parse) &&
       abs(checks$output_reproduced_by_L - 1) < 1e-3) {
     z <- list.files(paths$raw, "\\.zip$", recursive = TRUE, full.names = TRUE)
-    z <- z[grepl("part_I_", z) & grepl(sprintf("(^|[^0-9])%d([^0-9]|$)", year), basename(z))]
+    z <- z[grepl("part_(I|III)_", z) & grepl(sprintf("(^|[^0-9])%d([^0-9]|$)", year), basename(z))]
     if (length(z) > 0) {
       unlink(z)
       L_("deleted raw zip ", paste(basename(z), collapse = ", "))
