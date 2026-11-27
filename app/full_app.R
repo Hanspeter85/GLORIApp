@@ -19,7 +19,7 @@ nice_name <- function(x) {
   lookup <- c(region_name = "No aggregation (164 countries/regions)",
               region_acronym = "No aggregation (ISO codes)",
               world_region_7 = "7 world regions",
-              income_group_worldbank = "World Bank income groups",
+              income_group_worldbank = "World Bank income groups (FY26, July 2025)",
               region_worldbank = "World Bank regions",
               development_group = "Development groups (LDCs etc.)",
               world = "World total",

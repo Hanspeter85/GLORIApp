@@ -79,7 +79,7 @@ region_code,region_acronym,region_name,world_region_7,development_group,income_g
 78,ISR,Israel,Europe,Developed economies,High income,"Middle East, North Africa, Afghanistan & Pakistan",World
 79,ITA,Italy,Europe,Developed economies,High income,Europe & Central Asia,World
 80,JAM,Jamaica,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
-81,JOR,Jordan,Middle East,Rest of Developing Asia and Oceania,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
+81,JOR,Jordan,Middle East,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
 82,JPN,Japan,Asia-Pacific,Developed economies,High income,East Asia & Pacific,World
 83,KAZ,Kazakhstan,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
 84,KEN,Kenya,Africa,Rest of Developing Latin America and Africa,Lower middle income,Sub-Saharan Africa,World
@@ -91,7 +91,7 @@ region_code,region_acronym,region_name,world_region_7,development_group,income_g
 90,LBN,Lebanon,Middle East,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
 91,LBR,Liberia,Africa,LDC,Low income,Sub-Saharan Africa,World
 92,LBY,Libya,Africa,Rest of Developing Latin America and Africa,Upper middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
-93,LKA,Sri Lanka,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,South Asia,World
+93,LKA,Sri Lanka,Asia-Pacific,Rest of Developing Asia and Oceania,Lower middle income,South Asia,World
 94,LTU,Lithuania,Europe,Developed economies,High income,Europe & Central Asia,World
 95,LUX,Luxembourg,Europe,Developed economies,High income,Europe & Central Asia,World
 96,LVA,Latvia,Europe,Developed economies,High income,Europe & Central Asia,World
@@ -121,7 +121,7 @@ region_code,region_acronym,region_name,world_region_7,development_group,income_g
 120,PSE,Palestine,Middle East,Rest of Developing Asia and Oceania,Lower middle income,"Middle East, North Africa, Afghanistan & Pakistan",World
 121,PAN,Panama,Latin America,Rest of Developing Latin America and Africa,High income,Latin America & Caribbean,World
 122,PER,Peru,Latin America,Rest of Developing Latin America and Africa,Upper middle income,Latin America & Caribbean,World
-123,PHL,Philippines,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+123,PHL,Philippines,Asia-Pacific,Rest of Developing Asia and Oceania,Lower middle income,East Asia & Pacific,World
 124,PNG,Papua New Guinea,Asia-Pacific,Rest of Developing Latin America and Africa,Lower middle income,East Asia & Pacific,World
 125,POL,Poland,Europe,Developed economies,High income,Europe & Central Asia,World
 126,PRK,North Korea,Asia-Pacific,Rest of Developing Asia and Oceania,Low income,East Asia & Pacific,World
@@ -145,7 +145,7 @@ region_code,region_acronym,region_name,world_region_7,development_group,income_g
 144,SWE,Sweden,Europe,Developed economies,High income,Europe & Central Asia,World
 145,SYR,Syria,Middle East,Rest of Developing Asia and Oceania,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
 146,TCD,Chad,Africa,LDC,Low income,Sub-Saharan Africa,World
-147,TGO,Togo,Africa,LDC,Lower middle income,Sub-Saharan Africa,World
+147,TGO,Togo,Africa,LDC,Low income,Sub-Saharan Africa,World
 148,THA,Thailand,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
 149,TJK,Tajikistan,EECCA,Rest of Developing Asia and Oceania,Lower middle income,Europe & Central Asia,World
 150,TKM,Turkmenistan,EECCA,Rest of Developing Asia and Oceania,Upper middle income,Europe & Central Asia,World
@@ -158,7 +158,7 @@ region_code,region_acronym,region_name,world_region_7,development_group,income_g
 157,USA,United States of America,North America,Developed economies,High income,North America,World
 158,UZB,Uzbekistan,EECCA,Rest of Developing Asia and Oceania,Lower middle income,Europe & Central Asia,World
 159,VEN,Venezuela,Latin America,Rest of Developing Latin America and Africa,Lower middle income,Latin America & Caribbean,World
-160,VNM,Viet Nam,Asia-Pacific,Rest of Developing Asia and Oceania,Upper middle income,East Asia & Pacific,World
+160,VNM,Viet Nam,Asia-Pacific,Rest of Developing Asia and Oceania,Lower middle income,East Asia & Pacific,World
 161,YEM,Yemen Arab Republic/Yemen (1990/1991),Middle East,LDC,Low income,"Middle East, North Africa, Afghanistan & Pakistan",World
 162,ZAF,South Africa,Africa,Rest of Developing Latin America and Africa,Upper middle income,Sub-Saharan Africa,World
 163,ZMB,Zambia,Africa,LDC,Lower middle income,Sub-Saharan Africa,World

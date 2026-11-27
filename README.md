@@ -172,8 +172,11 @@ sparse), `E.rds` (gross exports by partner), `L.f32` and `LY.f32` (float32 binar
 readable in Python with `np.fromfile(f, "<f4", offset=12)`), `M.rds` (multipliers
 of the catalogue indicators).
 
-World Bank income groups: World Bank API classification (file
-`input/concordances/worldbank_country_classification.csv`, retrieval date inside).
+World Bank income groups: classification of fiscal year **FY26** (published July 2025,
+based on GNI per capita 2024) from the World Bank historical file
+`input/concordances/worldbank_OGHIST.xlsx`; World Bank regions from the World Bank
+API (`worldbank_country_classification.csv`). To switch the year, change
+`wb_fiscal_year` in `parser/01_build_concordances.R` and re-run it (no re-parsing needed).
 The four GLORIA "Rest of ..." regions form their own group because they mix
 countries of different income levels.
 

@@ -67,6 +67,23 @@ if (!file.exists(wb_file)) {
 }
 wb <- fread(wb_file)
 
+# Income groups of a FIXED World Bank fiscal year from the historical file
+# OGHIST.xlsx (https://ddh-openapi.worldbank.org/resources/DR0095334/download),
+# stored in input/concordances/worldbank_OGHIST.xlsx.
+# FY26 = classification published in July 2025 (based on GNI per capita 2024).
+# To use another year, change wb_fiscal_year and re-run this script.
+wb_fiscal_year <- "FY26"
+og <- read.xlsx(file.path(paths$input, "concordances", "worldbank_OGHIST.xlsx"),
+                sheet = "Country Analytical History", colNames = FALSE)
+fy_row <- which(og[[2]] == "Bank's fiscal year:")
+fy_col <- which(unlist(og[fy_row, ]) == wb_fiscal_year)
+if (length(fy_col) != 1) stop(wb_fiscal_year, " not found in worldbank_OGHIST.xlsx")
+og <- data.table(iso3 = og[[1]], code = trimws(og[[fy_col]]))[!is.na(iso3) & nchar(iso3) == 3]
+og[, wb_income_fy := c(L = "Low income", LM = "Lower middle income",
+                       UM = "Upper middle income", H = "High income")[code]]
+wb <- merge(wb, og[, .(iso3, wb_income_fy)], by = "iso3", all.x = TRUE)
+wb[, wb_income := fifelse(is.na(wb_income_fy), wb_income, wb_income_fy)]
+
 # GLORIA acronyms that differ from the ISO code
 iso_fix <- c(SDS = "SSD",   # South Sudan
              DYE = "YEM")   # DR Yemen (Aden) -> today's Yemen
