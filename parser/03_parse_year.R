@@ -54,11 +54,21 @@ raw_csv_pattern <- function(year) {
   sprintf("_(T|Y|V|TQ|YQ)-Results_%d_0%d_Markup001.*\\.csv$", year, gloria_version)
 }
 
+# On Windows use the built-in tar.exe (bsdtar, reads zip files). Other "tar"
+# programs on the PATH (e.g. from Git or Rtools) are GNU tar and cannot read zip.
+tar_exe <- function() {
+  if (.Platform$OS.type == "windows") {
+    w <- file.path(Sys.getenv("SystemRoot", "C:/Windows"), "System32", "tar.exe")
+    if (file.exists(w)) return(w)
+  }
+  "tar"
+}
+
 .zip_list_cache <- new.env()
 zip_contents <- function(zip) {
   key <- normalizePath(zip)
   if (is.null(.zip_list_cache[[key]])) {
-    .zip_list_cache[[key]] <- system2("tar", c("-tf", shQuote(zip)), stdout = TRUE)
+    .zip_list_cache[[key]] <- system2(tar_exe(), c("-tf", shQuote(zip)), stdout = TRUE)
   }
   .zip_list_cache[[key]]
 }
@@ -89,7 +99,7 @@ prepare_year_files <- function(year) {
                         (grepl("\\.zip$", entries) & grepl(year_token, basename(entries)))]
       if (length(want) > 0) {
         log_msg("  extracting ", length(want), " file(s) for ", year, " from ", basename(z))
-        res <- system2("tar", c("-xf", shQuote(z), "-C", shQuote(out), shQuote(want)))
+        res <- system2(tar_exe(), c("-xf", shQuote(z), "-C", shQuote(out), shQuote(want)))
         if (res != 0) stop("Unzipping failed: ", z)
       }
       done_zips <- c(done_zips, z)
