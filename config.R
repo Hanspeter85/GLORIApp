@@ -83,5 +83,8 @@ parser_options <- list(
   # Delete the unzipped raw csv files after a year has been parsed (saves space).
   delete_unzipped = TRUE,
   # Skip years that are already parsed (makes the parser resumable).
-  skip_existing = TRUE
+  skip_existing = TRUE,
+  # Delete the raw zip of a year (MRIO part I, a few GB) once that year has
+  # been parsed successfully. Saves ~60-120 GB; the zips stay on Google Drive.
+  delete_raw_after_parse = TRUE
 )

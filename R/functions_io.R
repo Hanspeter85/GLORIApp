@@ -48,6 +48,13 @@ read_f32 <- function(file) {
   x
 }
 
+# Read the parsed inter-industry matrix Z of a year (stored as Z.rds or Z.f32)
+read_Z <- function(year, parsed_dir = paths$parsed) {
+  f_rds <- file.path(parsed_dir, year, "Z.rds")
+  if (file.exists(f_rds)) return(readRDS(f_rds))
+  read_f32(file.path(parsed_dir, year, "Z.f32"))
+}
+
 # -----------------------------------------------------------------------------
 # Locate raw files
 # -----------------------------------------------------------------------------

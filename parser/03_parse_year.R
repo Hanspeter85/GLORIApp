@@ -178,7 +178,15 @@ parse_year <- function(year, meta, logfile = NULL) {
 
   # Save the basic variables now (frees memory before the inversion)
   L_("saving Z, Y, V, x, Q, QY, E")
-  saveRDS(Matrix(Z, sparse = TRUE), file.path(out_dir, "Z.rds"))
+  # Z: store as sparse matrix if it has few non-zero cells, otherwise as
+  # float32 (a sparse matrix needs 12 bytes per non-zero cell, float32 needs
+  # 4 bytes per cell, so sparse only pays off below ~30% non-zeros).
+  # Read it with read_Z(year) from R/functions_io.R in both cases.
+  if (mean(Z != 0) < 0.3) {
+    saveRDS(Matrix(Z, sparse = TRUE), file.path(out_dir, "Z.rds"))
+  } else {
+    write_f32(Z, file.path(out_dir, "Z.f32"))
+  }
   saveRDS(Y,  file.path(out_dir, "Y.rds"))
   saveRDS(V,  file.path(out_dir, "V.rds"))
   saveRDS(x,  file.path(out_dir, "x.rds"))
@@ -233,6 +241,18 @@ parse_year <- function(year, meta, logfile = NULL) {
   # --- 10) Clean up ----------------------------------------------------------------------
   if (isTRUE(parser_options$delete_unzipped) && src != paths$raw) {
     unlink(src, recursive = TRUE)
+  }
+  # Delete the big raw zip of this year (part I, a few GB) to save disk space.
+  # It can be downloaded again at any time with the update function.
+  # Only done when the checks look fine (L reproduces gross output).
+  if (isTRUE(parser_options$delete_raw_after_parse) &&
+      abs(checks$output_reproduced_by_L - 1) < 1e-3) {
+    z <- list.files(paths$raw, "\\.zip$", recursive = TRUE, full.names = TRUE)
+    z <- z[grepl("part_I_", z) & grepl(sprintf("(^|[^0-9])%d([^0-9]|$)", year), basename(z))]
+    if (length(z) > 0) {
+      unlink(z)
+      L_("deleted raw zip ", paste(basename(z), collapse = ", "))
+    }
   }
   file.create(file.path(out_dir, "_DONE"))
   L_(sprintf("done in %.1f min", checks$seconds / 60))
