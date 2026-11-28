@@ -156,7 +156,7 @@ The GLORIA data are not part of the bundle: copy the data folder to
 | `config.R` | all paths and settings (single place to change) |
 | `app/app.R`, `app/full_app.R` | Shiny user interface and server |
 | `app/charts_tab.R` | tab "Charts" (interactive charts, image export) |
-| `app/gloria_reading.R` | tab "MRIO explained" (background pages from the GLORIA release notes) |
+| `app/gloria_reading.R` | tab "About GLORIA" (GLORIA, IELab, Global MRIO Lab; background pages from the GLORIA release notes) |
 | `app/update_tab.R` | tab "Data & updates" |
 | `app/help.md` | "How it works" page of the app |
 | `R/engine.R` | all calculations (footprints, production, overview, aggregation, plausibility checks); usable without the app |
