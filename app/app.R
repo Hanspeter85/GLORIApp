@@ -41,6 +41,7 @@ source(file.path(root, "R", "share.R"), local = TRUE)
 source(file.path(root, "app", "update_tab.R"), local = TRUE)
 source(file.path(root, "app", "charts_tab.R"), local = TRUE)
 source(file.path(root, "app", "how_it_works.R"), local = TRUE)
+source(file.path(root, "app", "gloria_reading.R"), local = TRUE)
 
 # Metadata created by the parser (labels, concordances, indicator catalogue).
 meta_file <- file.path(paths$meta, "meta.rds")

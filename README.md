@@ -32,7 +32,7 @@ gives a quick interactive look at the result (ranking, time series, composition)
 1. Install **R** (>= 4.3) and **RStudio**.
 2. Install the R packages (once):
    ```r
-   install.packages(c("shiny", "bslib", "DT", "plotly", "ggplot2", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown"))
+   install.packages(c("shiny", "bslib", "DT", "plotly", "ggplot2", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown", "pdftools"))
    # optional: install.packages(c("testthat", "officer", "mschart"))  # tests and intro slides
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
@@ -156,6 +156,7 @@ The GLORIA data are not part of the bundle: copy the data folder to
 | `config.R` | all paths and settings (single place to change) |
 | `app/app.R`, `app/full_app.R` | Shiny user interface and server |
 | `app/charts_tab.R` | tab "Charts" (interactive charts, image export) |
+| `app/gloria_reading.R` | tab "MRIO explained" (background pages from the GLORIA release notes) |
 | `app/update_tab.R` | tab "Data & updates" |
 | `app/help.md` | "How it works" page of the app |
 | `R/engine.R` | all calculations (footprints, production, overview, aggregation, plausibility checks); usable without the app |

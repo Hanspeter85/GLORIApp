@@ -6,7 +6,7 @@ local({
   root <- REPO
   meta_file <- file.path(paths$meta, "meta.rds")
   suppressPackageStartupMessages({ library(shiny); library(bslib) })
-  for (f in c("R/texts.R", "R/export.R", "app/update_tab.R", "app/charts_tab.R", "app/how_it_works.R", "app/full_app.R")) {
+  for (f in c("R/texts.R", "R/export.R", "app/update_tab.R", "app/charts_tab.R", "app/how_it_works.R", "app/gloria_reading.R", "app/full_app.R")) {
     source(file.path(REPO, f), local = environment())
   }
   assign("server", server, envir = app_env)

@@ -204,6 +204,7 @@ ui <- page_sidebar(
     ),
     charts_ui(),
     nav_panel("Indicator explanations", DT::DTOutput("catalogue")),
+    gloria_reading_ui(),
     update_ui(),
     how_it_works_panel()
   )
