@@ -56,7 +56,7 @@ The glue between the two is **reactivity**: Shiny remembers which inputs an expr
 ## What happens when the user clicks *Calculate*
 
 1. The browser sends the button click to the R process (`input$go` changes).
-2. `result()` reads `spec()`: a plain R list such as `list(type = "footprint", indicators = "ghg_edgar", years = 2019, origin_region = "world_region_7", ...)`.
+2. `result()` reads `spec()`: a plain R list such as `list(type = "footprint", indicators = "ghg_edgar", years = 2019, production_region = "world_region_7", ...)`.
 3. `result()` calls `run_calculation(spec, meta)` from `R/engine.R`. The engine loops over years and indicators, loads the needed files of each year from the data folder (with a small cache), calculates, aggregates with the chosen groupings and returns a long `data.table`.
 4. `result_formatted()` optionally reshapes it to wide format (`to_wide()`).
 5. `output$status`, `output$table` and `output$download_ui` re-run automatically. The browser shows the preview and the download button. *Download csv* writes the full table with `data.table::fwrite()`.
@@ -167,9 +167,9 @@ source("config.R"); source("R/functions_io.R"); source("R/engine.R")
 meta <- readRDS(file.path(paths$meta, "meta.rds"))
 res <- run_calculation(list(
   type = "footprint", indicators = c("ghg_edgar", "va_total"), years = 2015:2022,
-  origin_region = "world_region_7", origin_sector = "broad_sector",
-  product_region = "none", product_sector = "none",
-  consumer_region = "region_name", by_fd = FALSE), meta)
+  production_region = "world_region_7", production_sector = "broad_sector",
+  product_made_in = "none", consumption_product = "none",
+  consumption_region = "region_name", by_fd = FALSE), meta)
 ```
 
 ## Specification
@@ -179,10 +179,11 @@ res <- run_calculation(list(
 | `type` | `"footprint"`, `"overview"`, `"production"`, `"exports"` | - |
 | `indicators` | catalogue ids (`input/indicator_catalogue.csv`) or `"sat:<code>"` for a raw satellite row | - |
 | `years` | integer vector | - |
-| `origin_region`, `origin_sector` | grouping of the origin dimension, or `"none"` | `"region_name"`, `"none"` |
-| `product_region`, `product_sector` | grouping of the final product dimension, or `"none"` | `"none"`, `"none"` |
-| `consumer_region` | grouping of consumers | `"region_name"` |
-| `by_fd` | split by final demand category | `FALSE` |
+| `production_region`, `production_sector` | production side: where (region) and what (sector), or `"none"` | `"region_name"`, `"none"` |
+| `consumption_product` | consumption side, what: sector grouping of the final products, or `"none"` | `"none"` |
+| `product_made_in` | consumption side, optional: region where the final product was made, or `"none"` | `"none"` |
+| `consumption_region` | consumption side, where: region grouping of consumers | `"region_name"` |
+| `by_fd` | consumption side, who: split by final demand category (column `consumption_category`) | `FALSE` |
 | `fd_codes` | final demand categories included (1-6) | all |
 | `include_direct_fd` | add direct emissions of final users | `TRUE` |
 | `keep_zeros` | keep zero rows | `FALSE` |
@@ -195,7 +196,7 @@ With $s = q/x$, three cases are distinguished (all give identical totals per con
 
 1. **Origin split only**: $F = \mathrm{diag}(s)\,(LY)$ using the pre-computed `LY.f32`; rows and columns are aggregated with sparse 0/1 matrices (`agg_matrix`). ~1 s per year and indicator.
 2. **Final product split only**: $F = (sL) \circ Y$ using the multipliers `M.rds` (catalogue indicators) or $sL$ computed from `L.f32` (raw satellite rows).
-3. **Origin × final product**: $F_{o,p,c} = \sum_{i\in o}\sum_{j\in p} s_i L_{ij} y_{jc}$. Implementation: $A_1 = G_o'\,\mathrm{diag}(s)\,L$ (origins × n), then for every consumer group $c$: $A_1\,\mathrm{diag}(y_c)\,G_p$. Needs `L.f32`; ~10-60 s per year.
+3. **Production side × final product**: $F_{o,p,c} = \sum_{i\in o}\sum_{j\in p} s_i L_{ij} y_{jc}$. Implementation: $A_1 = G_o'\,\mathrm{diag}(s)\,L$ (origins × n), then for every consumer group $c$: $A_1\,\mathrm{diag}(y_c)\,G_p$. Needs `L.f32`; ~10-60 s per year.
 
 Direct emissions of final users (`QY`) are added with origin = consumer region and the sector/product label `DIRECT_LABEL`.
 

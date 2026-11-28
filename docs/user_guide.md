@@ -122,15 +122,20 @@ Any selection of the years 1990-2029. GLORIA is based on statistics up to about 
 
 ## Step 4 - Breakdown of the result
 
-Here you decide which columns the result table has. Every dimension can be grouped by region and by sector:
+Here you decide which columns the result table has. Both sides of the footprint are described the same way: **where** (region) and **what** (sector or product); the consumption side also by **who** (final demand category).
 
-| Dimension | Question | Columns in the table |
-|---|---|---|
-| Where the pressure occurs (origin) | In which countries and sectors are the emissions released? | origin_region, origin_sector |
-| What is bought (final product) | Which products are bought, and where were they made? | product_region, product_sector |
-| Who buys (consumer) | Whose consumption is it, and which final demand category? | consumer_region, final_demand |
+| Side | Question | Drop-down | Column in the table |
+|---|---|---|---|
+| Production side | **Where** does the pressure occur? | Where: region | production_region |
+| Production side | **What** (which sector) causes it directly? | What: sector | production_sector |
+| Consumption side | **Where** are the consumers? | Where: region | consumption_region |
+| Consumption side | **What** final products do they buy? | What: final product | consumption_product |
+| Consumption side | **Who** buys (households, government, investment, ...)? | Who: split by final demand category | consumption_category |
+| Consumption side (optional) | Where was the final product made? | region where the final product was made | product_made_in |
 
-*Do not split (total)* leaves a dimension out. Splitting origin **and** final product at the same time gives a very detailed from-to table (e.g. "Chinese coal power in cars bought in Germany"). It takes longer (10-60 seconds per year and indicator). Group regions and sectors coarsely in that case.
+*Do not split (total)* leaves a dimension out. Splitting the production side **and** the final product at the same time gives a very detailed from-to table (e.g. "Chinese coal power in cars bought in Germany"). It takes longer (10-60 seconds per year and indicator), so group regions and sectors coarsely in that case.
+
+For *Overview* and *Production-based* only the production side is used.
 
 Region groupings: countries, 7 world regions, World Bank income groups (classification of July 2025), World Bank regions, development groups, world total, or your own groups (step 6). Sector groupings: 120 sectors, 20 ISIC sections, 6 broad sectors, or your own groups.
 

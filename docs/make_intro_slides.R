@@ -18,24 +18,24 @@ yr <- 2019   # example year (latest year before the pandemic with full statistic
 # -----------------------------------------------------------------------------
 # 1) Example numbers
 # -----------------------------------------------------------------------------
-base <- list(origin_region = "region_name", origin_sector = "none", product_region = "none",
-             product_sector = "none", consumer_region = "region_name", by_fd = FALSE,
+base <- list(production_region = "region_name", production_sector = "none", product_made_in = "none",
+             consumption_product = "none", consumption_region = "region_name", by_fd = FALSE,
              fd_codes = 1:6, include_direct_fd = TRUE)
 fo  <- run_calculation(modifyList(base, list(type = "footprint", indicators = "ghg_edgar",
-                                             years = yr, origin_region = "world_region_7")), meta)
-aut <- fo[consumer_region == "Austria", .(region = origin_region, Mt = value / 1000)][order(-Mt)]
+                                             years = yr, production_region = "world_region_7")), meta)
+aut <- fo[consumption_region == "Austria", .(region = production_region, Mt = value / 1000)][order(-Mt)]
 pr  <- run_calculation(modifyList(base, list(type = "production", indicators = "ghg_edgar", years = yr)), meta)
-aut_pba <- pr[origin_region == "Austria", sum(value)] / 1000
+aut_pba <- pr[production_region == "Austria", sum(value)] / 1000
 aut_fp  <- sum(aut$Mt)
 world_ghg <- sum(pr$value) / 1e6
 ov <- run_calculation(modifyList(base, list(type = "overview", indicators = c("ghg_edgar", "mat_total"),
-                                            years = c(2000, yr), origin_region = "income_group_worldbank")), meta)
+                                            years = c(2000, yr), production_region = "income_group_worldbank")), meta)
 ov <- ov[account == "net_imports" & region != "Rest-of-world regions (mixed)"]
 # value-added footprint of Austria: where is the income behind Austrian consumption earned?
 va <- run_calculation(modifyList(base, list(type = "footprint", indicators = "va_total", years = yr)), meta)
-va_aut <- va[consumer_region == "Austria"]
-va_abroad <- va_aut[origin_region != "Austria", sum(value)] / sum(va_aut$value)
-va_top <- va_aut[origin_region != "Austria"][order(-value)][1:3, origin_region]
+va_aut <- va[consumption_region == "Austria"]
+va_abroad <- va_aut[production_region != "Austria", sum(value)] / sum(va_aut$value)
+va_top <- va_aut[production_region != "Austria"][order(-value)][1:3, production_region]
 
 # -----------------------------------------------------------------------------
 # 2) Design: 16:9 canvas, palette, fonts
@@ -207,7 +207,7 @@ doc <- title(doc, "The app in seven steps", "Left sidebar, top to bottom - then 
 steps <- list(c("What to calculate", "footprint, production- vs consumption-based overview, territorial account"),
               c("Indicators", "35+ recommended indicators (incl. value added) with explanations, or any raw GLORIA row"),
               c("Years", "any selection of 1990-2029"),
-              c("Breakdown", "split by origin, final product and consumer - regions and sectors, each grouped as you like"),
+              c("Breakdown", "production side (where, what) and consumption side (where, what, who), grouped as you like"),
               c("Final demand", "households, government, investment ...; direct household emissions"),
               c("Own groupings (6) and output (7)", "define groups like EU27 or Food in the app; long (pivot-ready) or wide csv"))
 for (i in seq_along(steps)) {
@@ -217,9 +217,9 @@ for (i in seq_along(steps)) {
 
 # 8 Footprint breakdown: one footprint, three dimensions
 doc <- new_slide(doc)
-doc <- title(doc, "One footprint, three ways to split it")
+doc <- title(doc, "One footprint, two sides: where, what, who")
 rt <- data.frame(
-  dim = c("Origin", "Final product", "Consumer", "Origin x product (expert)", "Overview / production-based"),
+  dim = c("Production: where + what", "Consumption: what", "Consumption: where + who", "Both sides (detailed)", "Overview / production-based"),
   q = c("Which countries and sectors emit CO2 for Austrian consumption?",
         "Which products (food, cars, buildings) drive the EU's land footprint?",
         "Which income group has the largest material footprint?",

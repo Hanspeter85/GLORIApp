@@ -112,35 +112,34 @@ ui <- page_sidebar(
       ),
 
       # --- Step 4: breakdown (which dimensions appear in the table) -------------------
-      # For each dimension a region grouping and a sector grouping can be chosen;
-      # "Do not split (total)" removes that dimension from the table.
+      # Same logic on both sides: WHERE (region), WHAT (sector / product) and, on
+      # the consumption side, WHO (final demand category). "Do not split (total)"
+      # removes that dimension from the table.
       accordion_panel(
         "4. Breakdown of the result", value = "step4",
         helpText(help_texts$breakdown),
-        # Origin: where the pressure physically occurs
-        sub_head(uiOutput("lab_origin", inline = TRUE)),
-        layout_columns(
-          selectInput("origin_region", "Regions", choices = NULL),
-          conditionalPanel("input.type != 'exports'",
-                           selectInput("origin_sector", "Sectors", choices = NULL))
+        # Production side: where the pressure physically occurs
+        tags$div(
+          class = "border rounded p-2 mb-2",
+          sub_head(uiOutput("lab_production", inline = TRUE)),
+          selectInput("production_region", "Where: region", choices = NULL),
+          conditionalPanel("input.type != 'exports' && input.type != 'overview'",
+                           selectInput("production_sector", "What: sector", choices = NULL))
         ),
-        # Final product: what is bought (footprint) / exporting country (exports)
+        # Consumption side: who buys what where (footprint) / exports (expert)
         conditionalPanel(
           "input.type == 'footprint' || input.type == 'exports'",
-          sub_head(uiOutput("lab_product", inline = TRUE)),
-          layout_columns(
-            selectInput("product_region", "Regions", choices = NULL),
-            selectInput("product_sector", "Sectors", choices = NULL)
-          ),
-          conditionalPanel("input.type == 'footprint'", uiOutput("detail_warning"))
-        ),
-        # Consumer: who buys (footprint) / partner country (exports)
-        conditionalPanel(
-          "input.type == 'footprint' || input.type == 'exports'",
-          sub_head(uiOutput("lab_consumer", inline = TRUE)),
-          selectInput("consumer_region", "Regions", choices = NULL),
-          conditionalPanel("input.type == 'footprint'",
-                           checkboxInput("by_fd", "Split by final demand category (households, government, investment, ...)", FALSE))
+          tags$div(
+            class = "border rounded p-2 mb-2",
+            sub_head(uiOutput("lab_consumption", inline = TRUE)),
+            selectInput("consumption_region", "Where: region", choices = NULL),
+            selectInput("consumption_product", "What: final product (sector)", choices = NULL),
+            conditionalPanel("input.type == 'footprint'",
+                             checkboxInput("by_fd", "Who: split by final demand category (households, government, investment, ...)", FALSE)),
+            selectInput("product_made_in", "Optional: region where the final product was made",
+                        choices = NULL),
+            conditionalPanel("input.type == 'footprint'", uiOutput("detail_warning"))
+          )
         )
       ),
 
@@ -224,9 +223,8 @@ server <- function(input, output, session) {
   output$type_help <- renderUI(helpText(result_type_help[[input$type]]))
 
   # Headings of the three breakdown blocks depend on the result type
-  output$lab_origin   <- renderText(dimension_labels[[input$type]][["origin"]])
-  output$lab_product  <- renderText(dimension_labels[[input$type]][["product"]])
-  output$lab_consumer <- renderText(dimension_labels[[input$type]][["consumer"]])
+  output$lab_production  <- renderText(dimension_labels[[input$type]][["production"]])
+  output$lab_consumption <- renderText(dimension_labels[[input$type]][["consumption"]])
 
   # Quick year selection links
   observeEvent(input$all_years, updateSelectizeInput(session, "years", selected = years_avail))
@@ -304,31 +302,31 @@ server <- function(input, output, session) {
     own_s <- if (nrow(g[kind == "sectors"]) > 0) "own_grouping"
     reg <- c(base_region_cols, own_r)
     sec <- c(base_sector_cols, own_s)
-    set_choices("origin_region",   c("none", reg, "world"), "region_name")
-    set_choices("origin_sector",   c("none", sec), "none")
-    set_choices("product_region",  c("none", reg, "world"), "none")
-    set_choices("product_sector",  c("none", sec), "none")
-    set_choices("consumer_region", c(reg, "world"), "region_name")
+    set_choices("production_region",   c("none", reg, "world"), "region_name")
+    set_choices("production_sector",   c("none", sec), "none")
+    set_choices("product_made_in",  c("none", reg, "world"), "none")
+    set_choices("consumption_product",  c("none", sec), "none")
+    set_choices("consumption_region", c(reg, "world"), "region_name")
   })
 
   # Warn when origin AND final product are split (slower, needs L)
   output$detail_warning <- renderUI({
-    origin_split  <- !identical(input$origin_region, "none") || !identical(input$origin_sector, "none")
-    product_split <- !identical(input$product_region, "none") || !identical(input$product_sector, "none")
+    origin_split  <- !identical(input$production_region, "none") || !identical(input$production_sector, "none")
+    product_split <- !identical(input$product_made_in, "none") || !identical(input$consumption_product, "none")
     if (origin_split && product_split) div(class = "alert alert-warning py-1 small", help_texts$detail)
   })
 
   # --- Collect all choices into one specification list ---------------------------
   spec <- reactive({
-    req(input$origin_region, input$consumer_region)
+    req(input$production_region, input$consumption_region)
     list(type = input$type,
          indicators = c(input$indicators, if (isTRUE(input$expert)) input$sat_rows),
          years = as.integer(input$years),
-         origin_region = input$origin_region,
-         origin_sector = if (input$type == "exports") "none" else input$origin_sector,
-         product_region = if (input$type %in% c("footprint", "exports")) input$product_region else "none",
-         product_sector = if (input$type %in% c("footprint", "exports")) input$product_sector else "none",
-         consumer_region = input$consumer_region,
+         production_region = input$production_region,
+         production_sector = if (input$type == "exports") "none" else input$production_sector,
+         product_made_in = if (input$type %in% c("footprint", "exports")) input$product_made_in else "none",
+         consumption_product = if (input$type %in% c("footprint", "exports")) input$consumption_product else "none",
+         consumption_region = input$consumption_region,
          by_fd = isTRUE(input$by_fd) && input$type == "footprint",
          fd_codes = as.integer(input$fd_codes),
          include_direct_fd = isTRUE(input$include_direct_fd),
@@ -346,7 +344,7 @@ server <- function(input, output, session) {
       need(length(sp$years) > 0, "Please choose at least one year (step 3)."),
       need(length(sp$fd_codes) > 0 || sp$type == "production",
            "Please choose at least one final demand category (step 5)."),
-      need(sp$type != "exports" || !identical(sp$product_region, "none"),
+      need(sp$type != "exports" || !identical(sp$product_made_in, "none"),
            "For exports please choose how to group the exporting countries (step 4).")
     )
     t0 <- Sys.time()

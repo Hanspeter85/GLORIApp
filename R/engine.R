@@ -7,8 +7,8 @@
 #   source("config.R"); source("R/functions_io.R"); source("R/engine.R")
 #   meta <- readRDS(file.path(paths$meta, "meta.rds"))
 #   res  <- run_calculation(list(type = "footprint", indicators = "ghg_edgar",
-#                                years = 2020, origin_region = "world_region_7",
-#                                consumer_region = "region_name"), meta)
+#                                years = 2020, production_region = "world_region_7",
+#                                consumption_region = "region_name"), meta)
 #
 # NOTATION (standard environmentally-extended input-output analysis)
 #   n   = 164 regions x 120 sectors = 19 680 region-sectors
@@ -22,8 +22,9 @@
 #
 # RESULT TYPES
 #   "footprint"   consumption-based account s L Y, split freely by
-#                 origin (where the pressure occurs), final product (what is
-#                 bought) and consumer (who buys). Works for every indicator:
+#                 the production side (where/what the pressure occurs) and the
+#                 consumption side (where/what/who: consumer region, final
+#                 product, final demand category). Works for every indicator:
 #                 with "Value added" it is the value-added footprint, i.e.
 #                 Trade in Value Added from the final-demand perspective.
 #   "production"  q: direct pressure where it happens (territorial account).
@@ -125,16 +126,16 @@ multiplier <- function(info, year) {
 # (= do not split, everything is summed up).
 #
 # keys_rs() returns, for each of the n region-sectors, its region group and
-# sector group as a data.table with 0, 1 or 2 columns named <prefix>_region
-# and <prefix>_sector (only for the dimensions that are split).
-keys_rs <- function(meta, region_col, sector_col, prefix) {
+# sector group as a data.table with 0, 1 or 2 columns (named region_name and
+# sector_name; only for the dimensions that are split).
+keys_rs <- function(meta, region_col, sector_col, region_name, sector_name) {
   out <- data.table(.dummy = seq_len(meta$n$rs))
   if (!identical(region_col, "none")) {
-    out[, (paste0(prefix, "_region")) :=
+    out[, (region_name) :=
           meta$regions[[region_col]][match(meta$idx_Z$region_code, meta$regions$region_code)]]
   }
   if (!identical(sector_col, "none")) {
-    out[, (paste0(prefix, "_sector")) :=
+    out[, (sector_name) :=
           meta$sectors[[sector_col]][match(meta$idx_Z$sector_code, meta$sectors$sector_code)]]
   }
   out[, .dummy := NULL]
@@ -143,9 +144,9 @@ keys_rs <- function(meta, region_col, sector_col, prefix) {
 
 # Keys of the 984 final demand columns (consumer region x category)
 keys_fd <- function(meta, region_col, by_fd) {
-  out <- data.table(consumer_region =
+  out <- data.table(consumption_region =
                       meta$regions[[region_col]][match(meta$idx_Y$region_code, meta$regions$region_code)])
-  if (by_fd) out[, final_demand := meta$fd$fd_name[match(meta$idx_Y$fd_code, meta$fd$fd_code)]]
+  if (by_fd) out[, consumption_category := meta$fd$fd_name[match(meta$idx_Y$fd_code, meta$fd$fd_code)]]
   out
 }
 
@@ -181,9 +182,12 @@ DIRECT_LABEL <- "Direct emissions of final users (households etc.)"
 # FOOTPRINT (consumption-based account) with free choice of dimensions
 # -----------------------------------------------------------------------------
 # The footprint of final demand column j is distributed over
-#   origin   o: region (and sector) where the pressure physically occurs
-#   product  p: region and sector that produced the final product bought
-#   consumer j: consumer region (and final demand category)
+#   PRODUCTION side  o: where (production_region) and what (production_sector)
+#                       - where the pressure physically occurs
+#   CONSUMPTION side j: where (consumption_region), what (consumption_product =
+#                       sector of the final product bought, optionally with
+#                       product_made_in = region that made it) and who
+#                       (consumption_category = households, government, ...)
 # Full detail:  F[o, p, j] = s_o * L[o, p] * Y[p, j]
 #
 # Three cases, from fast to slower:
@@ -193,9 +197,9 @@ DIRECT_LABEL <- "Direct emissions of final users (households etc.)"
 # All three give the same totals per consumer.
 calc_footprint <- function(info, year, meta, sp) {
   fd_sel <- meta$idx_Y$fd_code %in% sp$fd_codes
-  o_keys <- keys_rs(meta, sp$origin_region, sp$origin_sector, "origin")
-  p_keys <- keys_rs(meta, sp$product_region, sp$product_sector, "product")
-  c_keys <- keys_fd(meta, sp$consumer_region, isTRUE(sp$by_fd))[fd_sel]
+  o_keys <- keys_rs(meta, sp$production_region, sp$production_sector, "production_region", "production_sector")
+  p_keys <- keys_rs(meta, sp$product_made_in, sp$consumption_product, "product_made_in", "consumption_product")
+  c_keys <- keys_fd(meta, sp$consumption_region, isTRUE(sp$by_fd))[fd_sel]
 
   if (ncol(p_keys) == 0) {
     # --- case 1: by origin ---------------------------------------------------
@@ -232,10 +236,10 @@ calc_footprint <- function(info, year, meta, sp) {
     if (!is.null(qy) && any(qy[fd_sel] != 0)) {
       reg_of_fd <- function(col) meta$regions[[col]][match(meta$idx_Y$region_code, meta$regions$region_code)][fd_sel]
       d <- copy(c_keys)[, value := qy[fd_sel]]
-      if ("origin_region" %in% names(o_keys)) d[, origin_region := reg_of_fd(sp$origin_region)]
-      if ("origin_sector" %in% names(o_keys)) d[, origin_sector := DIRECT_LABEL]
-      if ("product_region" %in% names(p_keys)) d[, product_region := reg_of_fd(sp$product_region)]
-      if ("product_sector" %in% names(p_keys)) d[, product_sector := DIRECT_LABEL]
+      if ("production_region" %in% names(o_keys)) d[, production_region := reg_of_fd(sp$production_region)]
+      if ("production_sector" %in% names(o_keys)) d[, production_sector := DIRECT_LABEL]
+      if ("product_made_in" %in% names(p_keys)) d[, product_made_in := reg_of_fd(sp$product_made_in)]
+      if ("consumption_product" %in% names(p_keys)) d[, consumption_product := DIRECT_LABEL]
       res <- rbind(res, d, use.names = TRUE, fill = TRUE)
     }
   }
@@ -247,18 +251,18 @@ calc_footprint <- function(info, year, meta, sp) {
 # -----------------------------------------------------------------------------
 calc_production <- function(info, year, meta, sp) {
   q <- direct_pressure(info, year)
-  keys <- keys_rs(meta, sp$origin_region, sp$origin_sector, "origin")
+  keys <- keys_rs(meta, sp$production_region, sp$production_sector, "production_region", "production_sector")
   res <- aggregate_long(matrix(q, ncol = 1), keys, data.table())
   if (isTRUE(sp$include_direct_fd)) {
     qy <- direct_pressure_fd(info, year)
     if (!is.null(qy)) {
       fd_sel <- meta$idx_Y$fd_code %in% sp$fd_codes
       d <- data.table(value = qy[fd_sel])
-      if ("origin_region" %in% names(keys)) {
-        d[, origin_region := meta$regions[[sp$origin_region]][
+      if ("production_region" %in% names(keys)) {
+        d[, production_region := meta$regions[[sp$production_region]][
           match(meta$idx_Y$region_code, meta$regions$region_code)][fd_sel]]
       }
-      if ("origin_sector" %in% names(keys)) d[, origin_sector := DIRECT_LABEL]
+      if ("production_sector" %in% names(keys)) d[, production_sector := DIRECT_LABEL]
       res <- rbind(res, d, use.names = TRUE, fill = TRUE)
     }
   }
@@ -269,12 +273,12 @@ calc_production <- function(info, year, meta, sp) {
 # OVERVIEW: production- vs consumption-based per region
 # -----------------------------------------------------------------------------
 calc_overview <- function(info, year, meta, sp) {
-  reg <- if (identical(sp$origin_region, "none")) "world" else sp$origin_region
-  sp2 <- modifyList(sp, list(origin_region = reg, origin_sector = "none",
-                             product_region = "none", product_sector = "none",
-                             consumer_region = reg, by_fd = FALSE))
-  prod <- calc_production(info, year, meta, sp2)[, .(production_based = sum(value)), by = .(region = origin_region)]
-  fp <- calc_footprint(info, year, meta, sp2)[, .(consumption_based = sum(value)), by = .(region = consumer_region)]
+  reg <- if (identical(sp$production_region, "none")) "world" else sp$production_region
+  sp2 <- modifyList(sp, list(production_region = reg, production_sector = "none",
+                             product_made_in = "none", consumption_product = "none",
+                             consumption_region = reg, by_fd = FALSE))
+  prod <- calc_production(info, year, meta, sp2)[, .(production_based = sum(value)), by = .(region = production_region)]
+  fp <- calc_footprint(info, year, meta, sp2)[, .(consumption_based = sum(value)), by = .(region = consumption_region)]
   res <- merge(prod, fp, by = "region", all = TRUE)
   res[is.na(res)] <- 0
   res[, net_imports := consumption_based - production_based]
@@ -293,8 +297,8 @@ calc_overview <- function(info, year, meta, sp) {
 # Origin = exporter -> "domestic", other region -> "foreign" content.
 # Gross exports count goods that cross borders several times more than once
 # (Koopman et al. 2014), so totals are larger than footprints.
-# Dimensions used: exporter = product_region (+ product_sector = exporting
-# sector), partner = consumer_region, origin = origin_region.
+# Dimensions used: exporter = product_made_in (+ consumption_product = exporting
+# sector), partner = consumption_region, origin = production_region.
 calc_exports <- function(info, year, meta, sp) {
   L <- load_var(year, "L.f32")
   E <- load_var(year, "E.rds")
@@ -302,8 +306,8 @@ calc_exports <- function(info, year, meta, sp) {
   n_sec <- meta$n$sec
   reg_codes <- meta$regions$region_code
   G_orig <- agg_matrix(as.character(meta$idx_Z$region_code), as.character(reg_codes))
-  by_sec <- !identical(sp$product_sector, "none")
-  sec_lab <- if (by_sec) meta$sectors[[sp$product_sector]] else rep("All sectors", n_sec)
+  by_sec <- !identical(sp$consumption_product, "none")
+  sec_lab <- if (by_sec) meta$sectors[[sp$consumption_product]] else rep("All sectors", n_sec)
   sec_groups <- unique(sec_lab)
 
   out <- vector("list", length(reg_codes))
@@ -327,11 +331,11 @@ calc_exports <- function(info, year, meta, sp) {
     if (identical(col, "none")) return(rep("World", length(code)))
     meta$regions[[col]][match(code, reg_codes)]
   }
-  res[, `:=`(exporter = lab(exporter, sp$product_region),
-             partner  = lab(partner,  sp$consumer_region),
-             origin   = lab(origin,   sp$origin_region))]
+  res[, `:=`(exporter = lab(exporter, sp$product_made_in),
+             partner  = lab(partner,  sp$consumption_region),
+             origin   = lab(origin,   sp$production_region))]
   by <- c("exporter", if (by_sec) "export_sector", "partner",
-          if (!identical(sp$origin_region, "none")) "origin", "origin_type")
+          if (!identical(sp$production_region, "none")) "origin", "origin_type")
   res[, .(value = sum(value)), by = by]
 }
 # -----------------------------------------------------------------------------
@@ -341,12 +345,12 @@ calc_exports <- function(info, year, meta, sp) {
 #   type             "footprint", "overview", "production" or "exports" (expert)
 #   indicators       character vector of indicator ids (see indicator_info)
 #   years            integer vector
-#   origin_region    region grouping where the pressure occurs   (or "none")
-#   origin_sector    sector grouping where the pressure occurs   (or "none")
-#   product_region   region grouping that made the final product (or "none")
-#   product_sector   sector grouping of the final product        (or "none")
-#   consumer_region  region grouping of the final consumer
-#   by_fd            TRUE = show final demand categories separately
+#   production_region    PRODUCTION side, where: region grouping (or "none")
+#   production_sector    PRODUCTION side, what: sector grouping (or "none")
+#   consumption_region   CONSUMPTION side, where: region grouping of consumers
+#   consumption_product  CONSUMPTION side, what: sector grouping of final products (or "none")
+#   product_made_in      CONSUMPTION side, optional: region that made the final product (or "none")
+#   by_fd                CONSUMPTION side, who: TRUE = split by final demand category
 #   fd_codes         final demand categories to include (1..6)
 #   include_direct_fd  add direct emissions of households etc.
 #   keep_zeros       keep rows with value 0
@@ -354,9 +358,9 @@ calc_exports <- function(info, year, meta, sp) {
 # sectors.csv (e.g. "region_name", "income_group_worldbank", "broad_sector").
 # progress: optional function(fraction, message) for a progress bar
 run_calculation <- function(spec, meta, progress = NULL) {
-  defaults <- list(origin_region = "region_name", origin_sector = "none",
-                   product_region = "none", product_sector = "none",
-                   consumer_region = "region_name", by_fd = FALSE, fd_codes = meta$fd$fd_code,
+  defaults <- list(production_region = "region_name", production_sector = "none",
+                   product_made_in = "none", consumption_product = "none",
+                   consumption_region = "region_name", by_fd = FALSE, fd_codes = meta$fd$fd_code,
                    include_direct_fd = TRUE, keep_zeros = FALSE)
   spec <- modifyList(defaults, spec)
   fun <- switch(spec$type,
@@ -378,8 +382,12 @@ run_calculation <- function(spec, meta, progress = NULL) {
   }
   res <- rbindlist(res, use.names = TRUE, fill = TRUE)
   if (!isTRUE(spec$keep_zeros)) res <- res[value != 0]
-  # column order: year, indicator, unit, all dimensions, value last
-  setcolorder(res, c("year", "indicator", "unit", setdiff(names(res), c("year", "indicator", "unit", "value")), "value"))
+  # column order: year, indicator, unit, production side, consumption side, value
+  dims <- setdiff(names(res), c("year", "indicator", "unit", "value"))
+  pref <- c("production_region", "production_sector", "consumption_region", "consumption_product",
+            "product_made_in", "consumption_category")
+  dims <- c(intersect(pref, dims), setdiff(dims, pref))
+  setcolorder(res, c("year", "indicator", "unit", dims, "value"))
   res[]
 }
 

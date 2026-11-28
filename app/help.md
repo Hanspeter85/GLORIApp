@@ -22,12 +22,12 @@ Footprint = `s * L * Y`
 
 **Footprint** is the main result type. It works the same way for every indicator; with *Value added* it is the value-added footprint (trade in value added of final demand). In step 4 you choose how to split it:
 
-| Dimension | Meaning | Typical question |
-|---|---|---|
-| Origin (regions, sectors) | where the pressure physically occurs | Which countries and sectors emit CO2 for Austrian consumption? |
-| Final product (regions, sectors) | which final products are bought, and where they were made | Which products drive the EU's land footprint? |
-| Consumer (regions, final demand category) | who buys | Which income group has the largest material footprint? |
-| Origin x final product (expert) | both at once, a detailed from-to table | How much Chinese coal power is in cars bought in Germany? |
+| Side | Where | What | Who | Typical question |
+|---|---|---|---|---|
+| Production side | region where the pressure occurs | sector that causes it directly | - | Which countries and sectors emit CO2 for Austrian consumption? |
+| Consumption side | consumer region | final product bought (optionally: where it was made) | final demand category (households, government, investment, ...) | Which products drive the EU's land footprint, and is it households or investment? |
+
+Splitting both sides at once gives a detailed from-to table, e.g. *How much Chinese coal power is in cars bought by German households?* (slower).
 
 Other result types: **Overview** (production-based, consumption-based and net imports per region) and **Production-based** (territorial account). Under *Show expert options* you also find **Embodied in gross exports** (OECD TiVA style, domestic vs. foreign content of exports).
 

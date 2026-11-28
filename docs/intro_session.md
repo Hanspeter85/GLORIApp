@@ -18,7 +18,7 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 
 1. **Production-based** = what happens inside a country. **Consumption-based (footprint)** = what a country's final demand causes worldwide. The difference is the *net import* of a pressure.
 2. Every pressure ends up in some final demand: the global sum of all footprints equals the global sum of all production-based accounts.
-3. A footprint can be split by **origin** (where does the pressure happen?) or by **final product** (what was bought?). Both give the same total.
+3. A footprint has two sides, both split by **where** and **what**: the production side (where does the pressure happen, in which sector?) and the consumption side (where are the consumers, what do they buy, and **who** buys: households, government, investment). All splits give the same total.
 4. **Value added is an indicator like any other**: its footprint shows where the income behind consumption is earned (trade in value added of final demand). Expert option: value added in gross exports (double counts goods crossing borders several times).
 5. Years after the latest statistics (roughly 2023+) are **nowcasts/projections**. Use them for trends with care, not for precise numbers.
 
@@ -35,7 +35,7 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 ## Exercises
 
 **Exercise 1 - carbon footprint of Austria.**
-Step 1 *Footprint*, indicator *Greenhouse gases (GWP100; EDGAR)*, year 2019. Step 4: origin regions *7 world regions*, origin sectors *Do not split*, final product *Do not split*, consumer *Countries/regions (164)*. Filter the csv for `consumer_region = Austria`.
+Step 1 *Footprint*, indicator *Greenhouse gases (GWP100; EDGAR)*, year 2019. Step 4: production side where *7 world regions*, what *Do not split*; consumption side where *Countries/regions (164)*, what *Do not split*. Filter the csv for `consumption_region = Austria`.
 - How large is Austria's carbon footprint (Mt CO2-eq = kt / 1000)?
 - Which share happens outside Europe?
 
@@ -45,14 +45,14 @@ Step 1 *Overview*, indicators *Greenhouse gases* and *Material footprint*, years
 - Check: net imports sum to (almost) zero over all groups. Why?
 
 **Exercise 3 - what drives the footprint?**
-Step 1 *Footprint*, indicator *Land use (total)*, year 2019. Step 4: origin *Do not split*, final product regions *Do not split* and sectors *6 broad sectors*, consumer *Countries/regions*, tick *Split by final demand category*.
+Step 1 *Footprint*, indicator *Land use (total)*, year 2019. Step 4: production side *Do not split* (both); consumption side where *Countries/regions*, what *6 broad sectors*, tick *Who: split by final demand category*.
 - Which product groups and which final demand category drive the land footprint of your country?
 
 **Exercise 4 - own region grouping.**
 Step 6: define a group "EU27" from the 27 member states (everything else becomes "Rest of world") and save it as csv. Repeat exercise 1 with consumer *Own grouping*.
 
 **Exercise 5 - value-added footprint.**
-Step 1 *Footprint*, indicator *Value added (total)*, year 2019, origin *Countries/regions*, consumer *Countries/regions*.
+Step 1 *Footprint*, indicator *Value added (total)*, year 2019, production side where *Countries/regions*, consumption side where *Countries/regions*.
 - Which share of the value added behind Austrian (or German) final demand is earned abroad, and where?
 - Expert: tick *Show expert options* and compare with *Embodied in gross exports* for Germany. Why are the gross-export numbers larger?
 

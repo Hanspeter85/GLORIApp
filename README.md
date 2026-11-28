@@ -17,10 +17,10 @@ What you can do in the app (no programming needed):
   regions, development groups, or your own grouping via csv upload) and **sectors**
   (120 sectors, ISIC sections, 6 broad sectors, or your own grouping)
 - choose **final demand categories** (households, government, investment, ...)
-- choose the **result type**: footprint from-to (origin -> consumer), footprint by
-  final product, production- vs. consumption-based overview, territorial account,
-  Trade in Value Added (TiVA) / indicators embodied in exports
-- download the result as **csv** in long format or as a pivot (wide) table
+- choose the **result type** (footprint, production- vs. consumption-based overview,
+  territorial account; expert: embodied in gross exports) and the **breakdown**:
+  production side (where, what) and consumption side (where, what, who)
+- download the result as **csv** in long format (pivot-ready) or as a wide cross table
 
 The app has no charts on purpose: it produces clean tables for Excel, R, Python, ...
 
@@ -106,7 +106,7 @@ shiny::runApp("app")
 
 or open `app/app.R` and click **Run App**. Results are computed on the fly; a
 footprint for one indicator and year takes a few seconds (the very detailed
-origin x final product breakdown 10-60 seconds).
+production side x final product breakdown 10-60 seconds).
 
 
 ### Portable version (no R installation needed)
@@ -147,8 +147,8 @@ source("config.R"); source("R/functions_io.R"); source("R/engine.R")
 meta <- readRDS(file.path(paths$meta, "meta.rds"))
 res <- run_calculation(list(
   type = "footprint", indicators = c("ghg_edgar", "mat_total"), years = 2015:2022,
-  origin_region = "world_region_7", origin_sector = "broad_sector",
-  product_region = "none", product_sector = "none", consumer_region = "region_name",
+  production_region = "world_region_7", production_sector = "broad_sector",
+  product_made_in = "none", consumption_product = "none", consumption_region = "region_name",
   by_fd = FALSE, fd_codes = 1:6, include_direct_fd = TRUE), meta)
 fwrite(res, "my_footprints.csv")
 ```

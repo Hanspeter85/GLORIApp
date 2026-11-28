@@ -38,14 +38,12 @@ result_type_help <- list(
 
 # Headings of the three breakdown blocks in step 4, per result type
 dimension_labels <- list(
-  footprint  = c(origin = "Where the pressure occurs (origin)",
-                 product = "What is bought (final product)",
-                 consumer = "Who buys (consumer)"),
-  overview   = c(origin = "Regions", product = "", consumer = ""),
-  production = c(origin = "Where the pressure occurs", product = "", consumer = ""),
-  exports    = c(origin = "Where the embodied value/pressure originates",
-                 product = "Exporting country and exporting sector",
-                 consumer = "Partner (importing) country")
+  footprint  = c(production = "PRODUCTION SIDE - where the pressure occurs",
+                 consumption = "CONSUMPTION SIDE - final demand that causes it"),
+  overview   = c(production = "Regions (production and consumption side)", consumption = ""),
+  production = c(production = "PRODUCTION SIDE - where the pressure occurs", consumption = ""),
+  exports    = c(production = "Origin of the embodied value/pressure",
+                 consumption = "Exports: Where = partner (importing) country, What = exporting sector, region where made = exporting country")
 )
 
 output_format_choices <- c(
@@ -65,11 +63,12 @@ help_texts <- list(
     "1990-2029. Years after the latest available statistics (roughly 2023+) are",
     "nowcasts/projections of the GLORIA team and should be interpreted with care."),
   breakdown = paste(
-    "Choose for each dimension how to group regions and sectors.",
-    "'Do not split (total)' leaves that dimension out of the table.",
-    "Typical: origin by region (+ sector) OR final product by sector, plus the consumer."),
+    "Both sides are split the same way: WHERE (region) and WHAT (sector or product); the",
+    "consumption side also by WHO (households, government, investment, ...).",
+    "'Do not split (total)' leaves a dimension out of the table. Typical: production side by",
+    "region (and sector) OR final product by sector, plus the consumer region."),
   detail = paste(
-    "Origin AND final product are split: very detailed from-to table. This needs the",
+    "Production side AND final product are split: very detailed from-to table. This needs the",
     "full Leontief inverse and takes roughly 10-60 seconds per year and indicator."),
   fd = paste(
     "Final demand = households, non-profit institutions, government, investment (gross",
@@ -99,17 +98,18 @@ describe_spec <- function(sp, meta) {
     if (length(parts) == 0) "not split" else paste(parts, collapse = " x ")
   }
   txt <- switch(sp$type,
-    footprint = sprintf("Footprint of %s. Origin: %s. Final product: %s. Consumer: %s%s.",
-                        fd, dim_txt(sp$origin_region, sp$origin_sector),
-                        dim_txt(sp$product_region, sp$product_sector),
-                        nice_name(sp$consumer_region), if (isTRUE(sp$by_fd)) " x final demand category" else ""),
+    footprint = sprintf("Footprint of %s. Production side: %s. Consumption side: where = %s, what = %s%s, who = %s.",
+                        fd, dim_txt(sp$production_region, sp$production_sector),
+                        nice_name(sp$consumption_region), dim_txt("none", sp$consumption_product),
+                        if (!identical(sp$product_made_in, "none")) paste0(" made in ", nice_name(sp$product_made_in)) else "",
+                        if (isTRUE(sp$by_fd)) "final demand categories" else "not split"),
     overview = sprintf("Production-based vs. consumption-based totals per region (%s).",
-                       dim_txt(sp$origin_region, "none")),
+                       dim_txt(sp$production_region, "none")),
     production = sprintf("Production-based (territorial) totals by %s.",
-                         dim_txt(sp$origin_region, sp$origin_sector)),
+                         dim_txt(sp$production_region, sp$production_sector)),
     exports = sprintf("Embodied in gross exports: exporter (%s) to partner (%s), domestic/foreign origin%s.",
-                      dim_txt(sp$product_region, sp$product_sector), nice_name(sp$consumer_region),
-                      if (!identical(sp$origin_region, "none")) paste0(" by ", nice_name(sp$origin_region)) else "")
+                      dim_txt(sp$product_made_in, sp$consumption_product), nice_name(sp$consumption_region),
+                      if (!identical(sp$production_region, "none")) paste0(" by ", nice_name(sp$production_region)) else "")
   )
   div(class = "alert alert-light",
       tags$b("You are about to calculate: "), txt, tags$br(),
