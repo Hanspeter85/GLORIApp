@@ -264,3 +264,7 @@ The parsed files can be read without R: `.arrow` files with `pyarrow` (snippet a
 # Portable version
 
 `portable/build_portable.R` copies the running R installation (R on Windows is relocatable), all packages the app needs with their dependencies (`tools::package_dependencies`), the app files and the guides into `../GLORIApp_portable`, compiles `portable/launcher.cs` into `Start GLORIApp.exe` with `csc.exe` (.NET Framework 4, part of Windows) and zips the folder. The launcher starts `R/bin/x64/Rscript.exe` with `R_LIBS_USER` pointing into the bundle and `GLORIAPP_PORTABLE=1`; in that mode `app/app.R` stops R when the browser session ends. Rebuild the bundle after every change to the app or after updating R/packages.
+
+# Sharing a compiled GLORIA
+
+`R/share.R`: `write_manifest()` writes `parsed/manifest.csv` (file, bytes, MD5) for a version folder; the person who compiled GLORIA runs it once before uploading the folder `v60` (e.g. to Box). On the receiving side the app (tab *Data & updates*, option A) calls `find_gloria_root()` (accepts the data root, the `v60` folder or its `parsed` sub folder) and `check_installation()` (meta file present, complete years, file sizes against the manifest, optionally MD5) and, if usable, stores the folder as `data_root` in the user settings and writes `active_version.txt`. Only the parsed standard matrices are shared; raw data are not needed.

@@ -22,7 +22,18 @@ update_ui <- function() {
     uiOutput("upd_space"),
     actionButton("upd_save_folders", "Save folders as default", icon = icon("floppy-disk"), class = "btn-sm"),
     hr(),
-    h4("Download and compile a new GLORIA release"),
+    h4("Option A: use an already compiled GLORIA (e.g. downloaded from Box)"),
+    p("If someone has already compiled GLORIA, download their folder (e.g. 'v60', ~125 GB) from Box,",
+      "a network drive or an external disk and put it into any folder on this PC. Enter that folder",
+      "below - the folder that contains 'v60', the 'v60' folder itself or its 'parsed' sub folder.",
+      "The app checks that all files are complete and then uses it (after a restart)."),
+    textInput("upd_existing", "Folder with the compiled GLORIA", width = "100%",
+              placeholder = "e.g. D:/GLORIA  or  D:/GLORIA/v60"),
+    checkboxInput("upd_existing_md5", "Also verify checksums (slower, ~1 min per 10 GB)", FALSE),
+    actionButton("upd_use_existing", "Check and use this folder", icon = icon("check")),
+    uiOutput("upd_existing_result"),
+    hr(),
+    h4("Option B: download and compile a new GLORIA release from Google Drive"),
     p("New GLORIA releases are published by the Industrial Ecology Virtual Laboratory",
       "(University of Sydney) as Google Drive folders, see",
       tags$a("ielab.info/labs/ielab-gloria", href = "https://ielab.info/labs/ielab-gloria", target = "_blank"),
@@ -94,6 +105,43 @@ update_server <- function(input, output, session, repo_root) {
     save_user_settings(data_root = d, raw_root = r)
     showNotification("Folders saved. They are used for updates right away and by the app after a restart.",
                      type = "message", duration = 8)
+  })
+
+
+  # --- Option A: use an already compiled GLORIA ---------------------------------------
+  existing <- reactiveVal(NULL)
+  observeEvent(input$upd_use_existing, {
+    root <- find_gloria_root(input$upd_existing)
+    if (is.na(root)) {
+      existing(list(error = "No compiled GLORIA found here (expected a folder like 'v60' with 'parsed/meta/meta.rds' inside)."))
+      return()
+    }
+    vers <- sort(as.integer(sub("v", "", grep("^v[0-9]+$", list.dirs(root, full.names = FALSE, recursive = FALSE), value = TRUE))))
+    vers <- vers[file.exists(file.path(root, sprintf("v%02d", vers), "parsed", "meta", "meta.rds"))]
+    v <- max(vers)
+    chk <- withProgress(message = "Checking the files ...",
+                        check_installation(file.path(root, sprintf("v%02d", v)), isTRUE(input$upd_existing_md5)))
+    if (chk$ok) {
+      save_user_settings(data_root = root)
+      writeLines(as.character(v), file.path(root, "active_version.txt"))
+    }
+    existing(list(root = root, version = v, chk = chk))
+  })
+  output$upd_existing_result <- renderUI({
+    e <- existing(); if (is.null(e)) return(NULL)
+    if (!is.null(e$error)) return(div(class = "alert alert-danger mt-2", e$error))
+    yrs <- e$chk$years
+    yr_txt <- if (length(yrs)) sprintf("%d years (%d-%d)", length(yrs), min(yrs), max(yrs)) else "no years"
+    if (e$chk$ok) {
+      div(class = "alert alert-success mt-2",
+          sprintf("GLORIA v%d found in %s: %s complete.", e$version, e$root, yr_txt),
+          if (length(e$chk$problems)) tags$p("Note: ", paste(e$chk$problems, collapse = "; ")),
+          tags$b(" This folder is now the data folder. Please restart the app to use it."))
+    } else {
+      div(class = "alert alert-danger mt-2",
+          sprintf("GLORIA v%d found in %s, but it cannot be used: %s. Please download the missing/incomplete files again.",
+                  e$version, e$root, paste(e$chk$problems, collapse = "; ")))
+    }
   })
 
   # --- Google Drive connection ----------------------------------------------------------

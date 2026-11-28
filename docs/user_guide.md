@@ -239,7 +239,11 @@ Production side where *Countries/regions*, what *Sectors (120)*. Consumption sid
 - **Sums**: the world total of a footprint equals the world total of the production-based account, if direct household emissions are included in both.
 - **Negative values** can appear for inventory changes (final demand category "changes in inventories").
 
-# Updating GLORIA
+# Getting and updating the GLORIA data
+
+**Option A - use an already compiled GLORIA (easiest).** If a colleague shares the compiled GLORIA (a folder called e.g. 'v60', about 125 GB) via Box, a network drive or a disk: download the whole folder, put it anywhere on your PC (e.g. *D:/GLORIA/v60*), open the tab **Data & updates**, enter the folder under *Option A* and click *Check and use this folder*. The app checks that nothing is missing or incomplete and uses the data after a restart. No Google account and no compiling is needed.
+
+**Option B - download and compile from Google Drive.**
 
 When a new GLORIA release is published, the tab **Data & updates** downloads and compiles it. At the top of the tab you choose where the compiled MRIO and the temporary raw files are stored (two folders, may be on different drives; *Save folders as default* keeps them for the next time). Connect Google Drive once, paste the link of the release folder, check it and start the update. It runs in the background for several hours, year by year, and deletes the raw files after each year. Afterwards restart the app. See the developer guide for details.
 

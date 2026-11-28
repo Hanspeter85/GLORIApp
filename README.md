@@ -60,7 +60,26 @@ the temporary raw downloads (e.g. on another drive). They are saved in a small
 settings file of the user (`tools::R_user_dir("GLORIApp", "config")`). Alternatively
 set `GLORIA_DATA_ROOT` / `GLORIA_RAW_ROOT` in `~/.Renviron`.
 
-## 2. Getting and compiling the GLORIA data
+## 2. Getting the GLORIA data
+
+There are two ways - the app works the same with both.
+
+### Option A: use an already compiled GLORIA (no Google account, no compiling)
+
+Someone who has compiled GLORIA shares the folder `v60` (~125 GB) e.g. via Box,
+a network drive or an external disk. Before sharing, run once in R (repo root):
+
+```r
+source("config.R"); source("R/functions_io.R"); source("R/share.R")
+write_manifest()     # writes v60/parsed/manifest.csv with sizes and MD5 checksums
+```
+
+Users download the whole `v60` folder, put it into any folder (e.g. `D:/GLORIA/v60`)
+and enter that folder in the app: tab **Data & updates** > *Option A* > *Check and
+use this folder*. The app checks that all years and files are complete (sizes,
+optionally checksums), saves the folder as data folder and uses it after a restart.
+
+### Option B: download and compile from Google Drive
 
 GLORIA releases are distributed as Google Drive folders by the Industrial Ecology
 Virtual Laboratory (https://ielab.info/labs/ielab-gloria). Only two parts are needed:

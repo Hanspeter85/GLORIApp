@@ -36,6 +36,7 @@ source(file.path(root, "R", "export.R"), local = TRUE)
 source(file.path(root, "R", "texts.R"), local = TRUE)
 
 source(file.path(root, "R", "update.R"), local = TRUE)
+source(file.path(root, "R", "share.R"), local = TRUE)
 source(file.path(root, "app", "update_tab.R"), local = TRUE)
 source(file.path(root, "app", "charts_tab.R"), local = TRUE)
 
@@ -54,7 +55,8 @@ if (data_ready) {
     theme = bs_theme(version = 5, bootswatch = "flatly"),
     nav_panel("Start", div(class = "alert alert-warning m-3",
       sprintf("No compiled GLORIA data found for version %d in %s.", gloria_version, paths$parsed),
-      "Use the tab 'Data & updates' to download and compile GLORIA (or run",
+      "Use the tab 'Data & updates': either point the app to an already compiled GLORIA (e.g. downloaded",
+      "from Box - option A) or download and compile it from Google Drive (option B; or run",
       tags$code("parser/run_parser.R"), "if the raw data are already downloaded).")),
     update_ui(),
     nav_panel("How it works", includeMarkdown(file.path(root, "app", "help.md")))
