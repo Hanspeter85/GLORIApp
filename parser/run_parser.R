@@ -92,7 +92,7 @@ if (length(chk_files) > 0) {
 # Only the parsed tables are kept. ReadMe and release notes are kept as
 # documentation in parsed/meta. Everything can be downloaded again from Drive.
 all_done <- all(file.exists(file.path(paths$parsed, expected_years, "_DONE")))
-# never delete while a download is still running (rclone writes *.partial files)
+# never delete while a download is still running (the downloader writes *.partial files)
 download_running <- length(list.files(paths$raw, "\\.partial$", recursive = TRUE)) > 0
 all_done <- all_done && !download_running
 if (isTRUE(parser_options$delete_raw_after_parse) && all_done && dir.exists(paths$raw)) {

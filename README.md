@@ -127,7 +127,7 @@ origin x final product breakdown 10-60 seconds).
 | `input/indicator_catalogue.csv` | recommended indicators with explanations |
 | `tests/test_pipeline.R` | end-to-end test on a mini GLORIA (3 regions x 4 sectors) |
 | `legacy/` | original v059 scripts of GLORIA-MRIO_Parser |
-| `docs/` | material for the introduction session |
+| `docs/` | user and developer guides (Markdown + Word via `docs/build_docs.R`), intro slides and exercises |
 
 ## 5. Using the engine from R scripts
 
