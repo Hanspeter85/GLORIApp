@@ -23,7 +23,17 @@ out_root <- normalizePath(file.path("..", "GLORIApp_portable"), mustWork = FALSE
 make_zip <- TRUE
 
 message("Building portable GLORIApp in ", out_root)
-unlink(out_root, recursive = TRUE)
+# If the portable app is currently running, its files are locked. Renaming the
+# folder fails in that case - stop BEFORE deleting anything.
+if (dir.exists(out_root)) {
+  old <- paste0(out_root, "_old")
+  unlink(old, recursive = TRUE)
+  if (!file.rename(out_root, old)) {
+    stop("The portable GLORIApp seems to be running (files in use). Close the app's ",
+         "browser tab (or end Rscript.exe in the task manager) and try again.")
+  }
+  unlink(old, recursive = TRUE)
+}
 dir.create(out_root, recursive = TRUE)
 
 # --- 1) Copy R itself --------------------------------------------------------------------
