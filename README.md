@@ -150,9 +150,10 @@ added to the recommended list in `input/indicator_catalogue.csv`.
 source("config.R"); source("R/functions_io.R"); source("R/engine.R")
 meta <- readRDS(file.path(paths$meta, "meta.rds"))
 res <- run_calculation(list(
-  type = "footprint_origin", indicators = c("ghg_edgar", "mat_total"), years = 2015:2022,
-  region_from = "world_region_7", region_to = "region_name", sector_col = "broad_sector",
-  by_sector = TRUE, by_fd = FALSE, fd_codes = 1:6, include_direct_fd = TRUE), meta)
+  type = "footprint", indicators = c("ghg_edgar", "mat_total"), years = 2015:2022,
+  origin_region = "world_region_7", origin_sector = "broad_sector",
+  product_region = "none", product_sector = "none", consumer_region = "region_name",
+  by_fd = FALSE, fd_codes = 1:6, include_direct_fd = TRUE), meta)
 fwrite(res, "my_footprints.csv")
 ```
 

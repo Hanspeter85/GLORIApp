@@ -19,7 +19,7 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 1. **Production-based** = what happens inside a country. **Consumption-based (footprint)** = what a country's final demand causes worldwide. The difference is the *net import* of a pressure.
 2. Every pressure ends up in some final demand: the global sum of all footprints equals the global sum of all production-based accounts.
 3. A footprint can be split by **origin** (where does the pressure happen?) or by **final product** (what was bought?). Both give the same total.
-4. **TiVA** with value added answers "who earns the money in exports?". Gross-export based indicators double count goods crossing borders several times; for "who causes what" use footprints.
+4. **Value added is an indicator like any other**: its footprint shows where the income behind consumption is earned (trade in value added of final demand). Expert option: value added in gross exports (double counts goods crossing borders several times).
 5. Years after the latest statistics (roughly 2023+) are **nowcasts/projections**. Use them for trends with care, not for precise numbers.
 
 ## Input-output in one picture
@@ -35,26 +35,26 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 ## Exercises
 
 **Exercise 1 - carbon footprint of Austria.**
-Result type *Footprint: where the pressure happens*, indicator *Greenhouse gases (GWP100; EDGAR)*, year 2019, origin regions: *7 world regions*, consumer regions: *No aggregation*. Filter the csv for `to_region = Austria`.
+Step 1 *Footprint*, indicator *Greenhouse gases (GWP100; EDGAR)*, year 2019. Step 4: origin regions *7 world regions*, origin sectors *Do not split*, final product *Do not split*, consumer *Countries/regions (164)*. Filter the csv for `consumer_region = Austria`.
 - How large is Austria's carbon footprint (Mt CO2-eq = kt / 1000)?
 - Which share happens outside Europe?
 
 **Exercise 2 - production vs. consumption.**
-Result type *Overview*, indicators *Greenhouse gases* and *Material footprint*, years 2000 and 2019, regions: *World Bank income groups*.
+Step 1 *Overview*, indicators *Greenhouse gases* and *Material footprint*, years 2000 and 2019, regions *World Bank income groups*.
 - Which income group is a net importer of emissions and materials? Did it change between 2000 and 2019?
 - Check: net imports sum to (almost) zero over all groups. Why?
 
 **Exercise 3 - what drives the footprint?**
-Result type *Footprint: by final product*, indicator *Land use (total)*, year 2019, product regions: *World total*, sectors: tick *Show sector detail* with *6 broad sectors*, final demand categories shown separately.
-- Which product groups and which final demand category drive the land footprint of the EU countries / of your country?
+Step 1 *Footprint*, indicator *Land use (total)*, year 2019. Step 4: origin *Do not split*, final product regions *Do not split* and sectors *6 broad sectors*, consumer *Countries/regions*, tick *Split by final demand category*.
+- Which product groups and which final demand category drive the land footprint of your country?
 
 **Exercise 4 - own region grouping.**
-Download the region template in step 4, define a group "EU27" (all other regions "Rest of world"), upload it and repeat exercise 1 with the EU27 as consumer.
+Step 6: define a group "EU27" from the 27 member states (everything else becomes "Rest of world") and save it as csv. Repeat exercise 1 with consumer *Own grouping*.
 
-**Exercise 5 - Trade in Value Added.**
-Result type *TiVA*, indicator *Value added (total)*, year 2019, show sector detail with *6 broad sectors*.
-- What share of Germany's manufacturing exports is foreign value added?
-- Repeat with *Greenhouse gases*: how much of the emissions embodied in China's exports happen in China?
+**Exercise 5 - value-added footprint.**
+Step 1 *Footprint*, indicator *Value added (total)*, year 2019, origin *Countries/regions*, consumer *Countries/regions*.
+- Which share of the value added behind Austrian (or German) final demand is earned abroad, and where?
+- Expert: tick *Show expert options* and compare with *Embodied in gross exports* for Germany. Why are the gross-export numbers larger?
 
 ## Pitfalls checklist
 

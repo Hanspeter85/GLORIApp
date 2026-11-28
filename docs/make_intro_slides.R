@@ -18,22 +18,24 @@ yr <- 2019   # example year (latest year before the pandemic with full statistic
 # -----------------------------------------------------------------------------
 # 1) Example numbers
 # -----------------------------------------------------------------------------
-base <- list(region_from = "region_name", region_to = "region_name", sector_col = "broad_sector",
-             by_sector = FALSE, by_fd = FALSE, fd_codes = 1:6, include_direct_fd = TRUE)
-fo  <- run_calculation(modifyList(base, list(type = "footprint_origin", indicators = "ghg_edgar",
-                                             years = yr, region_from = "world_region_7")), meta)
-aut <- fo[to_region == "Austria", .(region = from_region, Mt = value / 1000)][order(-Mt)]
+base <- list(origin_region = "region_name", origin_sector = "none", product_region = "none",
+             product_sector = "none", consumer_region = "region_name", by_fd = FALSE,
+             fd_codes = 1:6, include_direct_fd = TRUE)
+fo  <- run_calculation(modifyList(base, list(type = "footprint", indicators = "ghg_edgar",
+                                             years = yr, origin_region = "world_region_7")), meta)
+aut <- fo[consumer_region == "Austria", .(region = origin_region, Mt = value / 1000)][order(-Mt)]
 pr  <- run_calculation(modifyList(base, list(type = "production", indicators = "ghg_edgar", years = yr)), meta)
-aut_pba <- pr[region == "Austria", sum(value)] / 1000
+aut_pba <- pr[origin_region == "Austria", sum(value)] / 1000
 aut_fp  <- sum(aut$Mt)
 world_ghg <- sum(pr$value) / 1e6
 ov <- run_calculation(modifyList(base, list(type = "overview", indicators = c("ghg_edgar", "mat_total"),
-                                            years = c(2000, yr), region_from = "income_group_worldbank")), meta)
+                                            years = c(2000, yr), origin_region = "income_group_worldbank")), meta)
 ov <- ov[account == "net_imports" & region != "Rest-of-world regions (mixed)"]
-tv <- run_calculation(modifyList(base, list(type = "tiva", indicators = "va_total", years = yr,
-                                            by_sector = TRUE, region_to = "world")), meta)
-deu <- tv[exporter == "Germany" & export_sector == "Manufacturing"]
-deu_fva <- deu[origin_type == "foreign", sum(value)] / sum(deu$value)
+# value-added footprint of Austria: where is the income behind Austrian consumption earned?
+va <- run_calculation(modifyList(base, list(type = "footprint", indicators = "va_total", years = yr)), meta)
+va_aut <- va[consumer_region == "Austria"]
+va_abroad <- va_aut[origin_region != "Austria", sum(value)] / sum(va_aut$value)
+va_top <- va_aut[origin_region != "Austria"][order(-value)][1:3, origin_region]
 
 # -----------------------------------------------------------------------------
 # 2) Design: 16:9 canvas, palette, fonts
@@ -199,50 +201,49 @@ for (k in 1:2) {
   doc <- ph_with(doc, ch, location = loc(0.6 + (k - 1) * 6.2, 2.0, 5.9, 4.9, label = paste("Chart", k)))
 }
 
-# 7 App in six steps
+# 7 App in seven steps
 doc <- new_slide(doc)
-doc <- title(doc, "The app in six steps", "Left sidebar, top to bottom - then click Calculate and download the csv")
-steps <- list(c("What to calculate", "footprint by origin or by product, overview, territorial, TiVA"),
-              c("Indicators", "35+ recommended indicators with explanations, or any raw GLORIA row"),
+doc <- title(doc, "The app in seven steps", "Left sidebar, top to bottom - then click Calculate and download the csv")
+steps <- list(c("What to calculate", "footprint, production- vs consumption-based overview, territorial account"),
+              c("Indicators", "35+ recommended indicators (incl. value added) with explanations, or any raw GLORIA row"),
               c("Years", "any selection of 1990-2029"),
-              c("Regions", "countries, world regions, World Bank income groups, or your own csv"),
-              c("Sectors and final demand", "120 sectors, ISIC sections, 6 broad sectors; households, government, investment ..."),
-              c("Output table", "long format for R/Python/pivot tables, or wide with one column per year"))
+              c("Breakdown", "split by origin, final product and consumer - regions and sectors, each grouped as you like"),
+              c("Final demand", "households, government, investment ...; direct household emissions"),
+              c("Own groupings (6) and output (7)", "define groups like EU27 or Food in the app; long (pivot-ready) or wide csv"))
 for (i in seq_along(steps)) {
   l <- if (i <= 3) 0.8 else 6.9; t <- 2.1 + ((i - 1) %% 3) * 1.6
   doc <- step(doc, l, t, 5.6, i, steps[[i]][1], steps[[i]][2])
 }
 
-# 8 Result types
+# 8 Footprint breakdown: one footprint, three dimensions
 doc <- new_slide(doc)
-doc <- title(doc, "Five result types answer five questions")
+doc <- title(doc, "One footprint, three ways to split it")
 rt <- data.frame(
-  `Result type` = c("Footprint: where it happens", "Footprint: by final product", "Overview", "Production-based", "TiVA / embodied in exports"),
-  `Typical question` = c("Which countries emit CO2 for Austrian consumption?",
-                         "Which products drive the EU's land footprint?",
-                         "Is a country a net importer of materials?",
-                         "How much is emitted inside each country?",
-                         "How much of German car exports is value created abroad?"),
-  check.names = FALSE)
-
+  dim = c("Origin", "Final product", "Consumer", "Origin x product (expert)", "Overview / production-based"),
+  q = c("Which countries and sectors emit CO2 for Austrian consumption?",
+        "Which products (food, cars, buildings) drive the EU's land footprint?",
+        "Which income group has the largest material footprint?",
+        "How much Chinese coal power is in the cars bought in Germany?",
+        "Is a country a net importer of emissions? How much is emitted inside it?"))
 for (i in seq_len(nrow(rt))) {
   t <- 1.75 + (i - 1) * 1.0
-  doc <- add_text(doc, 0.8, t, 4.0, 0.8, par(tx(rt[i, 1], 16, col$white, TRUE)), bg = col$green,
-                  geom = "roundRect", label = paste("Type", i))
-  doc <- add_text(doc, 5.0, t, 7.5, 0.8, par(tx(rt[i, 2], 16, col$text)), bg = col$light,
+  doc <- add_text(doc, 0.8, t, 4.0, 0.8, par(tx(rt$dim[i], 16, col$white, TRUE)), bg = col$green,
+                  geom = "roundRect", label = paste("Dimension", i))
+  doc <- add_text(doc, 5.0, t, 7.5, 0.8, par(tx(rt$q[i], 16, col$text)), bg = col$light,
                   geom = "roundRect", label = paste("Question", i))
 }
 
-# 9 TiVA
+# 9 Value-added footprint (= trade in value added of final demand)
 doc <- new_slide(doc)
-doc <- title(doc, "One third of German export value is created abroad",
-             sprintf("Trade in value added, %d: value added embodied in Germany's gross manufacturing exports", yr))
-doc <- stat(doc, 0.8, 2.4, 4.5, paste0(fmt(100 * deu_fva), " %"), "foreign value added (suppliers abroad)", col$amber)
-doc <- stat(doc, 5.5, 2.4, 4.5, paste0(fmt(100 * (1 - deu_fva)), " %"), "domestic value added (created in Germany)", col$green)
+doc <- title(doc, sprintf("%s %% of Austria's value-added footprint is earned abroad", fmt(100 * va_abroad)),
+             sprintf("Value-added footprint of Austria, %d - a footprint like any other, with the indicator 'Value added'", yr))
+doc <- stat(doc, 0.8, 2.4, 4.5, paste0(fmt(100 * va_abroad), " %"), "earned abroad (wages, profits, taxes)", col$amber)
+doc <- stat(doc, 5.5, 2.4, 4.5, paste0(fmt(100 * (1 - va_abroad)), " %"), "earned in Austria", col$green)
+doc <- stat(doc, 9.6, 2.4, 3.2, paste(va_top[1]), "largest foreign source", col$muted)
 doc <- add_text(doc, 0.8, 4.9, 11.7, 1.15,
-                par(tx("Same machinery works for any indicator: ", 15, col$text, TRUE),
-                    tx("choose Greenhouse gases instead of Value added to see where the emissions embodied in a country's exports happen. ", 15),
-                    tx("Gross-export based indicators double count goods that cross borders several times - for 'who causes what' use footprints.", 15, col$muted)),
+                par(tx("Same calculation as a carbon or material footprint: ", 15, col$text, TRUE),
+                    tx(sprintf("the indicator is value added instead of emissions. Next largest sources: %s. ", paste(va_top[2:3], collapse = ", ")), 15),
+                    tx("Experts can also compute value added in gross exports (OECD TiVA style) - see expert options in step 1.", 15, col$muted)),
                 bg = col$light, label = "Message box")
 
 # 10 Exercises
@@ -250,9 +251,9 @@ doc <- new_slide(doc)
 doc <- title(doc, "Hands-on: five exercises in pairs", "Details and expected steps in docs/intro_session.md")
 ex <- list(c("Carbon footprint of Austria", "where do the emissions happen?"),
            c("Production vs. consumption", "who is a net importer, 2000 vs 2019?"),
-           c("What drives the land footprint", "products and final demand categories"),
-           c("Own region grouping", "upload an EU27 csv and repeat exercise 1"),
-           c("Trade in value added", "foreign value in German and Chinese exports"))
+           c("What drives the land footprint", "final products and final demand categories"),
+           c("Own region grouping", "define EU27 in step 6 and repeat exercise 1"),
+           c("Value-added footprint", "where is the income behind your country's consumption earned?"))
 for (i in seq_along(ex)) {
   doc <- step(doc, if (i <= 3) 0.8 else 6.9, 2.1 + ((i - 1) %% 3) * 1.6, 5.6, i, ex[[i]][1], ex[[i]][2])
 }
@@ -264,7 +265,7 @@ pit <- list(c("Units", "kt vs Mt, tonnes, 1000 ha, persons, 1000 USD at current 
             c("Recent years", "after ~2022 GLORIA nowcasts and projects - use for trends, with care"),
             c("Rest-of-world regions", "four regions bundle many small countries of mixed income"),
             c("Direct household emissions", "heating and private cars: included only if ticked in step 5"),
-            c("Gross exports", "TiVA on gross exports double counts multi-border trade"))
+            c("Gross exports (expert)", "embodied in gross exports double counts multi-border trade"))
 for (i in seq_along(pit)) {
   doc <- step(doc, if (i <= 3) 0.8 else 6.9, 2.1 + ((i - 1) %% 3) * 1.6, 5.6, "!", pit[[i]][1], pit[[i]][2])
 }

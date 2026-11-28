@@ -2,6 +2,13 @@
 # app/full_app.R  -  Full footprint calculator (used when parsed data exist)
 # =============================================================================
 # Sourced by app/app.R. Defines `ui` and `server`.
+#
+# The sidebar has 7 steps:
+#   1 what to calculate    2 indicators     3 years
+#   4 breakdown of the result (origin / final product / consumer)
+#   5 final demand         6 own groupings  7 output table
+# All calculations are done by run_calculation() in R/engine.R.
+# =============================================================================
 
 meta <- readRDS(meta_file)
 
@@ -13,28 +20,27 @@ meta$sectors <- fread(file.path(paths$input, "concordances", "sectors.csv"))
 years_avail <- available_years()
 
 # --- Choices for the drop-down menus ---------------------------------------------
-# Region aggregations = all columns of regions.csv except the codes.
-# The names of the list are what the user sees.
+# Region groupings = all columns of regions.csv except the codes, sector
+# groupings = all columns of sectors.csv. The names are what the user sees.
 nice_name <- function(x) {
-  lookup <- c(region_name = "No aggregation (164 countries/regions)",
-              region_acronym = "No aggregation (ISO codes)",
+  lookup <- c(none = "Do not split (total)",
+              region_name = "Countries/regions (164)",
+              region_acronym = "Countries/regions (164, ISO codes)",
               world_region_7 = "7 world regions",
               income_group_worldbank = "World Bank income groups (FY26, July 2025)",
               region_worldbank = "World Bank regions",
               development_group = "Development groups (LDCs etc.)",
               world = "World total",
-              sector_name = "No aggregation (120 sectors)",
+              sector_name = "Sectors (120)",
               isic_section = "ISIC Rev.4 sections (20)",
               broad_sector = "6 broad sectors",
-              total = "All sectors together")
-  ifelse(x %in% names(lookup), lookup[x], x)
+              total = "All sectors together",
+              own_grouping = "Own grouping (step 6)")
+  unname(ifelse(x %in% names(lookup), lookup[x], x))
 }
-agg_choices <- function(tab, drop) {
-  cols <- setdiff(names(tab), drop)
-  setNames(cols, nice_name(cols))
-}
-region_choices <- agg_choices(meta$regions, c("region_code"))
-sector_choices <- agg_choices(meta$sectors, c("sector_code", "total"))
+agg_choices <- function(cols) setNames(cols, nice_name(cols))
+base_region_cols <- setdiff(names(meta$regions), c("region_code", "world"))
+base_sector_cols <- setdiff(names(meta$sectors), c("sector_code", "total"))
 
 # Indicator choices grouped by theme (shown as groups in the drop-down)
 cat_tab <- meta$catalogue
@@ -49,6 +55,9 @@ sat_choices <- setNames(paste0("sat:", meta$satellites$sat_code),
 
 fd_choices <- setNames(meta$fd$fd_code, meta$fd$fd_name)
 
+# Little helper: a bold sub heading inside a sidebar step
+sub_head <- function(txt) tags$p(tags$b(txt), class = "mb-1 mt-2")
+
 # =============================================================================
 # 2. USER INTERFACE
 # =============================================================================
@@ -58,30 +67,34 @@ ui <- page_sidebar(
   title = paste0("GLORIApp - footprint calculator (GLORIA v", meta$version, ")"),
   theme = bs_theme(version = 5, bootswatch = "flatly"),
   sidebar = sidebar(
-    width = 420,
+    width = 440,
     accordion(
-      open = c("step1", "step2", "step3"),
+      open = c("step1", "step2", "step3", "step4"),
       multiple = TRUE,
 
       # --- Step 1: what to calculate ---------------------------------------------
       accordion_panel(
         "1. What do you want to calculate?", value = "step1",
-        radioButtons("type", NULL, choices = result_type_choices, selected = "footprint_origin"),
-        uiOutput("type_help")
+        radioButtons("type", NULL, choices = result_type_choices, selected = "footprint"),
+        uiOutput("type_help"),
+        checkboxInput("expert_types", "Show expert options", FALSE)
       ),
 
       # --- Step 2: indicators -------------------------------------------------------
       accordion_panel(
-        "2. Indicators (pressures)", value = "step2",
+        "2. Indicators", value = "step2",
         selectizeInput("indicators", "Recommended indicators",
                        choices = indicator_choices, selected = "ghg_edgar",
                        multiple = TRUE,
                        options = list(placeholder = "Type to search ...", plugins = list("remove_button"))),
+        helpText(help_texts$indicators),
         checkboxInput("expert", "Expert mode: choose raw GLORIA satellite rows", FALSE),
         conditionalPanel(
           "input.expert",
-          selectizeInput("sat_rows", "Raw satellite rows (5 982 available)", choices = NULL,
-                         multiple = TRUE, options = list(placeholder = "e.g. 'co2' or 'Iron ores'")),
+          selectizeInput("sat_rows", sprintf("Raw satellite rows (%s available)",
+                                             format(nrow(meta$satellites), big.mark = ",")),
+                         choices = NULL, multiple = TRUE,
+                         options = list(placeholder = "e.g. 'co2' or 'Iron ores'")),
           helpText(help_texts$expert)
         )
       ),
@@ -98,50 +111,74 @@ ui <- page_sidebar(
         helpText(help_texts$years)
       ),
 
-      # --- Step 4: regions ---------------------------------------------------------------
+      # --- Step 4: breakdown (which dimensions appear in the table) -------------------
+      # For each dimension a region grouping and a sector grouping can be chosen;
+      # "Do not split (total)" removes that dimension from the table.
       accordion_panel(
-        "4. Regions", value = "step4",
-        selectInput("region_from", "Origin / producing / exporting regions",
-                    choices = region_choices, selected = "region_name"),
-        selectInput("region_to", "Consumer / partner regions",
-                    choices = region_choices, selected = "region_name"),
-        fileInput("region_upload", "Optional: own region grouping (csv)", accept = ".csv"),
-        helpText(help_texts$regions),
-        downloadLink("dl_region_template", "Download template with all regions")
+        "4. Breakdown of the result", value = "step4",
+        helpText(help_texts$breakdown),
+        # Origin: where the pressure physically occurs
+        sub_head(uiOutput("lab_origin", inline = TRUE)),
+        layout_columns(
+          selectInput("origin_region", "Regions", choices = NULL),
+          conditionalPanel("input.type != 'exports'",
+                           selectInput("origin_sector", "Sectors", choices = NULL))
+        ),
+        # Final product: what is bought (footprint) / exporting country (exports)
+        conditionalPanel(
+          "input.type == 'footprint' || input.type == 'exports'",
+          sub_head(uiOutput("lab_product", inline = TRUE)),
+          layout_columns(
+            selectInput("product_region", "Regions", choices = NULL),
+            selectInput("product_sector", "Sectors", choices = NULL)
+          ),
+          conditionalPanel("input.type == 'footprint'", uiOutput("detail_warning"))
+        ),
+        # Consumer: who buys (footprint) / partner country (exports)
+        conditionalPanel(
+          "input.type == 'footprint' || input.type == 'exports'",
+          sub_head(uiOutput("lab_consumer", inline = TRUE)),
+          selectInput("consumer_region", "Regions", choices = NULL),
+          conditionalPanel("input.type == 'footprint'",
+                           checkboxInput("by_fd", "Split by final demand category (households, government, investment, ...)", FALSE))
+        )
       ),
 
-      # --- Step 5: sectors and final demand ---------------------------------------------
+      # --- Step 5: final demand ----------------------------------------------------------
       accordion_panel(
-        "5. Sectors and final demand", value = "step5",
-        checkboxInput("by_sector", "Show sector detail", FALSE),
-        conditionalPanel(
-          "input.by_sector",
-          selectInput("sector_col", "Sector aggregation", choices = sector_choices,
-                      selected = "broad_sector"),
-          fileInput("sector_upload", "Optional: own sector grouping (csv)", accept = ".csv"),
-          downloadLink("dl_sector_template", "Download template with all sectors")
-        ),
+        "5. Final demand", value = "step5",
         checkboxGroupInput("fd_codes", "Final demand categories to include",
                            choices = fd_choices, selected = meta$fd$fd_code),
-        checkboxInput("by_fd", "Show final demand categories separately", FALSE),
         checkboxInput("include_direct_fd",
-                      "Include direct emissions of households (heating, cars, ...)", TRUE),
-        conditionalPanel(
-          "input.type == 'tiva'",
-          checkboxInput("tiva_origin_detail", "TiVA: show origin region of value added", FALSE)
-        ),
+                      "Include direct emissions of households (heating, private cars, ...)", TRUE),
         helpText(help_texts$fd)
       ),
 
-      # --- Step 6: output format ----------------------------------------------------------
+      # --- Step 6: own groupings ---------------------------------------------------------
       accordion_panel(
-        "6. Output table", value = "step6",
-        radioButtons("format", NULL,
-                     choices = c("Long format (one value per row; best for R, Python, pivot tables)" = "long",
-                                 "Pivot / wide format (one column per ...)" = "wide")),
+        "6. Own groupings (optional)", value = "step6",
+        helpText(help_texts$own_groups),
+        radioButtons("grp_kind", NULL, inline = TRUE,
+                     choices = c("Regions" = "regions", "Sectors" = "sectors")),
+        textInput("grp_name", "Name of the group", placeholder = "e.g. EU27 or Food"),
+        selectizeInput("grp_members", "Members", choices = NULL, multiple = TRUE,
+                       options = list(placeholder = "Type to search ...", plugins = list("remove_button"))),
+        actionButton("grp_add", "Add group", icon = icon("plus"), class = "btn-sm btn-outline-primary"),
+        tags$div(class = "mt-2", tableOutput("grp_table")),
+        textInput("grp_rest_regions", "Name for all other regions", "Rest of world"),
+        textInput("grp_rest_sectors", "Name for all other sectors", "Other sectors"),
+        actionLink("grp_clear", "remove all own groups"), " | ",
+        downloadLink("grp_download", "save groupings (csv)"),
+        fileInput("grp_upload", "Load saved groupings (csv)", accept = ".csv")
+      ),
+
+      # --- Step 7: output format ----------------------------------------------------------
+      accordion_panel(
+        "7. Output table", value = "step7",
+        radioButtons("format", NULL, choices = output_format_choices),
         conditionalPanel(
           "input.format == 'wide'",
-          selectInput("pivot_col", "Columns", choices = c("year", "indicator"))
+          selectInput("pivot_col", "One column per", choices = c("year", "indicator"))
         ),
         checkboxInput("keep_zeros", "Keep rows with value 0", FALSE)
       )
@@ -172,76 +209,134 @@ server <- function(input, output, session) {
   # Tab "Data & updates" (see app/update_tab.R)
   update_server(input, output, session, root)
 
-  # Expert mode: the list of 5 982 satellite rows is loaded on the server side
+  # Expert mode: the list of all satellite rows is loaded on the server side
   # (much faster than sending it all to the browser at once)
   updateSelectizeInput(session, "sat_rows", choices = sat_choices, server = TRUE)
 
+  # Expert result type (indicators embodied in gross exports) only when asked for
+  observeEvent(input$expert_types, {
+    ch <- if (isTRUE(input$expert_types)) c(result_type_choices, result_type_expert) else result_type_choices
+    sel <- if (input$type %in% ch) input$type else "footprint"
+    updateRadioButtons(session, "type", choices = ch, selected = sel)
+  }, ignoreInit = TRUE)
+
   # Short explanation of the chosen result type
   output$type_help <- renderUI(helpText(result_type_help[[input$type]]))
+
+  # Headings of the three breakdown blocks depend on the result type
+  output$lab_origin   <- renderText(dimension_labels[[input$type]][["origin"]])
+  output$lab_product  <- renderText(dimension_labels[[input$type]][["product"]])
+  output$lab_consumer <- renderText(dimension_labels[[input$type]][["consumer"]])
 
   # Quick year selection links
   observeEvent(input$all_years, updateSelectizeInput(session, "years", selected = years_avail))
   observeEvent(input$five_years, updateSelectizeInput(session, "years",
                                                       selected = years_avail[years_avail %% 5 == 0]))
 
-  # --- Optional user-defined groupings (uploaded csv) -------------------------------
-  # Region csv: columns region_acronym, group. Sector csv: sector_code, group.
-  # The uploaded grouping is added as a new column "own_grouping".
+  # ---------------------------------------------------------------------------
+  # Own groupings (step 6)
+  # ---------------------------------------------------------------------------
+  # Stored as a table: kind (regions/sectors), group name, member code.
+  # Region members are ISO codes (region_acronym), sector members sector codes.
+  groups <- reactiveVal(data.table(kind = character(), group = character(), member = character()))
+
+  member_choices <- function(kind) {
+    if (kind == "regions") setNames(meta$regions$region_acronym, meta$regions$region_name)
+    else setNames(as.character(meta$sectors$sector_code), meta$sectors$sector_name)
+  }
+  observeEvent(input$grp_kind, {
+    updateSelectizeInput(session, "grp_members", choices = member_choices(input$grp_kind),
+                         selected = character(0), server = TRUE)
+  })
+  observeEvent(input$grp_add, {
+    nm <- trimws(input$grp_name)
+    if (!nzchar(nm) || length(input$grp_members) == 0) {
+      showNotification("Please give the group a name and choose at least one member.", type = "warning")
+      return()
+    }
+    g <- groups()[!(kind == input$grp_kind & (group == nm | member %in% input$grp_members))]
+    groups(rbind(g, data.table(kind = input$grp_kind, group = nm, member = input$grp_members)))
+    updateTextInput(session, "grp_name", value = "")
+    updateSelectizeInput(session, "grp_members", selected = character(0))
+  })
+  observeEvent(input$grp_clear, groups(groups()[0]))
+  observeEvent(input$grp_upload, {
+    up <- fread(input$grp_upload$datapath, colClasses = "character")
+    if (!all(c("kind", "group", "member") %in% names(up))) {
+      showNotification("The csv needs the columns kind, group, member (as saved by this app).", type = "error")
+      return()
+    }
+    groups(up[, .(kind, group, member)])
+  })
+  output$grp_download <- downloadHandler("GLORIApp_own_groupings.csv", function(f) fwrite(groups(), f))
+  output$grp_table <- renderTable({
+    g <- groups()
+    if (nrow(g) == 0) return(data.frame(Info = "No own groups defined yet."))
+    g[, .(Members = .N), by = .(Type = kind, Group = group)]
+  })
+
+  # Metadata including the column "own_grouping" (if own groups exist)
   meta_r <- reactive({
     m <- meta
-    if (!is.null(input$region_upload)) {
-      up <- fread(input$region_upload$datapath)
-      validate(need(all(c("region_acronym", "group") %in% names(up)),
-                    "Region csv needs the columns 'region_acronym' and 'group'."))
-      m$regions[, own_grouping := up$group[match(region_acronym, up$region_acronym)]]
-      m$regions[is.na(own_grouping), own_grouping := "Not assigned"]
+    g <- groups()
+    if (nrow(g[kind == "regions"]) > 0) {
+      rg <- g[kind == "regions"]
+      m$regions <- copy(m$regions)[, own_grouping := rg$group[match(region_acronym, rg$member)]]
+      m$regions[is.na(own_grouping), own_grouping := input$grp_rest_regions]
     }
-    if (!is.null(input$sector_upload)) {
-      up <- fread(input$sector_upload$datapath)
-      validate(need(all(c("sector_code", "group") %in% names(up)),
-                    "Sector csv needs the columns 'sector_code' and 'group'."))
-      m$sectors[, own_grouping := up$group[match(sector_code, up$sector_code)]]
-      m$sectors[is.na(own_grouping), own_grouping := "Not assigned"]
+    if (nrow(g[kind == "sectors"]) > 0) {
+      sg <- g[kind == "sectors"]
+      m$sectors <- copy(m$sectors)[, own_grouping := sg$group[match(as.character(sector_code), sg$member)]]
+      m$sectors[is.na(own_grouping), own_grouping := input$grp_rest_sectors]
     }
     m
   })
-  observeEvent(input$region_upload, {
-    ch <- c(region_choices, "Own grouping (uploaded)" = "own_grouping")
-    updateSelectInput(session, "region_from", choices = ch, selected = "own_grouping")
-    updateSelectInput(session, "region_to", choices = ch)
+
+  # (Re)fill the grouping drop-downs; keeps the current selection if possible
+  set_choices <- function(id, choices, default) {
+    sel <- isolate(input[[id]])
+    if (is.null(sel) || !sel %in% choices) sel <- default
+    updateSelectInput(session, id, choices = agg_choices(choices), selected = sel)
+  }
+  observe({
+    g <- groups()
+    own_r <- if (nrow(g[kind == "regions"]) > 0) "own_grouping"
+    own_s <- if (nrow(g[kind == "sectors"]) > 0) "own_grouping"
+    reg <- c(base_region_cols, own_r)
+    sec <- c(base_sector_cols, own_s)
+    set_choices("origin_region",   c("none", reg, "world"), "region_name")
+    set_choices("origin_sector",   c("none", sec), "none")
+    set_choices("product_region",  c("none", reg, "world"), "none")
+    set_choices("product_sector",  c("none", sec), "none")
+    set_choices("consumer_region", c(reg, "world"), "region_name")
   })
-  observeEvent(input$sector_upload, {
-    updateSelectInput(session, "sector_col",
-                      choices = c(sector_choices, "Own grouping (uploaded)" = "own_grouping"),
-                      selected = "own_grouping")
+
+  # Warn when origin AND final product are split (slower, needs L)
+  output$detail_warning <- renderUI({
+    origin_split  <- !identical(input$origin_region, "none") || !identical(input$origin_sector, "none")
+    product_split <- !identical(input$product_region, "none") || !identical(input$product_sector, "none")
+    if (origin_split && product_split) div(class = "alert alert-warning py-1 small", help_texts$detail)
   })
-  output$dl_region_template <- downloadHandler(
-    "region_grouping_template.csv",
-    function(f) fwrite(meta$regions[, .(region_acronym, region_name, group = world_region_7)], f))
-  output$dl_sector_template <- downloadHandler(
-    "sector_grouping_template.csv",
-    function(f) fwrite(meta$sectors[, .(sector_code, sector_name, group = broad_sector)], f))
 
   # --- Collect all choices into one specification list ---------------------------
   spec <- reactive({
+    req(input$origin_region, input$consumer_region)
     list(type = input$type,
          indicators = c(input$indicators, if (isTRUE(input$expert)) input$sat_rows),
          years = as.integer(input$years),
-         region_from = input$region_from,
-         region_to = input$region_to,
-         sector_col = input$sector_col,
-         by_sector = isTRUE(input$by_sector),
-         by_fd = isTRUE(input$by_fd),
+         origin_region = input$origin_region,
+         origin_sector = if (input$type == "exports") "none" else input$origin_sector,
+         product_region = if (input$type %in% c("footprint", "exports")) input$product_region else "none",
+         product_sector = if (input$type %in% c("footprint", "exports")) input$product_sector else "none",
+         consumer_region = input$consumer_region,
+         by_fd = isTRUE(input$by_fd) && input$type == "footprint",
          fd_codes = as.integer(input$fd_codes),
          include_direct_fd = isTRUE(input$include_direct_fd),
-         tiva_origin_detail = isTRUE(input$tiva_origin_detail),
          keep_zeros = isTRUE(input$keep_zeros))
   })
 
   # Plain-language description of what will be calculated (updates live)
-  output$description <- renderUI({
-    describe_spec(spec(), meta_r())
-  })
+  output$description <- renderUI(describe_spec(spec(), meta_r()))
 
   # --- Run the calculation when the button is clicked ----------------------------
   result <- eventReactive(input$go, {
@@ -250,7 +345,9 @@ server <- function(input, output, session) {
       need(length(sp$indicators) > 0, "Please choose at least one indicator (step 2)."),
       need(length(sp$years) > 0, "Please choose at least one year (step 3)."),
       need(length(sp$fd_codes) > 0 || sp$type == "production",
-           "Please choose at least one final demand category (step 5).")
+           "Please choose at least one final demand category (step 5)."),
+      need(sp$type != "exports" || !identical(sp$product_region, "none"),
+           "For exports please choose how to group the exporting countries (step 4).")
     )
     t0 <- Sys.time()
     res <- withProgress(message = "Calculating", value = 0, {
@@ -302,4 +399,3 @@ server <- function(input, output, session) {
                   rownames = FALSE, options = list(pageLength = 50))
   })
 }
-

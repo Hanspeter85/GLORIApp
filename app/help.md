@@ -18,15 +18,18 @@ Footprint = `s * L * Y`
 - `L` - Leontief inverse: how much output of every sector worldwide is needed to deliver one unit of a final product (all supply-chain steps)
 - `Y` - final demand: what households, governments and investors buy
 
-### Result types
+### Result types and breakdown
 
-| Result type | Rows | Columns | Typical question |
-|---|---|---|---|
-| Footprint: where it happens | origin region (x sector) | consumer region (x final demand category) | Which countries emit CO2 for Austrian consumption? |
-| Footprint: by final product | supplying region (x product) | consumer region | Which products drive the material footprint of the EU? |
-| Overview | region | production, consumption, net imports | Is a country a net importer of land use? |
-| Production-based | region (x sector) | - | Emissions inside each country |
-| TiVA | exporter (x sector) | partner, domestic/foreign | How much value of German exports is created abroad? |
+**Footprint** is the main result type. It works the same way for every indicator; with *Value added* it is the value-added footprint (trade in value added of final demand). In step 4 you choose how to split it:
+
+| Dimension | Meaning | Typical question |
+|---|---|---|
+| Origin (regions, sectors) | where the pressure physically occurs | Which countries and sectors emit CO2 for Austrian consumption? |
+| Final product (regions, sectors) | which final products are bought, and where they were made | Which products drive the EU's land footprint? |
+| Consumer (regions, final demand category) | who buys | Which income group has the largest material footprint? |
+| Origin x final product (expert) | both at once, a detailed from-to table | How much Chinese coal power is in cars bought in Germany? |
+
+Other result types: **Overview** (production-based, consumption-based and net imports per region) and **Production-based** (territorial account). Under *Show expert options* you also find **Embodied in gross exports** (OECD TiVA style, domestic vs. foreign content of exports).
 
 ### Good to know
 

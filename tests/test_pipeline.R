@@ -96,33 +96,46 @@ print(chk)
 # --- engine checks ------------------------------------------------------------------------
 source("R/engine.R")
 ok <- function(cond, msg) { cat(if (cond) "PASS " else "FAIL ", msg, "\n"); if (!cond) quit(status = 1) }
-near <- function(a, b) abs(a - b) <= 1e-4 * max(1, abs(b))
-sp <- list(indicators = c("ghg_edgar", "mat_metals", "va_total"), years = 2020,
-           region_from = "region_name", region_to = "region_name", sector_col = "broad_sector",
-           by_sector = TRUE, by_fd = TRUE, fd_codes = 1:6, include_direct_fd = TRUE,
-           tiva_origin_detail = TRUE)
+near <- function(a, b) all(abs(a - b) <= 1e-6 * pmax(1, abs(b)))
+base <- list(indicators = c("ghg_edgar", "mat_metals", "va_total"), years = 2020,
+             fd_codes = 1:6, include_direct_fd = TRUE, consumer_region = "region_name", by_fd = TRUE)
+run <- function(...) run_calculation(modifyList(base, list(...)), meta)
 
-fo <- run_calculation(modifyList(sp, list(type = "footprint_origin")), meta)
-fp <- run_calculation(modifyList(sp, list(type = "footprint_product")), meta)
-pr <- run_calculation(modifyList(sp, list(type = "production")), meta)
-ov <- run_calculation(modifyList(sp, list(type = "overview")), meta)
-tv <- run_calculation(modifyList(sp, list(type = "tiva", indicators = "va_total")), meta)
+fo <- run(type = "footprint", origin_region = "region_name", origin_sector = "broad_sector")
+fp <- run(type = "footprint", product_region = "region_name", product_sector = "broad_sector")
+fx <- run(type = "footprint", origin_region = "region_name", origin_sector = "broad_sector",
+          product_region = "world_region_7", product_sector = "sector_name")
+pr <- run(type = "production", origin_region = "region_name", origin_sector = "broad_sector")
+ov <- run(type = "overview", origin_region = "region_name")
+tv <- run(type = "exports", indicators = "va_total", origin_region = "region_name",
+          product_region = "region_name", product_sector = "broad_sector")
 
 for (ind in unique(pr$indicator)) {
   ok(near(fo[indicator == ind, sum(value)], pr[indicator == ind, sum(value)]),
      paste("footprint total = production total:", ind))
 }
-a <- fo[!grepl("^Direct", from_sector), .(v = sum(value)), by = .(indicator, to_region)]
-b <- fp[, .(v = sum(value)), by = .(indicator, to_region)]
-m <- merge(a, b, by = c("indicator", "to_region"))
-ok(all(near(m$v.x, m$v.y)), "origin- and product-based footprints agree per consumer")
-ok(ov[account == "net_imports", near(sum(value), 0)], "net imports sum to zero globally")
+tot <- function(d) d[, .(v = sum(value)), keyby = .(indicator, consumer_region, final_demand)]$v
+ok(near(tot(fo), tot(fp)), "origin- and product-split footprints agree per consumer and category")
+ok(near(tot(fo), tot(fx)), "origin x product footprint agrees per consumer and category")
+a <- fx[, .(v = sum(value)), keyby = .(indicator, origin_region, origin_sector, consumer_region, final_demand)]
+b <- fo[, .(v = sum(value)), keyby = .(indicator, origin_region, origin_sector, consumer_region, final_demand)]
+ok(nrow(a) == nrow(b) && near(a$v, b$v), "origin x product summed over products = origin result")
+a <- fx[, .(v = sum(value)), keyby = .(indicator, product_sector, consumer_region)]
+b <- run(type = "footprint", origin_region = "none", product_region = "none", product_sector = "sector_name",
+         by_fd = FALSE)[, .(v = sum(value)), keyby = .(indicator, product_sector, consumer_region)]
+ok(nrow(a) == nrow(b) && near(a$v, b$v), "origin x product summed over origins = product result")
+# (relative to the size of the accounts: L Y is stored as float32, ~7 digits)
+ok(ov[account == "net_imports", abs(sum(value))] <= 1e-5 * ov[account == "production_based", sum(abs(value))],
+   "net imports sum to zero globally")
 E <- readRDS(file.path(paths$parsed, 2020, "E.rds"))
-ok(near(tv[, sum(value)], sum(E)), "TiVA: domestic + foreign VA = gross exports")
+ok(near(tv[, sum(value)], sum(E)), "exports: domestic + foreign VA = gross exports")
 ok(near(chk$output_reproduced_by_L, 1), "L reproduces gross output")
 w <- to_wide(fo, "year"); ok(nrow(w) > 0, "wide format works")
-fo2 <- run_calculation(modifyList(sp, list(type = "footprint_origin", by_sector = FALSE, by_fd = FALSE)), meta)
-ok(!anyDuplicated(fo2[, .(indicator, from_region, to_region)]), "no duplicate rows without sector detail")
-pr2 <- run_calculation(modifyList(sp, list(type = "production", by_sector = FALSE)), meta)
-ok(!anyDuplicated(pr2[, .(indicator, region)]), "no duplicate rows in production account")
+fo2 <- run(type = "footprint", origin_region = "region_name", by_fd = FALSE)
+ok(!anyDuplicated(fo2[, .(indicator, origin_region, consumer_region)]), "no duplicate rows without sector detail")
+pr2 <- run(type = "production", origin_region = "region_name")
+ok(!anyDuplicated(pr2[, .(indicator, origin_region)]), "no duplicate rows in production account")
+w1 <- run(type = "footprint", origin_region = "none", consumer_region = "world", by_fd = FALSE)
+ok(near(w1[indicator == "Value added (total)", sum(value)], pr[indicator == "Value added (total)", sum(value)]),
+   "world value-added footprint = world value added")
 cat("All tests passed.\n")
