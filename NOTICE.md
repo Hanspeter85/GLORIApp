@@ -2,7 +2,7 @@
 
 ## Copyright
 
-Copyright (c) 2026 Hanspeter Wieland. All rights reserved except as granted below.
+Copyright (c) 2026 [Hanspeter Wieland](https://orcid.org/0000-0001-5944-7155) (ORCID 0000-0001-5944-7155). All rights reserved except as granted below.
 
 ## Licence of GLORIApp (code)
 

@@ -283,7 +283,7 @@ doc <- add_text(doc, 0.8, 1.8, 11.7, 4.5,
                 par(tx("Scripts: ", 18, col$moss, TRUE), tx("R/engine.R works without the app - see README.md", 18, col$white)),
                 label = "Getting started")
 doc <- add_text(doc, 0.8, 6.4, 11.7, 0.6,
-                par(tx("Please cite GLORIA: Lenzen et al. (2017) Econ. Syst. Res. 29, 158-186; Lenzen et al. (2021) Nature Sustainability. GLORIA: CC BY-NC 3.0 AU. GLORIApp: (c) 2026 Hanspeter Wieland, non-commercial use only, no warranty.", 12, col$light)),
+                par(tx("Please cite GLORIA: Lenzen et al. (2017) Econ. Syst. Res. 29, 158-186; Lenzen et al. (2021) Nature Sustainability. GLORIA: CC BY-NC 3.0 AU. GLORIApp: (c) 2026 Hanspeter Wieland (ORCID 0000-0001-5944-7155), non-commercial use only, no warranty.", 12, col$light)),
                 label = "Citation")
 
 out <- "docs/GLORIApp_intro.pptx"

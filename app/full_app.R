@@ -200,7 +200,7 @@ ui <- page_sidebar(
       uiOutput("download_ui"),
       DT::DTOutput("table"),
       tags$p(class = "small text-muted mt-3",
-             paste0(legal$copyright, " - non-commercial use only - GLORIA data: CC BY-NC 3.0 AU - "),
+             copyright_tag(), paste0(" - non-commercial use only - GLORIA data: CC BY-NC 3.0 AU - "),
              "results without warranty - see 'How it works' for licence, citation and disclaimer.")
     ),
     charts_ui(),

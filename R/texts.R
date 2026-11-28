@@ -143,7 +143,8 @@ space_text <- sprintf(paste(
 # Copyright, licences, citation and disclaimer (full texts: LICENSE, NOTICE.md)
 # -----------------------------------------------------------------------------
 legal <- list(
-  copyright  = "GLORIApp (c) 2026 Hanspeter Wieland",
+  copyright  = "GLORIApp (c) 2026 Hanspeter Wieland (ORCID 0000-0001-5944-7155)",
+  orcid      = "https://orcid.org/0000-0001-5944-7155",
   licence    = paste("GLORIApp is licensed under the PolyForm Noncommercial License 1.0.0:",
                      "non-commercial use only (research, teaching, personal study, public institutions);",
                      "commercial use requires prior written permission."),
@@ -158,3 +159,11 @@ legal <- list(
                      "Hanspeter Wieland assumes no liability for the correctness, completeness or fitness for a",
                      "particular purpose of the footprints and other results, or for decisions based on them.")
 )
+
+# Copyright line for the app with the author's name linked to his ORCID record
+copyright_tag <- function() {
+  shiny::tagList("GLORIApp (c) 2026 ",
+                 shiny::tags$a(href = legal$orcid, target = "_blank", title = "ORCID record of the author",
+                               "Hanspeter Wieland"),
+                 " (ORCID ", shiny::tags$a(href = legal$orcid, target = "_blank", "0000-0001-5944-7155"), ")")
+}

@@ -43,7 +43,7 @@ how_it_works_panel <- function() {
         )),
     div(class = "alert alert-secondary small",
         tags$b("Copyright, licence and disclaimer"), tags$br(),
-        legal$copyright, ". ", legal$licence, tags$br(),
+        copyright_tag(), ". ", legal$licence, tags$br(),
         legal$gloria, tags$br(),
         legal$citation, tags$br(),
         tags$b(legal$disclaimer), tags$br(),

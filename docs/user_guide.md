@@ -1,6 +1,7 @@
 ---
 title: "GLORIApp - User guide"
 subtitle: "Footprints with the GLORIA global input-output database, without programming"
+author: "[Hanspeter Wieland](https://orcid.org/0000-0001-5944-7155) (ORCID 0000-0001-5944-7155)"
 ---
 
 # What GLORIApp does
@@ -251,7 +252,7 @@ When a new GLORIA release is published, the tab **Data & updates** downloads and
 
 # Licence, citation and disclaimer
 
-**GLORIApp** is copyright (c) 2026 Hanspeter Wieland. It may be used, copied and modified for **non-commercial purposes only** (research, teaching, personal study, public institutions) under the PolyForm Noncommercial License 1.0.0. Any commercial use needs prior written permission. The documentation is licensed under CC BY-NC 4.0.
+**GLORIApp** is copyright (c) 2026 [Hanspeter Wieland](https://orcid.org/0000-0001-5944-7155). It may be used, copied and modified for **non-commercial purposes only** (research, teaching, personal study, public institutions) under the PolyForm Noncommercial License 1.0.0. Any commercial use needs prior written permission. The documentation is licensed under CC BY-NC 4.0.
 
 **GLORIA data** are made available by the GLORIA team under a Creative Commons Attribution-NonCommercial licence (CC BY-NC 3.0 AU); for commercial applications contact the GLORIA team. This also applies to all results you calculate with GLORIApp.
 

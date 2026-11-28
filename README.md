@@ -215,7 +215,7 @@ countries of different income levels.
 
 ## Licence, citation and disclaimer
 
-Copyright (c) 2026 Hanspeter Wieland. GLORIApp is licensed under the
+Copyright (c) 2026 [Hanspeter Wieland](https://orcid.org/0000-0001-5944-7155) (ORCID 0000-0001-5944-7155). GLORIApp is licensed under the
 **PolyForm Noncommercial License 1.0.0** ([`LICENSE`](LICENSE)): free for
 non-commercial use (research, teaching, personal study, public institutions);
 **commercial use requires prior written permission**. Documentation: CC BY-NC 4.0.

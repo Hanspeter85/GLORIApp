@@ -1,6 +1,7 @@
 ---
 title: "GLORIApp - Developer guide"
 subtitle: "Parser, data format, calculation engine and app internals"
+author: "[Hanspeter Wieland](https://orcid.org/0000-0001-5944-7155) (ORCID 0000-0001-5944-7155)"
 ---
 
 # Overview
