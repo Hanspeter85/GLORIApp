@@ -48,7 +48,7 @@ unlink(file.path(r_out, c("doc", "tests")), recursive = TRUE)
 
 # --- 2) Copy the packages the app needs (with all dependencies) -------------------------
 # (markdown is needed by shiny::includeMarkdown for the help page)
-pkgs <- c("shiny", "bslib", "DT", "plotly", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown")
+pkgs <- c("shiny", "bslib", "DT", "plotly", "ggplot2", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown")
 ip <- installed.packages()
 deps <- tools::package_dependencies(pkgs, db = ip, recursive = TRUE,
                                     which = c("Depends", "Imports", "LinkingTo"))

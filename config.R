@@ -25,11 +25,18 @@ first_set <- function(...) { for (v in list(...)) if (!is.null(v) && !is.na(v) &
 data_root <- first_set(Sys.getenv("GLORIA_DATA_ROOT"), user_settings$data_root,
                        file.path(Sys.getenv("USERPROFILE", unset = path.expand("~")), "Data", "GLORIA"))
 raw_root  <- first_set(Sys.getenv("GLORIA_RAW_ROOT"), user_settings$raw_root)
+# Folder where the app saves results and charts with the "Save in folder" buttons
+results_dir <- first_set(user_settings$results_dir,
+                         file.path(Sys.getenv("USERPROFILE", unset = path.expand("~")), "Documents", "GLORIApp_results"))
 
-# Save the folders chosen in the app (used from the next start on)
-save_user_settings <- function(data_root, raw_root = "") {
+# Save settings chosen in the app (used from the next start on). Only the
+# given entries are changed, the others are kept.
+save_user_settings <- function(...) {
+  new <- list(...)
+  cur <- if (file.exists(settings_file)) as.list(read.dcf(settings_file)[1, ]) else list()
+  cur[names(new)] <- new
   dir.create(dirname(settings_file), recursive = TRUE, showWarnings = FALSE)
-  write.dcf(data.frame(data_root = data_root, raw_root = raw_root), settings_file)
+  write.dcf(as.data.frame(cur, stringsAsFactors = FALSE), settings_file)
 }
 
 # --- GLORIA version -----------------------------------------------------------

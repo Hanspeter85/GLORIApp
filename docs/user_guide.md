@@ -158,7 +158,7 @@ Define your own groups, e.g. "EU27" from 27 countries or "Food" from the agricul
 - **Excel workbook (.xlsx)**: sheet *result* plus a sheet *info* with all settings and the plausibility checks. Excel allows at most 1,048,576 rows; for bigger results the app asks you to choose CSV/text or to group more coarsely.
 - **Text, tab-separated (.txt)**.
 
-Click **Calculate**. The result appears as a preview (first 1,000 rows) and can be downloaded with the **Download** button. The column *unit* gives the unit of every value.
+Click **Calculate**. The result appears as a preview (first 1,000 rows) and can be downloaded with the **Download** button. The column *unit* gives the unit of every value. Next to it, **Save in folder** writes the file directly into the folder given in step 7 (default: *Documents/GLORIApp_results*; *remember this folder* keeps your choice). Downloads go to your browser's download folder.
 
 ## Charts
 
@@ -169,6 +169,8 @@ After *Calculate*, the tab **Charts** shows the result as an interactive chart. 
 - **Composition (stacked bars)**: one column on the axis, another as colour (e.g. consumer regions by production sector).
 
 Choose the indicator, the column to show (*Show by*), optionally a filter (e.g. only `consumption_region = Austria`) and the number of groups; smaller groups are combined into *Other*. The charts are for a quick look; for publication-quality figures use the csv in your own tool.
+**Export**: below the chart settings choose *PNG*, *JPEG* (images, 300 dpi), *SVG* or *PDF* (vector graphics, can be edited e.g. in Inkscape or Illustrator) and click *Download image*, or *Save image in folder* to save it directly into the folder set in step 7.
+
 
 # Typical questions - which settings?
 

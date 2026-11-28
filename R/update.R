@@ -157,7 +157,7 @@ set_active_version <- function(version) {
 
 # Free disk space (GB) of the drive holding `path` (Windows only, else NA)
 free_disk_gb <- function(path = data_root) {
-  if (.Platform$OS.type != "windows") return(NA_real_)
+  if (.Platform$OS.type != "windows" || length(path) != 1 || !nzchar(path)) return(NA_real_)
   drive <- substr(normalizePath(path, mustWork = FALSE), 1, 1)
   out <- tryCatch(system2("powershell", c("-NoProfile", "-Command",
                    shQuote(sprintf("(Get-PSDrive %s).Free", drive))), stdout = TRUE),

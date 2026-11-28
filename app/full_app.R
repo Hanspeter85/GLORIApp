@@ -180,7 +180,9 @@ ui <- page_sidebar(
         ),
         checkboxInput("keep_zeros", "Keep rows with value 0", FALSE),
         selectInput("file_type", "File format for the download", choices = file_type_choices),
-        helpText(help_texts$file_type)
+        helpText(help_texts$file_type),
+        textInput("results_dir", "Folder for 'Save in folder' (results and charts)", value = results_dir),
+        actionLink("save_results_dir", "remember this folder")
       )
     ),
     actionButton("go", "Calculate", class = "btn-primary btn-lg w-100", icon = icon("play"))
@@ -213,7 +215,7 @@ server <- function(input, output, session) {
 
   # Tab "Charts" (see app/charts_tab.R) - uses result() defined further below;
   # reactives are evaluated lazily, so it can be referenced here.
-  charts_server(input, output, session, reactive(result()))
+  charts_server(input, output, session, reactive(result()), reactive(trimws(input$results_dir)))
 
   # Expert mode: the list of all satellite rows is loaded on the server side
   # (much faster than sending it all to the browser at once)
@@ -373,8 +375,36 @@ server <- function(input, output, session) {
                  sprintf("The result has %s rows - too many for Excel (max. 1,048,576). Choose CSV or text in step 7, or group the result more coarsely.",
                          format(n, big.mark = ","))))
     }
-    downloadButton("download", sprintf("Download (%s)", names(file_type_choices)[file_type_choices == input$file_type]),
-                   class = "btn-success mb-3")
+    div(class = "d-flex gap-2 align-items-start flex-wrap",
+        downloadButton("download", sprintf("Download (%s)", names(file_type_choices)[file_type_choices == input$file_type]),
+                       class = "btn-success mb-3"),
+        actionButton("save_result", "Save in folder (step 7)", icon = icon("folder-open"),
+                     class = "btn-outline-success mb-3"))
+  })
+
+  # --- Save result directly into a folder on this PC ---------------------------------
+  # (the app runs locally, so the server can write to the chosen folder)
+  observeEvent(input$save_results_dir, {
+    if (!folder_ok(trimws(input$results_dir))) {
+      showNotification("This folder does not exist and could not be created.", type = "error"); return()
+    }
+    save_user_settings(results_dir = trimws(input$results_dir))
+    showNotification("Folder remembered for the next start.", type = "message")
+  })
+  result_file_name <- function(ext) {
+    sprintf("GLORIA_v%d_%s_%s.%s", meta$version, input$type, format(Sys.time(), "%Y%m%d_%H%M%S"), ext)
+  }
+  observeEvent(input$save_result, {
+    dir <- trimws(input$results_dir)
+    if (!folder_ok(dir)) {
+      showNotification("The folder in step 7 does not exist and could not be created.", type = "error"); return()
+    }
+    ext <- c(csv = "csv", csv2 = "csv", xlsx = "xlsx", txt = "txt")[[input$file_type]]
+    f <- file.path(dir, result_file_name(ext))
+    ok <- tryCatch({
+      write_result_file(result_formatted(), f, input$file_type, spec(), attr(result(), "checks")); TRUE
+    }, error = function(e) { showNotification(conditionMessage(e), type = "error", duration = NULL); FALSE })
+    if (ok) showNotification(paste("Saved:", normalizePath(f)), type = "message", duration = 15)
   })
 
   # Plausibility checks of the calculation (computed by run_calculation, see

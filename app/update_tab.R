@@ -91,7 +91,7 @@ update_server <- function(input, output, session, repo_root) {
       showNotification("A folder does not exist and could not be created, or is not writable.", type = "error")
       return()
     }
-    save_user_settings(d, r)
+    save_user_settings(data_root = d, raw_root = r)
     showNotification("Folders saved. They are used for updates right away and by the app after a restart.",
                      type = "message", duration = 8)
   })

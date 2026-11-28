@@ -40,6 +40,21 @@ test_that("clicking Calculate produces a result with passing checks", {
       expect_true(file.exists(f) && file.size(f) > 0)
     }
     expect_equal(openxlsx::getSheetNames(f), c("result", "info"))
+    # chart export in all image formats, for all chart types
+    for (ct in c("rank", "time", "stack")) {
+      session$setInputs(ch_type = ct, ch_indicator = res$indicator[1], ch_dim = "production_region",
+                        ch_colour = "production_sector", ch_year = "2020", ch_top = 5, ch_filter_dim = "")
+      for (fmt in c("png", "jpeg", "svg", "pdf")) {
+        session$setInputs(ch_img_format = fmt)
+        img <- output$ch_download
+        expect_true(file.exists(img) && file.size(img) > 1000)
+      }
+    }
+    # save directly into a folder
+    dir <- file.path(tempdir(), "gloriapp_save_test"); unlink(dir, recursive = TRUE)
+    session$setInputs(results_dir = dir, file_type = "csv", save_result = 1, ch_save = 1)
+    expect_equal(length(list.files(dir, "[.]csv$")), 1)
+    expect_equal(length(list.files(dir, "[.]pdf$")), 1)
   })
 })
 

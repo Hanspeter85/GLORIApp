@@ -32,7 +32,7 @@ gives a quick interactive look at the result (ranking, time series, composition)
 1. Install **R** (>= 4.3) and **RStudio**.
 2. Install the R packages (once):
    ```r
-   install.packages(c("shiny", "bslib", "DT", "plotly", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown"))
+   install.packages(c("shiny", "bslib", "DT", "plotly", "ggplot2", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown"))
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 

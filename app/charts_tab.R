@@ -30,15 +30,21 @@ charts_ui <- function() {
         conditionalPanel("input.ch_type == 'stack'", selectInput("ch_colour", "Colour by", choices = NULL)),
         conditionalPanel("input.ch_type != 'time'", selectInput("ch_year", "Year", choices = NULL)),
         numericInput("ch_top", "Groups shown (rest = 'Other')", value = 12, min = 3, max = 30),
-        uiOutput("ch_filter_ui")
+        uiOutput("ch_filter_ui"),
+        hr(),
+        selectInput("ch_img_format", "Export chart as", c("PNG image" = "png", "JPEG image" = "jpeg",
+                                                         "SVG (vector, for editing)" = "svg", "PDF (vector)" = "pdf")),
+        downloadButton("ch_download", "Download image", class = "btn-sm btn-success w-100 mb-2"),
+        actionButton("ch_save", "Save image in folder (step 7)", icon = icon("folder-open"),
+                     class = "btn-sm btn-outline-success w-100")
       ),
       plotly::plotlyOutput("chart", height = "560px"),
-      helpText("Hover over the chart for exact values. The camera icon (top right) saves the chart as PNG.")
+      helpText("Hover over the chart for exact values. Use 'Export chart as' (left) to save the chart as PNG, JPEG, SVG or PDF (300 dpi, 10 x 6 inch).")
     )
   )
 }
 
-charts_server <- function(input, output, session, result) {
+charts_server <- function(input, output, session, result, results_dir) {
 
   # Dimension columns of the result (everything except year/indicator/unit/value)
   dims <- reactive({
@@ -170,6 +176,81 @@ charts_server <- function(input, output, session, result) {
                   unit, NULL)
     }
   })
+
+  # --- Static version of the chart for export (ggplot2) -------------------------------
+  # Same data, colours and order as the interactive chart.
+  chart_gg <- reactive({
+    cd <- chart_data(); d <- copy(cd$d); unit <- cd$unit
+    th <- ggplot2::theme_minimal(base_size = 12) +
+      ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank(),
+                     panel.grid.major.x = ggplot2::element_line(colour = chart_ink$grid),
+                     text = ggplot2::element_text(colour = chart_ink$secondary),
+                     plot.title = ggplot2::element_text(colour = chart_ink$primary, face = "bold"),
+                     legend.position = "bottom", plot.background = ggplot2::element_rect(fill = "white", colour = NA))
+    src <- ggplot2::labs(caption = sprintf("Source: GLORIA v%s, calculated with GLORIApp", gloria_version))
+    if (input$ch_type == "rank") {
+      d <- d[order(value)]; d[, grp := factor(grp, levels = grp)]
+      ggplot2::ggplot(d, ggplot2::aes(value, grp)) +
+        ggplot2::geom_col(fill = ifelse(d$grp == "Other", chart_other, chart_cols[1]), width = 0.7) +
+        ggplot2::scale_x_continuous(labels = function(v) format(v, big.mark = ",", scientific = FALSE)) +
+        ggplot2::labs(title = sprintf("%s, %s", input$ch_indicator, input$ch_year), x = unit, y = NULL) + th + src
+    } else if (input$ch_type == "time") {
+      grps <- d[, .(t = sum(abs(value))), by = grp][order(-t), grp]
+      grps <- c(setdiff(grps, "Other"), intersect(grps, "Other"))
+      cols <- setNames(c(chart_cols, rep(chart_other, 40))[seq_along(grps)], grps); cols["Other"] <- chart_other
+      d[, grp := factor(grp, levels = grps)]
+      ggplot2::ggplot(d, ggplot2::aes(year, value, colour = grp)) +
+        ggplot2::geom_line(linewidth = 0.9) + ggplot2::geom_point(size = 2) +
+        ggplot2::scale_x_continuous(breaks = if (length(unique(d$year)) <= 15) sort(unique(d$year)) else ggplot2::waiver()) +
+        ggplot2::scale_colour_manual(values = cols, name = NULL) +
+        ggplot2::scale_y_continuous(labels = function(v) format(v, big.mark = ",", scientific = FALSE)) +
+        ggplot2::labs(title = input$ch_indicator, x = NULL, y = unit) + th +
+        ggplot2::theme(panel.grid.major.y = ggplot2::element_line(colour = chart_ink$grid),
+                       panel.grid.major.x = ggplot2::element_blank()) + src
+    } else {
+      cols_g <- d[, .(t = sum(abs(value))), by = col][order(-t), col]
+      cols_g <- c(setdiff(cols_g, "Other"), intersect(cols_g, "Other"))
+      cols <- setNames(c(chart_cols, chart_other)[seq_along(cols_g)], cols_g); cols["Other"] <- chart_other
+      ord <- d[, .(t = sum(value)), by = grp][order(t), grp]
+      d[, `:=`(grp = factor(grp, levels = ord), col = factor(col, levels = rev(cols_g)))]
+      ggplot2::ggplot(d, ggplot2::aes(value, grp, fill = col)) +
+        ggplot2::geom_col(width = 0.7, colour = "white", linewidth = 0.3) +
+        ggplot2::scale_fill_manual(values = cols, name = NULL, breaks = cols_g) +
+        ggplot2::scale_x_continuous(labels = function(v) format(v, big.mark = ",", scientific = FALSE)) +
+        ggplot2::labs(title = sprintf("%s, %s - by %s", input$ch_indicator, input$ch_year, nice_dim(input$ch_colour)),
+                      x = unit, y = NULL) + th + src
+    }
+  })
+
+  chart_file_name <- function() {
+    sprintf("GLORIA_chart_%s_%s.%s", input$ch_type, format(Sys.time(), "%Y%m%d_%H%M%S"), input$ch_img_format)
+  }
+  output$ch_download <- downloadHandler(
+    filename = chart_file_name,
+    content = function(file) save_chart(chart_gg(), file, input$ch_img_format)
+  )
+  observeEvent(input$ch_save, {
+    dir <- results_dir()
+    if (!folder_ok(dir)) {
+      showNotification("The folder in step 7 does not exist and could not be created.", type = "error"); return()
+    }
+    f <- file.path(dir, chart_file_name())
+    save_chart(chart_gg(), f, input$ch_img_format)
+    showNotification(paste("Saved:", normalizePath(f)), type = "message", duration = 15)
+  })
+}
+
+# Write a ggplot chart to a file: png/jpeg (300 dpi), svg or pdf (vector)
+save_chart <- function(p, file, format = "png", width = 10, height = 6) {
+  dev <- switch(format,
+                png  = "png",
+                jpeg = "jpeg",
+                svg  = function(filename, ...) grDevices::svg(filename, ...),
+                pdf  = grDevices::cairo_pdf,
+                stop("Unknown image format: ", format))
+  ggplot2::ggsave(file, p, device = dev, width = width, height = height, dpi = 300, bg = "white")
+  invisible(file)
 }
 
 # Readable names of the result columns
