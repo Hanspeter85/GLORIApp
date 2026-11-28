@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # app/charts_tab.R  -  Tab "Charts": quick visualisation of the last result
 # =============================================================================
@@ -188,7 +189,7 @@ charts_server <- function(input, output, session, result, results_dir) {
                      text = ggplot2::element_text(colour = chart_ink$secondary),
                      plot.title = ggplot2::element_text(colour = chart_ink$primary, face = "bold"),
                      legend.position = "bottom", plot.background = ggplot2::element_rect(fill = "white", colour = NA))
-    src <- ggplot2::labs(caption = sprintf("Source: GLORIA v%s, calculated with GLORIApp", gloria_version))
+    src <- ggplot2::labs(caption = sprintf("Source: GLORIA v%s (Lenzen et al. 2017, 2021; CC BY-NC 3.0 AU), calculated with GLORIApp", gloria_version))
     if (input$ch_type == "rank") {
       d <- d[order(value)]; d[, grp := factor(grp, levels = grp)]
       ggplot2::ggplot(d, ggplot2::aes(value, grp)) +

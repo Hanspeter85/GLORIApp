@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # Helper: build a MINI GLORIA (3 regions x 4 sectors, random numbers) in the
 # same raw file layout as the real data and parse it with the real parser.

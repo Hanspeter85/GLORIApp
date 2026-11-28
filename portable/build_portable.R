@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # portable/build_portable.R  -  Build GLORIApp as a portable folder (no R needed)
 # =============================================================================
@@ -67,7 +68,8 @@ dir.create(app_out)
 for (d in c("R", "app", "parser", "update", "input")) {
   file.copy(d, app_out, recursive = TRUE)
 }
-file.copy(c("config.R", "README.md"), app_out)
+file.copy(c("config.R", "README.md", "LICENSE", "NOTICE.md"), app_out)
+file.copy(c("LICENSE", "NOTICE.md"), out_root)
 dir.create(file.path(app_out, "docs"))
 file.copy(list.files("docs", "\\.(docx|pptx|md)$", full.names = TRUE), file.path(app_out, "docs"))
 
@@ -94,6 +96,10 @@ writeLines(c(
   "",
   "Messages of the last start are written to GLORIApp_log.txt.",
   "User guide: GLORIApp\\docs\\GLORIApp_user_guide.docx",
+  "",
+  "Copyright (c) 2026 Hanspeter Wieland. Non-commercial use only (PolyForm Noncommercial",
+  "License 1.0.0, see LICENSE). GLORIA data: CC BY-NC 3.0 AU. Results are provided without",
+  "any warranty - see NOTICE.md for licences, citation and the full disclaimer.",
   sprintf("Built %s with R %s.", format(Sys.Date()), getRversion())
 ), file.path(out_root, "README.txt"))
 

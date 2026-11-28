@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # R/functions_io.R  -  Helper functions for reading, writing and aggregating
 # =============================================================================

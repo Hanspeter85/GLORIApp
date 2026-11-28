@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for R/texts.R and R/update.R helpers
 
 test_that("format_secs", {

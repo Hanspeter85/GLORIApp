@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # parser/03_parse_year.R  -  Parse ONE year of GLORIA into analysis-ready files
 # =============================================================================

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for R/export.R (download formats)
 
 res <- run_calculation(list(type = "footprint", indicators = "ghg_edgar", years = 2020,
@@ -19,6 +20,9 @@ test_that("xlsx has the result sheet and an info sheet with the checks", {
   f <- tempfile(fileext = ".xlsx")
   write_result_file(res, f, "xlsx", spec = list(type = "footprint"), checks = attr(res, "checks"))
   expect_equal(openxlsx::getSheetNames(f), c("result", "info"))
+  info <- openxlsx::read.xlsx(f, "info")
+  expect_true(any(grepl("PolyForm Noncommercial", info$value)))
+  expect_true(any(grepl("without warranty", info$value)))
   back <- openxlsx::read.xlsx(f, "result")
   expect_equal(nrow(back), nrow(res))
   expect_true(near(sum(back$value), sum(res$value), 1e-9))

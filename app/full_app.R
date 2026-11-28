@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # app/full_app.R  -  Full footprint calculator (used when parsed data exist)
 # =============================================================================
@@ -196,7 +197,10 @@ ui <- page_sidebar(
       uiOutput("status"),
       uiOutput("checks_ui"),
       uiOutput("download_ui"),
-      DT::DTOutput("table")
+      DT::DTOutput("table"),
+      tags$p(class = "small text-muted mt-3",
+             paste0(legal$copyright, " - non-commercial use only - GLORIA data: CC BY-NC 3.0 AU - "),
+             "results without warranty - see 'How it works' for licence, citation and disclaimer.")
     ),
     charts_ui(),
     nav_panel("Indicator explanations", DT::DTOutput("catalogue")),

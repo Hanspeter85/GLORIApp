@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # docs/make_intro_slides.R  -  Builds docs/GLORIApp_intro.pptx
 # =============================================================================
@@ -282,7 +283,7 @@ doc <- add_text(doc, 0.8, 1.8, 11.7, 4.5,
                 par(tx("Scripts: ", 18, col$moss, TRUE), tx("R/engine.R works without the app - see README.md", 18, col$white)),
                 label = "Getting started")
 doc <- add_text(doc, 0.8, 6.4, 11.7, 0.6,
-                par(tx("Please cite: Lenzen et al. (2022) Nature Sustainability 5, 157-166, and the GLORIA v60 release notes", 12, col$light)),
+                par(tx("Please cite GLORIA: Lenzen et al. (2017) Econ. Syst. Res. 29, 158-186; Lenzen et al. (2021) Nature Sustainability. GLORIA: CC BY-NC 3.0 AU. GLORIApp: (c) 2026 Hanspeter Wieland, non-commercial use only, no warranty.", 12, col$light)),
                 label = "Citation")
 
 out <- "docs/GLORIApp_intro.pptx"

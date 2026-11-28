@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # docs/build_docs.R  -  Convert the Markdown guides to Word (.docx)
 # =============================================================================

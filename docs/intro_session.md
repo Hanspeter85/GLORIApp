@@ -67,4 +67,4 @@ Step 1 *Footprint*, indicator *Value added (total)*, year 2019, production side 
 
 - GLORIA release notes v60 (in `C:/Users/<user>/Data/GLORIA/v60/raw/`).
 - Miller & Blair (2022): *Input-Output Analysis: Foundations and Extensions*, 3rd ed., chapters 2, 3 and 10.
-- Lenzen et al. (2022), *Nature Sustainability* 5, 157-166 (GLORIA material footprint).
+- Lenzen et al. (2021), *Nature Sustainability*, doi:10.1038/s41893-021-00811-6 (GLORIA material footprint) and Lenzen et al. (2017), *Economic Systems Research* 29, 158-186 (Global MRIO Lab).

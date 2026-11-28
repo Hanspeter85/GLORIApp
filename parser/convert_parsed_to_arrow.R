@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # parser/convert_parsed_to_arrow.R  -  One-off migration of older parsed data
 # =============================================================================

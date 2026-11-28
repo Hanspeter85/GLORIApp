@@ -1,5 +1,6 @@
 // =============================================================================
 // portable/launcher.cs  -  "Start GLORIApp.exe" of the portable version
+// Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE)
 // =============================================================================
 // Starts the Shiny app with the R that is shipped next to this exe (folder R\),
 // so no R installation is needed. The app opens in the default web browser;

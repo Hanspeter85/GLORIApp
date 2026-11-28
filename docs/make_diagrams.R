@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # docs/make_diagrams.R  -  Architecture diagrams for the developer guide
 # =============================================================================

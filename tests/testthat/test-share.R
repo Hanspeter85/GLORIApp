@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for R/share.R (using an already compiled GLORIA from a folder)
 
 vdir <- file.path(data_root, "v60")

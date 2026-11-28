@@ -212,8 +212,17 @@ API (`worldbank_country_classification.csv`). To switch the year, change
 The four GLORIA "Rest of ..." regions form their own group because they mix
 countries of different income levels.
 
-## Citation
+## Licence, citation and disclaimer
 
-Please cite GLORIA: Lenzen, M. et al. (2022) Implementing the material footprint to
-measure progress towards SDGs 8 and 12. *Nature Sustainability* 5, 157-166, and the
-release notes of the version used.
+Copyright (c) 2026 Hanspeter Wieland. GLORIApp is licensed under the
+**PolyForm Noncommercial License 1.0.0** ([`LICENSE`](LICENSE)): free for
+non-commercial use (research, teaching, personal study, public institutions);
+**commercial use requires prior written permission**. Documentation: CC BY-NC 4.0.
+
+GLORIA data are licensed by the GLORIA team under **CC BY-NC 3.0 AU**; please cite
+Lenzen et al. (2017) *Economic Systems Research* 29, 158-186 and Lenzen et al. (2021)
+*Nature Sustainability* (doi:10.1038/s41893-021-00811-6).
+
+GLORIApp and its results are provided "as is", **without any warranty**; the author
+assumes no liability for the correctness of the footprints. Details, full citations
+and the complete disclaimer: [`NOTICE.md`](NOTICE.md).

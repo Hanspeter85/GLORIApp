@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for R/engine.R: input-output identities on the mini GLORIA
 
 base <- list(indicators = c("ghg_edgar", "mat_metals", "va_total"), years = 2019:2020,

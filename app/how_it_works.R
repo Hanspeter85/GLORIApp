@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # app/how_it_works.R  -  Tab "How it works" with links to the documentation
 # =============================================================================
@@ -21,6 +22,13 @@ how_it_works_panel <- function() {
           doc_link("GLORIApp_intro.pptx", "Introduction slides (PowerPoint)", "for an introduction session"),
           doc_link("intro_session.md", "Exercises for the introduction session (text)", "five hands-on exercises")
         )),
+    div(class = "alert alert-secondary small",
+        tags$b("Copyright, licence and disclaimer"), tags$br(),
+        legal$copyright, ". ", legal$licence, tags$br(),
+        legal$gloria, tags$br(),
+        legal$citation, tags$br(),
+        tags$b(legal$disclaimer), tags$br(),
+        "Full texts: files LICENSE and NOTICE.md in the app folder."),
     includeMarkdown(file.path(root, "app", "help.md"))
   )
 }

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # R/share.R  -  Share a compiled GLORIA and use a compiled GLORIA from a folder
 # =============================================================================

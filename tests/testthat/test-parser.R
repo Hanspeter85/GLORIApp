@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for the parser (parser/*.R), using the mini GLORIA from setup.R
 
 test_that("metadata has the right dimensions and labels", {

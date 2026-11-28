@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # R/export.R  -  Write a result table to csv, Excel or text files
 # =============================================================================
@@ -36,10 +37,14 @@ write_result_file <- function(res, file, type = "csv", spec = NULL, checks = NUL
       openxlsx::freezePane(wb, "result", firstRow = TRUE)
       progress(0.6, "writing settings and checks")
       openxlsx::addWorksheet(wb, "info")
-      info <- data.frame(item = c("Created", "GLORIA version", "Settings"),
+      legal <- get0("legal", ifnotfound = list(copyright = "GLORIApp (c) 2026 Hanspeter Wieland", licence = "see LICENSE",
+                                               gloria = "see NOTICE.md", citation = "see NOTICE.md", disclaimer = "see NOTICE.md"))
+      info <- data.frame(item = c("Created", "GLORIA version", "Settings", "Copyright", "Licence",
+                                  "GLORIA data", "Citation", "Disclaimer"),
                          value = c(format(Sys.time()), as.character(gloria_version),
                                    if (is.null(spec)) "" else paste(names(spec), vapply(spec, function(v) paste(v, collapse = ", "), ""),
-                                                                    sep = " = ", collapse = "; ")))
+                                                                    sep = " = ", collapse = "; "),
+                                   legal$copyright, legal$licence, legal$gloria, legal$citation, legal$disclaimer))
       openxlsx::writeData(wb, "info", info)
       if (!is.null(checks)) openxlsx::writeData(wb, "info", checks, startRow = nrow(info) + 3)
       progress(0.8, "saving")

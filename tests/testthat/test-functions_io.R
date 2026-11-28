@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Unit tests for R/functions_io.R
 
 test_that("float32 Arrow matrix files round-trip with ~7 digits", {

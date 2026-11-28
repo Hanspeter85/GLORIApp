@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # parser/02_build_meta.R  -  Labels, index tables and indicator catalogue
 # =============================================================================

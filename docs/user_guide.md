@@ -249,6 +249,19 @@ Production side where *Countries/regions*, what *Sectors (120)*. Consumption sid
 
 When a new GLORIA release is published, the tab **Data & updates** downloads and compiles it. At the top of the tab you choose where the compiled MRIO and the temporary raw files are stored (two folders, may be on different drives; *Save folders as default* keeps them for the next time). Connect Google Drive once, paste the link of the release folder, check it and start the update. It runs in the background for several hours, year by year, and deletes the raw files after each year. Afterwards restart the app. See the developer guide for details.
 
-# How to cite
+# Licence, citation and disclaimer
 
-Please cite GLORIA: Lenzen, M., Geschke, A., West, J. et al. (2022). Implementing the material footprint to measure progress towards Sustainable Development Goals 8 and 12. *Nature Sustainability* 5, 157-166. Also cite the release notes of the GLORIA version used (shown in the app title).
+**GLORIApp** is copyright (c) 2026 Hanspeter Wieland. It may be used, copied and modified for **non-commercial purposes only** (research, teaching, personal study, public institutions) under the PolyForm Noncommercial License 1.0.0. Any commercial use needs prior written permission. The documentation is licensed under CC BY-NC 4.0.
+
+**GLORIA data** are made available by the GLORIA team under a Creative Commons Attribution-NonCommercial licence (CC BY-NC 3.0 AU); for commercial applications contact the GLORIA team. This also applies to all results you calculate with GLORIApp.
+
+**Please cite** GLORIA as requested in its release notes:
+
+- Lenzen, M., Geschke, A., Abd Rahman, M.D., et al. (2017) The Global MRIO Lab - charting the world economy. *Economic Systems Research* 29, 158-186.
+- Lenzen, M., Geschke, A., West, J., et al. (2021) Implementing the material footprint to measure progress towards Sustainable Development Goals 8 and 12. *Nature Sustainability*, https://doi.org/10.1038/s41893-021-00811-6.
+
+Suggested wording: "We used Release 060 of the GLORIA global environmentally-extended multi-region input-output (MRIO) database (Lenzen et al. 2021), constructed in the Global MRIO Lab (Lenzen et al. 2017)", and mention that the calculations were done with GLORIApp.
+
+**Disclaimer.** GLORIApp and all results calculated with it are provided "as is", without warranty of any kind. Hanspeter Wieland assumes no liability for the correctness, completeness or fitness for a particular purpose of the footprints and other results, or for decisions based on them. Results depend on the GLORIA database (including nowcasts and projections for recent years) and on the methods described in this guide; please check them before use.
+
+The full texts are in the files `LICENSE` and `NOTICE.md` of the app folder.

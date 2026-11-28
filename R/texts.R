@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # =============================================================================
 # R/texts.R  -  All explanatory texts shown in the app
 # =============================================================================
@@ -137,3 +138,23 @@ space_text <- sprintf(paste(
   "compiling needs %d GB RAM (32 GB recommended)."),
   space_needs$total_gb, space_needs$per_year_gb, space_needs$raw_tmp_gb,
   space_needs$ram_app_gb, space_needs$ram_parse_gb)
+
+# -----------------------------------------------------------------------------
+# Copyright, licences, citation and disclaimer (full texts: LICENSE, NOTICE.md)
+# -----------------------------------------------------------------------------
+legal <- list(
+  copyright  = "GLORIApp (c) 2026 Hanspeter Wieland",
+  licence    = paste("GLORIApp is licensed under the PolyForm Noncommercial License 1.0.0:",
+                     "non-commercial use only (research, teaching, personal study, public institutions);",
+                     "commercial use requires prior written permission."),
+  gloria     = paste("GLORIA data: Global MRIO Lab (University of Sydney et al.), licensed under",
+                     "Creative Commons Attribution-NonCommercial (CC BY-NC 3.0 AU); this also applies",
+                     "to results calculated from it. For commercial use contact the GLORIA team."),
+  citation   = paste("Please cite: Lenzen et al. (2017) The Global MRIO Lab - charting the world economy,",
+                     "Economic Systems Research 29, 158-186; Lenzen et al. (2021) Implementing the material",
+                     "footprint to measure progress towards SDGs 8 and 12, Nature Sustainability,",
+                     "doi:10.1038/s41893-021-00811-6. Calculated with GLORIApp."),
+  disclaimer = paste("Disclaimer: GLORIApp and all results are provided \"as is\", without warranty of any kind.",
+                     "Hanspeter Wieland assumes no liability for the correctness, completeness or fitness for a",
+                     "particular purpose of the footprints and other results, or for decisions based on them.")
+)

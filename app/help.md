@@ -41,4 +41,4 @@ Other result types: **Overview** (production-based, consumption-based and net im
 
 ### Citation
 
-Lenzen, M. et al. (2022): Implementing the material footprint to measure progress towards SDGs 8 and 12. *Nature Sustainability* 5, 157-166. Please also cite the GLORIA release notes of the version used (here v60).
+Please cite GLORIA as requested by the GLORIA team: Lenzen et al. (2017) *Economic Systems Research* 29, 158-186, and Lenzen et al. (2021) *Nature Sustainability*, https://doi.org/10.1038/s41893-021-00811-6 - full references, licences and disclaimer in `NOTICE.md` and at the top of this tab.

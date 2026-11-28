@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Hanspeter Wieland - PolyForm Noncommercial License 1.0.0 (see LICENSE, NOTICE.md)
 # Tests of the Shiny server logic (shiny::testServer, no browser needed)
 
 app_env <- new.env()
@@ -18,6 +19,8 @@ test_that("the user interface can be built", {
   html <- as.character(app_env$ui)
   expect_true(grepl("docs/GLORIApp_user_guide.docx", html, fixed = TRUE))
   expect_true(grepl("docs/GLORIApp_developer_guide.docx", html, fixed = TRUE))
+  expect_true(grepl("Hanspeter Wieland", html, fixed = TRUE))
+  expect_true(grepl("CC BY-NC 3.0 AU", html, fixed = TRUE))
 })
 
 test_that("clicking Calculate produces a result with passing checks", {
