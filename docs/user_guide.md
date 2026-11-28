@@ -163,6 +163,64 @@ After *Calculate*, the tab **Charts** shows the result as an interactive chart. 
 
 Choose the indicator, the column to show (*Show by*), optionally a filter (e.g. only `consumption_region = Austria`) and the number of groups; smaller groups are combined into *Other*. The charts are for a quick look; for publication-quality figures use the csv in your own tool.
 
+# Typical questions - which settings?
+
+Each recipe lists what to set; everything not mentioned stays at its default (all final demand categories, direct household emissions included, long format). "Production side" and "Consumption side" refer to the two boxes in step 4. "Not split" means *Do not split (total)*. Choose the indicator and year(s) you need; the examples use greenhouse gases.
+
+**1. How large is the carbon footprint of my country?**
+Step 1 *Footprint*. Production side: where *not split*, what *not split*. Consumption side: where *Countries/regions*, what *not split*, who unticked.
+→ One row per country; filter `consumption_region`.
+
+**2. In which countries are the emissions of my country's consumption released?**
+As 1, but production side where *Countries/regions* (or *7 world regions*).
+→ Filter `consumption_region` = your country; `production_region` shows where the emissions happen. Chart: *Ranking*, show by *production region*, filter on *consumption region*.
+
+**3. Which sectors (at home and abroad) cause them?**
+As 2, plus production side what *6 broad sectors* (or *Sectors (120)*).
+→ `production_sector` shows e.g. electricity, agriculture, manufacturing. *Direct emissions of final users* are households' own heating and cars.
+
+**4. Which products drive the footprint (food, cars, buildings, services ...)?**
+Production side: both *not split*. Consumption side: where *Countries/regions*, what *6 broad sectors* or *Sectors (120)*.
+→ `consumption_product` = the final products bought, with the emissions of their whole supply chain.
+
+**5. Is it households, the government or investment?**
+Any recipe above, plus consumption side *Who: split by final demand category*.
+→ Column `consumption_category`.
+
+**6. Footprints of income groups or world regions**
+Consumption side where *World Bank income groups* (or *7 world regions*, *World Bank regions*).
+
+**7. Is my country a net importer of emissions (or materials, land ...)?**
+Step 1 *Overview*, regions *Countries/regions*.
+→ For each region: production-based, consumption-based and net imports (positive = net importer).
+
+**8. How much is emitted inside each country, by sector? (territorial, like national inventories)**
+Step 1 *Production-based*. Where *Countries/regions*, what *6 broad sectors*.
+
+**9. How has the footprint developed over time?**
+Recipe 1 with *select all years* (or *every 5th year*) in step 3.
+→ Charts tab: *Time series*. Note: years after ~2022 are projections.
+
+**10. Where is the income behind my country's consumption earned? (value-added footprint, trade in value added)**
+Recipe 2 with indicator *Value added (total)*.
+→ Share of `production_region` other than your country = value added earned abroad.
+
+**11. How many jobs abroad depend on EU consumption?**
+Step 6: define *EU27* (rest = *Rest of world*). Indicator *Employment (total)*. Production side where *Countries/regions*; consumption side where *Own grouping (step 6)*.
+→ Filter `consumption_region = EU27`, then look at `production_region` outside the EU.
+
+**12. What is the land footprint of the food we eat?**
+Step 6: define a sector group *Food* (crop and animal farming, fishing, the food and beverage manufacturing sectors, *Hospitality* ...). Indicator *Land use (total)*. Production side where *7 world regions*; consumption side where *Countries/regions*, what *Own grouping (step 6)*.
+→ Filter `consumption_product = Food`.
+
+**13. Which of my country's consumption is made abroad, and what does it cause there?**
+Production side *not split*; consumption side where *Countries/regions*, what *6 broad sectors*, made in *Countries/regions*.
+→ `product_made_in` = where the final product was produced (e.g. cars made in Germany bought in Austria).
+
+**14. Very detailed: how much coal power from China is in the cars bought in Germany?**
+Production side where *Countries/regions*, what *Sectors (120)*. Consumption side where *Countries/regions*, what *Sectors (120)*.
+→ Filter `production_region = China`, `production_sector` = *Electric power generation, transmission and distribution*, `consumption_product` = *Motor vehicles, trailers and semi-trailers*, `consumption_region = Germany`. This "both sides" breakdown is slow (up to a minute per year) and gives very large tables; group coarsely where you can and use few years.
+
 # Reading the results correctly
 
 - **Units**: kt = 1,000 tonnes; Mt = 1,000 kt. Land in 1,000 hectares, energy in terajoules, employment in persons, money in 1,000 USD at current prices (so values over time include inflation).
