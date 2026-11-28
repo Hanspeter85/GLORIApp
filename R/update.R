@@ -155,25 +155,36 @@ set_active_version <- function(version) {
   writeLines(as.character(version), file.path(data_root, "active_version.txt"))
 }
 
-# Free disk space (GB) of the drive holding data_root (Windows only, else NA)
-free_disk_gb <- function() {
+# Free disk space (GB) of the drive holding `path` (Windows only, else NA)
+free_disk_gb <- function(path = data_root) {
   if (.Platform$OS.type != "windows") return(NA_real_)
-  drive <- substr(normalizePath(data_root, mustWork = FALSE), 1, 1)
+  drive <- substr(normalizePath(path, mustWork = FALSE), 1, 1)
   out <- tryCatch(system2("powershell", c("-NoProfile", "-Command",
                    shQuote(sprintf("(Get-PSDrive %s).Free", drive))), stdout = TRUE),
                   error = function(e) NA)
   round(as.numeric(out[1]) / 1e9, 1)
 }
 
+# Check that a folder exists or can be created and is writable
+folder_ok <- function(path) {
+  if (!nzchar(path)) return(FALSE)
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  dir.exists(path) && file.access(path, 2) == 0
+}
+
 # Start download + parsing in a separate background R process.
-# Returns the path of the log file.
-start_update <- function(folder_id, version, repo_root = ".", download_only = FALSE) {
-  logdir <- file.path(data_root, sprintf("v%02d", version), "logs")
+# data_dir / raw_dir: where the compiled MRIO and the raw files go (default:
+# the current settings). Returns the path of the log file.
+start_update <- function(folder_id, version, repo_root = ".", download_only = FALSE,
+                         data_dir = data_root, raw_dir = raw_root) {
+  logdir <- file.path(data_dir, sprintf("v%02d", version), "logs")
   dir.create(logdir, recursive = TRUE, showWarnings = FALSE)
   log <- file.path(logdir, sprintf("update_%s.log", format(Sys.time(), "%Y%m%d_%H%M%S")))
   rscript <- file.path(R.home("bin"), if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
   args <- c(shQuote(normalizePath(file.path(repo_root, "update", "update_gloria.R"))),
-            folder_id, version, if (download_only) "--download-only")
+            folder_id, version, if (download_only) "--download-only",
+            shQuote(paste0("--data-root=", data_dir)),
+            if (nzchar(raw_dir)) shQuote(paste0("--raw-root=", raw_dir)))
   # wait = FALSE: the app does not wait, the process runs on its own
   system2(rscript, args, wait = FALSE, stdout = log, stderr = log)
   log

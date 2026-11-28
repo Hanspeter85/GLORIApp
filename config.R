@@ -2,22 +2,35 @@
 # config.R  -  Central settings for the parser, the updater and the Shiny app
 # =============================================================================
 # This is the ONLY place where paths and the GLORIA version are set.
-# Normally nothing has to be changed here: new GLORIA releases are installed
-# with the update function of the app (tab "Data & updates") or with
-# update/update_gloria.R, which also switch the active version.
+# Normally nothing has to be changed here: the folders are chosen in the app
+# (tab "Data & updates"), new GLORIA releases are installed with the update
+# function of the app or with update/update_gloria.R.
 #
 # The file is loaded with source() by the parser, the updater and app/app.R.
 # =============================================================================
 
 # --- Data folders -------------------------------------------------------------
 # The data deliberately live OUTSIDE the git repository (far too big for GitHub).
-# Default: C:/Users/<user>/Data/GLORIA  with one sub folder per version (v60, v61, ...)
-# Can be overridden with the environment variable GLORIA_DATA_ROOT, e.g. by
-# adding the line  GLORIA_DATA_ROOT=D:/Data/GLORIA  to the file ~/.Renviron
-data_root <- Sys.getenv(
-  "GLORIA_DATA_ROOT",
-  unset = file.path(Sys.getenv("USERPROFILE", unset = path.expand("~")), "Data", "GLORIA")
-)
+#   data_root  compiled GLORIA (MRIO) - one sub folder per version (v60, v61, ...)
+#   raw_root   raw downloads and unpacked files while parsing (temporary; they
+#              are deleted after parsing). Empty = inside data_root.
+# Priority for each: 1) environment variable (GLORIA_DATA_ROOT / GLORIA_RAW_ROOT,
+#                       e.g. in ~/.Renviron or set by the updater),
+#                    2) the folders saved in the app (user settings file),
+#                    3) default C:/Users/<user>/Data/GLORIA
+settings_file <- file.path(tools::R_user_dir("GLORIApp", "config"), "settings.dcf")
+user_settings <- if (file.exists(settings_file)) as.list(read.dcf(settings_file)[1, ]) else list()
+first_set <- function(...) { for (v in list(...)) if (!is.null(v) && !is.na(v) && nzchar(v)) return(v); "" }
+
+data_root <- first_set(Sys.getenv("GLORIA_DATA_ROOT"), user_settings$data_root,
+                       file.path(Sys.getenv("USERPROFILE", unset = path.expand("~")), "Data", "GLORIA"))
+raw_root  <- first_set(Sys.getenv("GLORIA_RAW_ROOT"), user_settings$raw_root)
+
+# Save the folders chosen in the app (used from the next start on)
+save_user_settings <- function(data_root, raw_root = "") {
+  dir.create(dirname(settings_file), recursive = TRUE, showWarnings = FALSE)
+  write.dcf(data.frame(data_root = data_root, raw_root = raw_root), settings_file)
+}
 
 # --- GLORIA version -----------------------------------------------------------
 # Version number as it appears in the raw file names ("..._060_Markup001...").
@@ -37,12 +50,13 @@ gloria_version <- local({
 gloria_years <- 1990:2029
 
 version_dir <- file.path(data_root, sprintf("v%02d", gloria_version))
+raw_dir     <- file.path(if (nzchar(raw_root)) raw_root else data_root, sprintf("v%02d", gloria_version))
 
 paths <- list(
   # Raw data as downloaded from Google Drive (zip archives)
-  raw       = file.path(version_dir, "raw"),
+  raw       = file.path(raw_dir, "raw"),
   # Scratch folder where ONE year is unzipped at a time (emptied after parsing)
-  unzip_tmp = file.path(version_dir, "tmp_unzip"),
+  unzip_tmp = file.path(raw_dir, "tmp_unzip"),
   # Analysis-ready parsed data (one sub folder per year)
   parsed    = file.path(version_dir, "parsed"),
   # Metadata (labels, indicator catalogue) used by parser and app

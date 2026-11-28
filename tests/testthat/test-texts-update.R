@@ -26,3 +26,10 @@ test_that("installed versions are listed", {
   expect_true(60 %in% v$version)
   expect_true(v[version == 60, ready_for_app])
 })
+
+test_that("folders are checked and created", {
+  d <- file.path(tempdir(), "gloriapp_folder_test", "sub")
+  expect_true(folder_ok(d))
+  expect_true(dir.exists(d))
+  expect_false(folder_ok(""))
+})

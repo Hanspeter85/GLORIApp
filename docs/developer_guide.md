@@ -102,7 +102,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 
 `config.R` is sourced by every entry point. Key settings:
 
-- `data_root`: data folder, default `C:/Users/<user>/Data/GLORIA`, overridable with the environment variable `GLORIA_DATA_ROOT` (e.g. in `~/.Renviron`).
+- `data_root`: folder for the compiled MRIO, default `C:/Users/<user>/Data/GLORIA`. `raw_root`: optional separate folder for raw downloads and unpacked files (empty = inside `data_root`). Priority: environment variables `GLORIA_DATA_ROOT` / `GLORIA_RAW_ROOT` (the updater passes the folders chosen in the app this way, via `--data-root=` / `--raw-root=`), then the user settings file written by the app (`save_user_settings()`, in `tools::R_user_dir("GLORIApp", "config")`), then the default.
 - `gloria_version`: from env `GLORIA_VERSION`, else `<data_root>/active_version.txt`, else 60.
 - `paths`: `raw`, `unzip_tmp`, `parsed`, `meta`, `logs` below `<data_root>/v<version>/`; `input` (repo folder, overridable with `GLORIA_INPUT_DIR`).
 - `parser_options`: `store_L`, `delete_unzipped`, `skip_existing`, `delete_raw_after_parse`.

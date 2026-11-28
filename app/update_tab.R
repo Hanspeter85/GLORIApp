@@ -13,6 +13,15 @@ update_ui <- function() {
     tableOutput("upd_versions"),
     uiOutput("upd_activate_ui"),
     hr(),
+    h4("Where the data are stored"),
+    p("The compiled GLORIA (MRIO, about 125 GB for 40 years) and the raw downloads can be stored in",
+      "different folders, e.g. the MRIO on a large internal disk and the temporary raw files on another drive.",
+      "The raw files are deleted again after each year has been compiled."),
+    textInput("upd_data_root", "Folder for the compiled MRIO", value = data_root, width = "100%"),
+    textInput("upd_raw_root", "Folder for raw downloads (empty = same as MRIO folder)", value = raw_root, width = "100%"),
+    uiOutput("upd_space"),
+    actionButton("upd_save_folders", "Save folders as default", icon = icon("floppy-disk"), class = "btn-sm"),
+    hr(),
     h4("Download and compile a new GLORIA release"),
     p("New GLORIA releases are published by the Industrial Ecology Virtual Laboratory",
       "(University of Sydney) as Google Drive folders, see",
@@ -67,6 +76,26 @@ update_server <- function(input, output, session, repo_root) {
                      type = "message", duration = NULL)
   })
 
+
+  # --- Folders for MRIO and raw files ------------------------------------------------
+  output$upd_space <- renderUI({
+    d <- trimws(input$upd_data_root); r <- trimws(input$upd_raw_root)
+    msg <- sprintf("Free disk space - MRIO folder: %s GB", free_disk_gb(d))
+    if (nzchar(r)) msg <- paste0(msg, sprintf(", raw folder: %s GB", free_disk_gb(r)))
+    tags$p(class = "small text-muted", msg,
+           " (needed: ~3.2 GB per year for the MRIO, ~11 GB temporarily for the raw files).")
+  })
+  observeEvent(input$upd_save_folders, {
+    d <- trimws(input$upd_data_root); r <- trimws(input$upd_raw_root)
+    if (!folder_ok(d) || (nzchar(r) && !folder_ok(r))) {
+      showNotification("A folder does not exist and could not be created, or is not writable.", type = "error")
+      return()
+    }
+    save_user_settings(d, r)
+    showNotification("Folders saved. They are used for updates right away and by the app after a restart.",
+                     type = "message", duration = 8)
+  })
+
   # --- Google Drive connection ----------------------------------------------------------
   output$upd_google <- renderUI({
     rv$refresh
@@ -77,7 +106,7 @@ update_server <- function(input, output, session, repo_root) {
     email <- if (!is.null(rv$email)) rv$email else google_login_cached()
     if (is.na(email)) div(class = "alert alert-warning", "Not connected to Google Drive yet.")
     else div(class = "alert alert-success",
-             sprintf("Connected to Google Drive as %s. Free disk space: %s GB", email, free_disk_gb()))
+             sprintf("Connected to Google Drive as %s.", email))
   })
   observeEvent(input$upd_login, {
     res <- tryCatch(google_login(), error = function(e) {
@@ -127,8 +156,14 @@ update_server <- function(input, output, session, repo_root) {
   # Start the background process
   observeEvent(input$upd_start, {
     ck <- rv$check
+    d <- trimws(input$upd_data_root); r <- trimws(input$upd_raw_root)
+    if (!folder_ok(d) || (nzchar(r) && !folder_ok(r))) {
+      showNotification("Please check the folders above: they must exist (or be creatable) and be writable.", type = "error")
+      return()
+    }
     rv$log <- start_update(ck$id, ck$version, repo_root = repo_root,
-                           download_only = isTRUE(input$upd_download_only))
+                           download_only = isTRUE(input$upd_download_only),
+                           data_dir = d, raw_dir = r)
     showNotification("Update started in the background. Progress is shown below.", type = "message")
   })
 

@@ -54,8 +54,11 @@ C:/Users/<user>/Data/GLORIA/
       logs/                <- parser and update logs
 ```
 
-To use another folder, add `GLORIA_DATA_ROOT=D:/somewhere/GLORIA` to the file
-`~/.Renviron` (in R: `usethis::edit_r_environ()` or `file.edit("~/.Renviron")`).
+The folders can be changed in the app (tab **Data & updates** > *Where the data are
+stored*): one folder for the compiled MRIO and, optionally, a separate folder for
+the temporary raw downloads (e.g. on another drive). They are saved in a small
+settings file of the user (`tools::R_user_dir("GLORIApp", "config")`). Alternatively
+set `GLORIA_DATA_ROOT` / `GLORIA_RAW_ROOT` in `~/.Renviron`.
 
 ## 2. Getting and compiling the GLORIA data
 

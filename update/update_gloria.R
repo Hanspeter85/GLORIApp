@@ -20,10 +20,15 @@
 # =============================================================================
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 2) stop("Usage: Rscript update/update_gloria.R <drive-folder-id> <version> [--download-only]")
+if (length(args) < 2) stop("Usage: Rscript update/update_gloria.R <drive-folder-id> <version> [--download-only] [--data-root=<folder>] [--raw-root=<folder>]")
 folder_id <- args[1]
 version <- as.integer(args[2])
 download_only <- "--download-only" %in% args
+
+# Folders for the compiled MRIO and for the raw files (chosen in the app)
+opt <- function(name) { a <- grep(paste0("^--", name, "="), args, value = TRUE); if (length(a)) sub("^--[a-z-]+=", "", a[1]) else "" }
+if (nzchar(opt("data-root"))) Sys.setenv(GLORIA_DATA_ROOT = opt("data-root"))
+if (nzchar(opt("raw-root")))  Sys.setenv(GLORIA_RAW_ROOT  = opt("raw-root"))
 
 # Work from the repo root (this script lives in <repo>/update/)
 script_path <- sub("--file=", "", grep("^--file=", commandArgs(FALSE), value = TRUE))

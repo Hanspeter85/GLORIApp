@@ -239,7 +239,7 @@ Production side where *Countries/regions*, what *Sectors (120)*. Consumption sid
 
 # Updating GLORIA
 
-When a new GLORIA release is published, the tab **Data & updates** downloads and compiles it. Connect Google Drive once, paste the link of the release folder, check it and start the update. It runs in the background for several hours, year by year, and deletes the raw files after each year. Afterwards restart the app. See the developer guide for details.
+When a new GLORIA release is published, the tab **Data & updates** downloads and compiles it. At the top of the tab you choose where the compiled MRIO and the temporary raw files are stored (two folders, may be on different drives; *Save folders as default* keeps them for the next time). Connect Google Drive once, paste the link of the release folder, check it and start the update. It runs in the background for several hours, year by year, and deletes the raw files after each year. Afterwards restart the app. See the developer guide for details.
 
 # How to cite
 
