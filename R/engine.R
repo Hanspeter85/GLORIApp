@@ -435,10 +435,12 @@ run_calculation <- function(spec, meta, progress = NULL) {
   res <- vector("list", nrow(jobs))
   for (i in seq_len(nrow(jobs))) {
     info <- indicator_info(jobs$indicator[i], meta)
-    if (!is.null(progress)) progress(i / nrow(jobs), sprintf("%d - %s", jobs$year[i], info$label))
+    # progress = share of finished jobs (reported before and after each job)
+    if (!is.null(progress)) progress((i - 1) / nrow(jobs), sprintf("%d - %s", jobs$year[i], info$label))
     r <- fun(info, jobs$year[i], meta, spec)
     r[, `:=`(year = jobs$year[i], indicator = info$label, unit = info$unit)]
     res[[i]] <- r
+    if (!is.null(progress)) progress(i / nrow(jobs), sprintf("%d - %s done", jobs$year[i], info$label))
   }
   res <- rbindlist(res, use.names = TRUE, fill = TRUE)
   if (!isTRUE(spec$keep_zeros)) res <- res[value != 0]

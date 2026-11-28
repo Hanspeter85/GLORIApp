@@ -102,3 +102,9 @@ describe_spec <- function(sp, meta) {
       tags$b("Indicators: "), paste(ind, collapse = "; "), tags$br(),
       tags$b("Years: "), yrs)
 }
+
+# Seconds as "45 s" / "3 min" (used for the remaining time in the progress bar)
+format_secs <- function(s) {
+  if (!is.finite(s) || s < 0) return("?")
+  if (s < 90) sprintf("%d s", round(s)) else sprintf("%d min", round(s / 60))
+}

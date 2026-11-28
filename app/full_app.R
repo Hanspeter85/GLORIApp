@@ -343,8 +343,13 @@ server <- function(input, output, session) {
            "Please choose at least one final demand category (step 5).")
     )
     t0 <- Sys.time()
-    res <- withProgress(message = "Calculating", value = 0, {
-      run_calculation(sp, meta_r(), progress = function(p, msg) setProgress(p, detail = msg))
+    # Progress bar with percentage and estimated remaining time
+    res <- withProgress(message = "Calculating: 0 %", value = 0, {
+      run_calculation(sp, meta_r(), progress = function(p, msg) {
+        el <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+        eta <- if (p > 0.02 && p < 1) sprintf(" - about %s left", format_secs(el / p - el)) else ""
+        setProgress(p, message = sprintf("Calculating: %d %%%s", round(100 * p), eta), detail = msg)
+      })
     })
     attr(res, "seconds") <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
     res
@@ -383,7 +388,21 @@ server <- function(input, output, session) {
     filename = function() {
       sprintf("GLORIA_v%d_%s_%s.csv", meta$version, input$type, format(Sys.time(), "%Y%m%d_%H%M"))
     },
-    content = function(file) fwrite(result_formatted(), file)
+    # Written in blocks of 200 000 rows so that a progress bar can be shown
+    content = function(file) {
+      res <- result_formatted()
+      n <- nrow(res); step <- 200000L
+      withProgress(message = "Writing csv: 0 %", value = 0, {
+        for (s in seq(1L, max(n, 1L), by = step)) {
+          rows <- s:min(n, s + step - 1L)
+          fwrite(res[rows], file, append = s > 1L)
+          p <- max(rows) / max(n, 1L)
+          setProgress(p, message = sprintf("Writing csv: %d %%", round(100 * p)),
+                      detail = sprintf("%s of %s rows", format(max(rows), big.mark = ","),
+                                       format(n, big.mark = ",")))
+        }
+      })
+    }
   )
 
   # Indicator explanation table
