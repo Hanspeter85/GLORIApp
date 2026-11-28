@@ -37,9 +37,15 @@ gives a quick interactive look at the result (ranking, time series, composition)
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 
-Hardware: the parser needs ~16 GB RAM (32 GB recommended) and ~150 GB free disk
-space for the parsed data of all years (plus ~60 GB for the downloaded raw data,
-which can be deleted after parsing).
+**Disk space and memory** (GLORIA v60, 164 regions x 120 sectors, 1990-2029):
+
+| What | Needed |
+|---|---|
+| Compiled GLORIA (all 40 years) | ~121 GB free disk space (~3 GB per year) |
+| Compiling it yourself (option B) | ~12 GB more while it runs (raw files of one year, deleted afterwards) |
+| RAM for the app | up to ~8 GB (16 GB PC is enough) |
+| RAM for compiling | ~16 GB (32 GB recommended) |
+| App itself / portable version | < 0.1 GB / ~0.5 GB unpacked |
 
 ### Where the data live
 
@@ -67,7 +73,7 @@ There are two ways - the app works the same with both.
 
 ### Option A: use an already compiled GLORIA (no Google account, no compiling)
 
-Someone who has compiled GLORIA shares the folder `v60` (~125 GB) e.g. via Box,
+Someone who has compiled GLORIA shares the folder `v60` (~121 GB) e.g. via Box,
 a network drive or an external disk. Before sharing, run once in R (repo root):
 
 ```r

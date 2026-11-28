@@ -152,7 +152,7 @@ Only these **standard matrices** are stored; no products of $L$ (such as $L\,Y$ 
 
 **float32 Arrow format** (`write_matrix` / `read_matrix` in `R/functions_io.R`): an Apache Arrow IPC file with one float32 column `v` holding the matrix column by column; `nrow` and `ncol` are stored in the file metadata. Arrow converts float32 to R doubles in fast C++ code (~1 s for $L$, versus ~12 s with base R `readBin`). In Python: `t = pyarrow.ipc.open_file(f).read_all(); L = t["v"].to_numpy().reshape((-1, int(t.schema.metadata[b"nrow"]))).T`. Data parsed with an older version (`*.f32` files) are converted with `parser/convert_parsed_to_arrow.R`.
 
-A parsed year needs ~3.2 GB; 1990-2029 ~125 GB.
+A parsed year needs ~3 GB; 1990-2029 ~121 GB (`space_needs` in `R/texts.R` holds the numbers shown in the app).
 
 ## Running the parser
 

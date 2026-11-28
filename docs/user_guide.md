@@ -241,7 +241,9 @@ Production side where *Countries/regions*, what *Sectors (120)*. Consumption sid
 
 # Getting and updating the GLORIA data
 
-**Option A - use an already compiled GLORIA (easiest).** If a colleague shares the compiled GLORIA (a folder called e.g. 'v60', about 125 GB) via Box, a network drive or a disk: download the whole folder, put it anywhere on your PC (e.g. *D:/GLORIA/v60*), open the tab **Data & updates**, enter the folder under *Option A* and click *Check and use this folder*. The app checks that nothing is missing or incomplete and uses the data after a restart. No Google account and no compiling is needed.
+**Disk space you need.** The compiled GLORIA (all 40 years) needs about **121 GB** of free disk space (about 3 GB per year). If you download and compile it yourself (option B), about **12 GB more** are needed while the update runs (raw files of one year at a time, deleted afterwards); the raw files can be put on another drive. The app shows the free space and whether it is enough in the tab *Data & updates*. Memory: the app uses up to about 8 GB RAM; compiling needs about 16 GB RAM (32 GB recommended).
+
+**Option A - use an already compiled GLORIA (easiest).** If a colleague shares the compiled GLORIA (a folder called e.g. 'v60', about 121 GB) via Box, a network drive or a disk: download the whole folder, put it anywhere on your PC (e.g. *D:/GLORIA/v60*), open the tab **Data & updates**, enter the folder under *Option A* and click *Check and use this folder*. The app checks that nothing is missing or incomplete and uses the data after a restart. No Google account and no compiling is needed.
 
 **Option B - download and compile from Google Drive.**
 

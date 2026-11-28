@@ -14,7 +14,7 @@ update_ui <- function() {
     uiOutput("upd_activate_ui"),
     hr(),
     h4("Where the data are stored"),
-    p("The compiled GLORIA (MRIO, about 125 GB for 40 years) and the raw downloads can be stored in",
+    p("The compiled GLORIA (MRIO, about 121 GB for 40 years) and the raw downloads can be stored in",
       "different folders, e.g. the MRIO on a large internal disk and the temporary raw files on another drive.",
       "The raw files are deleted again after each year has been compiled."),
     textInput("upd_data_root", "Folder for the compiled MRIO", value = data_root, width = "100%"),
@@ -23,7 +23,7 @@ update_ui <- function() {
     actionButton("upd_save_folders", "Save folders as default", icon = icon("floppy-disk"), class = "btn-sm"),
     hr(),
     h4("Option A: use an already compiled GLORIA (e.g. downloaded from Box)"),
-    p("If someone has already compiled GLORIA, download their folder (e.g. 'v60', ~125 GB) from Box,",
+    p("If someone has already compiled GLORIA, download their folder (e.g. 'v60', ~121 GB - make sure you have this much free space) from Box,",
       "a network drive or an external disk and put it into any folder on this PC. Enter that folder",
       "below - the folder that contains 'v60', the 'v60' folder itself or its 'parsed' sub folder.",
       "The app checks that all files are complete and then uses it (after a restart)."),
@@ -91,10 +91,22 @@ update_server <- function(input, output, session, repo_root) {
   # --- Folders for MRIO and raw files ------------------------------------------------
   output$upd_space <- renderUI({
     d <- trimws(input$upd_data_root); r <- trimws(input$upd_raw_root)
-    msg <- sprintf("Free disk space - MRIO folder: %s GB", free_disk_gb(d))
-    if (nzchar(r)) msg <- paste0(msg, sprintf(", raw folder: %s GB", free_disk_gb(r)))
-    tags$p(class = "small text-muted", msg,
-           " (needed: ~3.2 GB per year for the MRIO, ~11 GB temporarily for the raw files).")
+    free_d <- free_disk_gb(d)
+    free_r <- if (nzchar(r)) free_disk_gb(r) else NA
+    # needed: compiled MRIO in the MRIO folder; raw files of one year either in
+    # the raw folder or (if empty) also in the MRIO folder
+    need_d <- space_needs$total_gb + if (nzchar(r)) 0 else space_needs$raw_tmp_gb
+    ok_d <- is.na(free_d) || free_d >= need_d
+    ok_r <- is.na(free_r) || free_r >= space_needs$raw_tmp_gb
+    msg <- sprintf("Free disk space in the MRIO folder: %s GB (needed for installing a GLORIA version: about %d GB)", free_d, need_d)
+    if (nzchar(r)) msg <- paste0(msg, sprintf("; raw folder: %s GB (needed: about %d GB)", free_r, space_needs$raw_tmp_gb))
+    inst <- installed_versions()
+    have <- if (nrow(inst) > 0 && any(inst$ready_for_app)) sprintf("Already installed here: GLORIA v%s. ", paste(inst$version[inst$ready_for_app], collapse = ", ")) else ""
+    div(class = if (ok_d && ok_r) "alert alert-success py-2 small" else "alert alert-warning py-2 small",
+        if (nzchar(have)) tags$b(have),
+        msg, tags$br(),
+        if (!(ok_d && ok_r)) tags$b("Not enough free space to install another GLORIA version here - free up space or choose another drive. "),
+        tags$br(), space_text)
   })
   observeEvent(input$upd_save_folders, {
     d <- trimws(input$upd_data_root); r <- trimws(input$upd_raw_root)

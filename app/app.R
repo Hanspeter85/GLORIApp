@@ -58,7 +58,7 @@ if (data_ready) {
       sprintf("No compiled GLORIA data found for version %d in %s.", gloria_version, paths$parsed),
       "Use the tab 'Data & updates': either point the app to an already compiled GLORIA (e.g. downloaded",
       "from Box - option A) or download and compile it from Google Drive (option B; or run",
-      tags$code("parser/run_parser.R"), "if the raw data are already downloaded).")),
+      tags$code("parser/run_parser.R"), "if the raw data are already downloaded).", tags$br(), tags$br(), space_text)),
     update_ui(),
     how_it_works_panel()
   )

@@ -120,3 +120,20 @@ help_texts$file_type <- paste(
   "CSV and text files work for any size and are read by Excel, R, Python and most tools.",
   "Excel files are limited to 1,048,576 rows; they also contain a sheet with the",
   "settings and the plausibility checks of the calculation.")
+
+# Disk space and memory needed for GLORIA (measured for v60, 164 regions x
+# 120 sectors, 40 years); shown in the app and used for the disk space check
+space_needs <- list(
+  per_year_gb = 3.0,   # compiled MRIO per year (L 1.55 GB, Z 1.55 GB, rest small)
+  total_gb    = 121,   # compiled MRIO, all 40 years
+  raw_tmp_gb  = 12,    # option B: raw zips + unpacked tables of one year at a time
+  ram_app_gb  = 8,     # RAM used by the app while calculating (L of one year)
+  ram_parse_gb = 16    # RAM needed to compile one year (32 GB recommended)
+)
+space_text <- sprintf(paste(
+  "Disk space: the compiled GLORIA needs about %d GB (%.0f GB per year, 40 years).",
+  "Downloading and compiling it yourself (option B) needs about %d GB more while it runs",
+  "(raw files of one year at a time, deleted afterwards). Memory: the app uses up to about %d GB RAM;",
+  "compiling needs %d GB RAM (32 GB recommended)."),
+  space_needs$total_gb, space_needs$per_year_gb, space_needs$raw_tmp_gb,
+  space_needs$ram_app_gb, space_needs$ram_parse_gb)
