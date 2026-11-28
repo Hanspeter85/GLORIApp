@@ -137,7 +137,7 @@ The GLORIA data are not part of the bundle: copy the data folder to
 | `input/concordances/regions.csv` | region groupings - **add a column to get a new aggregation in the app** |
 | `input/concordances/sectors.csv` | sector groupings - same |
 | `input/indicator_catalogue.csv` | recommended indicators with explanations |
-| `tests/test_pipeline.R` | end-to-end test on a mini GLORIA (3 regions x 4 sectors) |
+| `tests/run_tests.R`, `tests/testthat/` | unit tests (testthat) on a mini GLORIA (3 regions x 4 sectors) |
 | `legacy/` | original v059 scripts of GLORIA-MRIO_Parser |
 | `docs/` | user and developer guides (Markdown + Word via `docs/build_docs.R`), intro slides and exercises |
 

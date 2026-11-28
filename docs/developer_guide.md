@@ -11,7 +11,7 @@ GLORIApp has three layers that can be used independently:
 2. **Engine** (`R/engine.R`): all footprint calculations on the parsed data. Pure R functions, no Shiny, usable from any script.
 3. **App** (`app/`): Shiny user interface on top of the engine, plus the update function (`R/update.R`, `update/update_gloria.R`).
 
-Dependencies: R >= 4.3 with `data.table`, `Matrix`, `arrow`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT`, `markdown`, `plotly` (app), `googledrive` (updates), `officer`, `mschart` (slides only). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
+Dependencies: R >= 4.3 with `data.table`, `Matrix`, `arrow`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT`, `markdown`, `plotly` (app), `googledrive` (updates), `officer`, `mschart` (slides only), `testthat` (tests). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
 
 # Architecture at a glance
 
@@ -70,7 +70,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | change a label or help text in the app | `R/texts.R` (result types, help texts) or `nice_name()` in `app/full_app.R` |
 | add a recommended indicator | `input/indicator_catalogue.csv` |
 | add a region or sector grouping | new column in `input/concordances/regions.csv` / `sectors.csv` |
-| change or add a calculation | `R/engine.R` (and a test in `tests/test_pipeline.R`) |
+| change or add a calculation | `R/engine.R` (and a test in `tests/testthat/test-engine.R`) |
 | add an input to the sidebar | UI part of `app/full_app.R` plus the field in `spec()` |
 | change how raw data are read | `parser/03_parse_year.R` |
 | change paths or the data folder | `config.R` or the environment variable `GLORIA_DATA_ROOT` |
@@ -93,7 +93,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | `update/update_gloria.R` | download + parse a release year by year (background process) |
 | `app/app.R`, `app/full_app.R`, `app/update_tab.R`, `app/charts_tab.R` | Shiny app (main UI, update tab, charts tab) |
 | `input/` | ReadMe of the GLORIA version, concordances, indicator catalogue |
-| `tests/test_pipeline.R` | end-to-end test on a synthetic mini GLORIA |
+| `tests/run_tests.R`, `tests/testthat/` | unit tests (testthat) on a synthetic mini GLORIA |
 | `docs/` | user/developer guides (Markdown sources, Word output), slides |
 | `legacy/` | original GLORIA-MRIO_Parser scripts (v059), not used |
 
@@ -227,11 +227,33 @@ Caching: `load_var()` keeps small objects of all years in memory but only one $L
 
 # Testing
 
+## Unit tests (testthat)
+
 ```r
-Rscript tests/test_pipeline.R
+Rscript tests/run_tests.R      # or in RStudio: source("tests/run_tests.R")
 ```
 
-Builds a synthetic GLORIA (3 regions × 4 sectors) in the same raw format, runs the real parser and checks input-output identities: footprint total = production total, origin/product/origin × product splits agree, net imports sum to zero, value added in gross exports = gross exports, world value-added footprint = world value added, $L$ reproduces output. Run it after every change to parser or engine.
+`tests/testthat/setup.R` builds a synthetic GLORIA (3 regions × 4 sectors, two years) in the same raw format as the real release, in a temporary folder, and runs the real parser on it. The real data are never touched. The test files:
+
+| File | What is tested |
+|---|---|
+| `test-functions_io.R` | float32 Arrow round trip, aggregation matrices, raw file lookup, csv reader |
+| `test-parser.R` | metadata, only standard matrices stored, $L\,Y = x$, $L \ge 0$, value added = output − inputs, year detection |
+| `test-engine.R` | world footprint = world production account; production-side, product and both-side splits agree; both computation orders agree; net imports sum to zero; value-added footprint = world value added; gross exports; plausibility checks pass and detect a wrong result; columns, wide format, raw satellite rows, cache |
+| `test-texts-update.R` | helper functions of texts and the update function (Drive links, file selection, installed versions) |
+| `test-app.R` | Shiny server with `shiny::testServer`: *Calculate* gives a result with passing checks, wide format, own groupings |
+
+Run the tests after every change to parser, engine or app; all must pass before committing.
+
+## Plausibility checks in the app
+
+Every calculation also runs input-output checks on the **real** data (`check_job()` and `finish_checks()` in `R/engine.R`). They are attached to the result (`attr(res, "checks")`) and shown in the app below the result: green if all pass, red if one fails, with a details table (expected, calculated, relative difference, tolerance 0.01 %):
+
+- footprint: sum over all consumers = sum of the satellite account (industries + direct emissions of final users); not applicable when only some final demand categories are selected
+- production-based account: sum = sum of the satellite account
+- overview: production-based total = satellite account; world consumption-based total = world production-based total
+- no missing or infinite values
+- for every year used: the Leontief inverse reproduces gross output ($L\,Y\mathbf{1} = x$, from the parser's `checks.csv`)
 
 # Other languages
 

@@ -190,6 +190,7 @@ ui <- page_sidebar(
       "Result",
       uiOutput("description"),
       uiOutput("status"),
+      uiOutput("checks_ui"),
       uiOutput("download_ui"),
       DT::DTOutput("table")
     ),
@@ -366,6 +367,30 @@ server <- function(input, output, session) {
   output$download_ui <- renderUI({
     result()
     downloadButton("download", "Download csv", class = "btn-success mb-3")
+  })
+
+  # Plausibility checks of the calculation (computed by run_calculation, see
+  # check_job() in R/engine.R): green = all passed, red = something is wrong
+  output$checks_ui <- renderUI({
+    chk <- attr(result(), "checks")
+    if (is.null(chk) || nrow(chk) == 0) return(NULL)
+    n_ok <- sum(chk$status == "OK"); n_fail <- sum(chk$status == "FAILED"); n_skip <- sum(chk$status == "skipped")
+    cls <- if (n_fail > 0) "alert alert-danger" else "alert alert-success"
+    head_txt <- if (n_fail > 0) sprintf("Plausibility checks: %d FAILED, %d passed", n_fail, n_ok)
+                else sprintf("Plausibility checks: all %d passed%s", n_ok,
+                             if (n_skip > 0) sprintf(" (%d not applicable)", n_skip) else "")
+    tab <- copy(chk)[, `:=`(expected = signif(expected, 8), calculated = signif(calculated, 8),
+                            rel_difference = signif(rel_difference, 2))]
+    div(class = cls,
+        tags$details(
+          tags$summary(tags$b(head_txt), " - click for details"),
+          tags$p(class = "small mt-2",
+                 "Input-output identities that must hold if the calculation is correct, e.g. the footprints of all",
+                 "consumers add up to the total of the satellite account. Tolerance: 0.01 %."),
+          renderTable(tab[, .(Check = check, Year = year, Indicator = indicator, Expected = expected,
+                              Calculated = calculated, `Rel. difference` = rel_difference,
+                              Status = status, Note = note)], digits = 8)
+        ))
   })
 
   output$status <- renderUI({

@@ -223,6 +223,7 @@ Production side where *Countries/regions*, what *Sectors (120)*. Consumption sid
 
 # Reading the results correctly
 
+- **Plausibility checks**: below every result the app shows a green box (*all checks passed*) or a red one. Click it to see the details. The checks verify basic input-output identities on the real data, e.g. that the footprints of all consumers add up to the total emissions of the world. A red box means something went wrong - do not use that result and report it.
 - **Units**: kt = 1,000 tonnes; Mt = 1,000 kt. Land in 1,000 hectares, energy in terajoules, employment in persons, money in 1,000 USD at current prices (so values over time include inflation).
 - **Rest-of-world regions**: four GLORIA regions (Rest of Americas, Europe, Africa, Asia-Pacific) bundle many small countries. In the World Bank income grouping they form their own group.
 - **Recent years** are projections (see step 3).

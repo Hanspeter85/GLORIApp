@@ -399,6 +399,76 @@ calc_exports <- function(info, year, meta, sp) {
   res[, .(value = sum(value)), by = by]
 }
 # -----------------------------------------------------------------------------
+# Plausibility checks of a calculation (shown in the app below the result)
+# -----------------------------------------------------------------------------
+# Input-output identities that must hold if everything was calculated
+# correctly. Tolerance: 0.01 % (L is stored with ~7 significant digits).
+CHECK_TOL <- 1e-4
+
+check_row <- function(check, year, indicator, expected, calculated, note = "") {
+  rel <- if (is.na(expected) || is.na(calculated)) NA_real_
+         else abs(calculated - expected) / max(abs(expected), 1e-12)
+  if (isTRUE(abs(calculated - expected) < 1e-9)) rel <- 0
+  status <- if (is.na(rel)) "skipped" else if (rel <= CHECK_TOL) "OK" else "FAILED"
+  data.table(check = check, year = year, indicator = indicator, expected = expected,
+             calculated = calculated, rel_difference = rel, status = status, note = note)
+}
+
+# Checks for one year and indicator (r = result before removing zero rows)
+check_job <- function(r, info, year, meta, sp) {
+  q_tot  <- sum(direct_pressure(info, year))
+  qy     <- direct_pressure_fd(info, year)
+  fd_sel <- meta$idx_Y$fd_code %in% sp$fd_codes
+  qy_sel <- if (isTRUE(sp$include_direct_fd) && !is.null(qy)) sum(qy[fd_sel]) else 0
+  all_fd <- all(meta$fd$fd_code %in% sp$fd_codes)
+  lab <- info$label
+  switch(sp$type,
+    footprint = {
+      # Every pressure is caused by some final demand: summed over all
+      # consumers, the footprint equals the total of the satellite account
+      # (industries + direct emissions of final users).
+      if (all_fd) {
+        check_row("Sum of footprints = sum of the satellite account (industries + final users)",
+                  year, lab, q_tot + qy_sel, sum(r$value))
+      } else {
+        check_row("Sum of footprints = sum of the satellite account", year, lab, NA, sum(r$value),
+                  "not applicable: only some final demand categories selected")
+      }
+    },
+    production = check_row("Sum of the territorial account = sum of the satellite account",
+                           year, lab, q_tot + qy_sel, sum(r$value)),
+    overview = rbind(
+      check_row("Production-based total = sum of the satellite account", year, lab,
+                q_tot + qy_sel, r[account == "production_based", sum(value)]),
+      check_row("Consumption-based total = production-based total (world)", year, lab,
+                if (all_fd) r[account == "production_based", sum(value)] else NA,
+                r[account == "consumption_based", sum(value)],
+                if (all_fd) "" else "not applicable: only some final demand categories selected")
+    ),
+    exports = check_row("(no check for gross exports)", year, lab, NA, sum(r$value), "scripts only")
+  )
+}
+
+# Checks on the whole result and on the data of the years used
+finish_checks <- function(chk, res, sp, meta) {
+  extra <- list(
+    check_row("No missing or infinite values in the result", NA, "all",
+              0, sum(!is.finite(res$value)))
+  )
+  # Leontief inverse reproduces gross output (L times total final demand = x),
+  # checked by the parser for every year (parsed/<year>/checks.csv)
+  for (y in unique(sp$years)) {
+    f <- year_file(y, "checks.csv")
+    if (file.exists(f)) {
+      v <- fread(f)$output_reproduced_by_L
+      extra[[length(extra) + 1]] <- check_row("Leontief inverse reproduces gross output (L Y = x)",
+                                              y, "all", 1, v)
+    }
+  }
+  rbind(rbindlist(extra), chk)
+}
+
+# -----------------------------------------------------------------------------
 # Main entry point used by the app
 # -----------------------------------------------------------------------------
 # spec: list with
@@ -433,6 +503,7 @@ run_calculation <- function(spec, meta, progress = NULL) {
   # Loop over years first: the big matrices of one year are loaded only once
   setorder(jobs, year)
   res <- vector("list", nrow(jobs))
+  checks <- vector("list", nrow(jobs))
   for (i in seq_len(nrow(jobs))) {
     info <- indicator_info(jobs$indicator[i], meta)
     # progress = share of finished jobs (reported before and after each job)
@@ -440,6 +511,7 @@ run_calculation <- function(spec, meta, progress = NULL) {
     r <- fun(info, jobs$year[i], meta, spec)
     r[, `:=`(year = jobs$year[i], indicator = info$label, unit = info$unit)]
     res[[i]] <- r
+    checks[[i]] <- check_job(r, info, jobs$year[i], meta, spec)
     if (!is.null(progress)) progress(i / nrow(jobs), sprintf("%d - %s done", jobs$year[i], info$label))
   }
   res <- rbindlist(res, use.names = TRUE, fill = TRUE)
@@ -450,7 +522,9 @@ run_calculation <- function(spec, meta, progress = NULL) {
             "product_made_in", "consumption_category")
   dims <- c(intersect(pref, dims), setdiff(dims, pref))
   setcolorder(res, c("year", "indicator", "unit", dims, "value"))
-  res[]
+  # plausibility checks (see check_job); shown in the app below the result
+  attr(res, "checks") <- finish_checks(rbindlist(checks), res, spec, meta)
+  res
 }
 
 # -----------------------------------------------------------------------------
