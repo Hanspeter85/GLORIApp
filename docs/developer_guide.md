@@ -85,6 +85,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | `R/functions_io.R` | float32 file format, csv reader, aggregation helpers, logging |
 | `R/engine.R` | calculation engine (footprints, production, overview, gross exports) |
 | `R/texts.R` | all user-facing texts of the app |
+| `R/export.R` | writing results as csv, csv for German Excel, xlsx or tab-separated text |
 | `R/update.R` | Google Drive helpers, installed versions, background update start |
 | `parser/01_build_concordances.R` | builds `input/concordances/regions.csv` and `sectors.csv` |
 | `parser/02_build_meta.R` | builds `meta.rds` (labels, index tables, indicator catalogue) |
@@ -241,7 +242,8 @@ Rscript tests/run_tests.R      # or in RStudio: source("tests/run_tests.R")
 | `test-parser.R` | metadata, only standard matrices stored, $L\,Y = x$, $L \ge 0$, value added = output − inputs, year detection |
 | `test-engine.R` | world footprint = world production account; production-side, product and both-side splits agree; both computation orders agree; net imports sum to zero; value-added footprint = world value added; gross exports; plausibility checks pass and detect a wrong result; columns, wide format, raw satellite rows, cache |
 | `test-texts-update.R` | helper functions of texts and the update function (Drive links, file selection, installed versions) |
-| `test-app.R` | Shiny server with `shiny::testServer`: *Calculate* gives a result with passing checks, wide format, own groupings |
+| `test-export.R` | csv, csv2, txt and xlsx files contain the full table; Excel row limit |
+| `test-app.R` | Shiny server with `shiny::testServer`: *Calculate* gives a result with passing checks, wide format, downloads in all four formats, own groupings |
 
 Run the tests after every change to parser, engine or app; all must pass before committing.
 

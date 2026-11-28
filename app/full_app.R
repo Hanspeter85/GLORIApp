@@ -178,7 +178,9 @@ ui <- page_sidebar(
           "input.format == 'wide'",
           selectInput("pivot_col", "One column per", choices = c("year", "indicator"))
         ),
-        checkboxInput("keep_zeros", "Keep rows with value 0", FALSE)
+        checkboxInput("keep_zeros", "Keep rows with value 0", FALSE),
+        selectInput("file_type", "File format for the download", choices = file_type_choices),
+        helpText(help_texts$file_type)
       )
     ),
     actionButton("go", "Calculate", class = "btn-primary btn-lg w-100", icon = icon("play"))
@@ -365,8 +367,14 @@ server <- function(input, output, session) {
 
   # The download button only appears once there is a result
   output$download_ui <- renderUI({
-    result()
-    downloadButton("download", "Download csv", class = "btn-success mb-3")
+    n <- nrow(result_formatted())
+    if (input$file_type == "xlsx" && n > EXCEL_MAX_ROWS) {
+      return(div(class = "alert alert-warning",
+                 sprintf("The result has %s rows - too many for Excel (max. 1,048,576). Choose CSV or text in step 7, or group the result more coarsely.",
+                         format(n, big.mark = ","))))
+    }
+    downloadButton("download", sprintf("Download (%s)", names(file_type_choices)[file_type_choices == input$file_type]),
+                   class = "btn-success mb-3")
   })
 
   # Plausibility checks of the calculation (computed by run_calculation, see
@@ -413,23 +421,11 @@ server <- function(input, output, session) {
 
   output$download <- downloadHandler(
     filename = function() {
-      sprintf("GLORIA_v%d_%s_%s.csv", meta$version, input$type, format(Sys.time(), "%Y%m%d_%H%M"))
+      ext <- c(csv = "csv", csv2 = "csv", xlsx = "xlsx", txt = "txt")[[input$file_type]]
+      sprintf("GLORIA_v%d_%s_%s.%s", meta$version, input$type, format(Sys.time(), "%Y%m%d_%H%M"), ext)
     },
-    # Written in blocks of 200 000 rows so that a progress bar can be shown
-    content = function(file) {
-      res <- result_formatted()
-      n <- nrow(res); step <- 200000L
-      withProgress(message = "Writing csv: 0 %", value = 0, {
-        for (s in seq(1L, max(n, 1L), by = step)) {
-          rows <- s:min(n, s + step - 1L)
-          fwrite(res[rows], file, append = s > 1L)
-          p <- max(rows) / max(n, 1L)
-          setProgress(p, message = sprintf("Writing csv: %d %%", round(100 * p)),
-                      detail = sprintf("%s of %s rows", format(max(rows), big.mark = ","),
-                                       format(n, big.mark = ",")))
-        }
-      })
-    }
+    content = function(file) write_result_file(result_formatted(), file, input$file_type,
+                                               spec(), attr(result(), "checks"))
   )
 
   # Indicator explanation table

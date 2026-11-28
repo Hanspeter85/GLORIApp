@@ -151,7 +151,14 @@ Define your own groups, e.g. "EU27" from 27 countries or "Food" from the agricul
 - **Long format**: one value per row with all dimensions as columns. This is the format for pivot tables in Excel and for analysis in R or Python. Recommended.
 - **Wide format**: a cross table with one column per year (or per indicator), handy for a quick look in Excel.
 
-Click **Calculate**. The result appears as a preview (first 1,000 rows) and can be downloaded as csv with **Download csv**. The column *unit* gives the unit of every value.
+**File format** for the download:
+
+- **CSV, comma-separated**: the international standard, for R, Python and English-language Excel.
+- **CSV for German/Austrian Excel**: semicolon-separated with decimal comma - opens correctly with a double click in German Excel.
+- **Excel workbook (.xlsx)**: sheet *result* plus a sheet *info* with all settings and the plausibility checks. Excel allows at most 1,048,576 rows; for bigger results the app asks you to choose CSV/text or to group more coarsely.
+- **Text, tab-separated (.txt)**.
+
+Click **Calculate**. The result appears as a preview (first 1,000 rows) and can be downloaded with the **Download** button. The column *unit* gives the unit of every value.
 
 ## Charts
 

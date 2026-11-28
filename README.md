@@ -128,7 +128,8 @@ The GLORIA data are not part of the bundle: copy the data folder to
 | `app/app.R`, `app/full_app.R` | Shiny user interface and server |
 | `app/update_tab.R` | tab "Data & updates" |
 | `app/help.md` | "How it works" page of the app |
-| `R/engine.R` | all calculations (footprints, production, overview, aggregation); usable without the app |
+| `R/engine.R` | all calculations (footprints, production, overview, aggregation, plausibility checks); usable without the app |
+| `R/export.R` | download formats (csv, csv for German Excel, xlsx, txt) |
 | `R/functions_io.R` | reading/writing helpers, aggregation helpers |
 | `R/texts.R` | all explanatory texts of the app |
 | `R/update.R` | Google Drive download helpers (package googledrive) |

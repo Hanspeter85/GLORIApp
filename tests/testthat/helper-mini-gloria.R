@@ -83,7 +83,7 @@ build_mini_gloria <- function(tmp, repo) {
 
   # run the real parser
   for (f in c("R/functions_io.R", "parser/02_build_meta.R", "parser/03_parse_year.R",
-              "R/engine.R", "R/texts.R", "R/update.R")) {
+              "R/engine.R", "R/export.R", "R/texts.R", "R/update.R")) {
     source(file.path(repo, f), local = globalenv())
   }
   meta <- suppressWarnings(build_meta())

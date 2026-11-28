@@ -32,6 +32,7 @@ source(file.path(root, "config.R"), local = TRUE)
 if (!grepl("^([A-Za-z]:|/)", paths$input)) paths$input <- file.path(root, paths$input)
 source(file.path(root, "R", "functions_io.R"), local = TRUE)
 source(file.path(root, "R", "engine.R"), local = TRUE)
+source(file.path(root, "R", "export.R"), local = TRUE)
 source(file.path(root, "R", "texts.R"), local = TRUE)
 
 source(file.path(root, "R", "update.R"), local = TRUE)

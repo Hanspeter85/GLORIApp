@@ -108,3 +108,15 @@ format_secs <- function(s) {
   if (!is.finite(s) || s < 0) return("?")
   if (s < 90) sprintf("%d s", round(s)) else sprintf("%d min", round(s / 60))
 }
+
+# File formats offered for the download (step 7)
+file_type_choices <- c(
+  "CSV, comma-separated (.csv)" = "csv",
+  "CSV for German/Austrian Excel, semicolon + decimal comma (.csv)" = "csv2",
+  "Excel workbook (.xlsx)" = "xlsx",
+  "Text, tab-separated (.txt)" = "txt"
+)
+help_texts$file_type <- paste(
+  "CSV and text files work for any size and are read by Excel, R, Python and most tools.",
+  "Excel files are limited to 1,048,576 rows; they also contain a sheet with the",
+  "settings and the plausibility checks of the calculation.")
