@@ -21,7 +21,8 @@ test_that("xlsx has the result sheet and an info sheet with the checks", {
   write_result_file(res, f, "xlsx", spec = list(type = "footprint"), checks = attr(res, "checks"))
   expect_equal(openxlsx::getSheetNames(f), c("result", "info"))
   info <- openxlsx::read.xlsx(f, "info")
-  expect_true(any(grepl("PolyForm Noncommercial", info$value)))
+  expect_true(any(grepl("non-commercial", info$value)))
+  expect_false(any(grepl("Wieland|orcid", info$value, ignore.case = TRUE)))   # no author name in exports
   expect_true(any(grepl("without warranty", info$value)))
   back <- openxlsx::read.xlsx(f, "result")
   expect_equal(nrow(back), nrow(res))
