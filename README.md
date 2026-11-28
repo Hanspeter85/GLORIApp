@@ -18,7 +18,7 @@ What you can do in the app (no programming needed):
   (120 sectors, ISIC sections, 6 broad sectors, or your own grouping)
 - choose **final demand categories** (households, government, investment, ...)
 - choose the **result type** (footprint, production- vs. consumption-based overview,
-  territorial account; expert: embodied in gross exports) and the **breakdown**:
+  territorial account) and the **breakdown**:
   production side (where, what) and consumption side (where, what, who)
 - download the result as **csv** in long format (pivot-ready) or as a wide cross table
 
@@ -127,7 +127,7 @@ The GLORIA data are not part of the bundle: copy the data folder to
 | `app/app.R`, `app/full_app.R` | Shiny user interface and server |
 | `app/update_tab.R` | tab "Data & updates" |
 | `app/help.md` | "How it works" page of the app |
-| `R/engine.R` | all calculations (footprints, TiVA, aggregation); usable without the app |
+| `R/engine.R` | all calculations (footprints, production, overview, aggregation); usable without the app |
 | `R/functions_io.R` | reading/writing helpers, aggregation helpers |
 | `R/texts.R` | all explanatory texts of the app |
 | `R/update.R` | Google Drive download helpers (package googledrive) |
@@ -159,8 +159,9 @@ Standard environmentally-extended MRIO analysis, same as in `GLORIA-MRIO_Parser`
 `Z` = use block of the GLORIA supply-use table (products x industries, treated as
 square sector x sector because GLORIA supply is near-diagonal),
 `x = Z 1 + Y 1`, `A = Z diag(1/x)`, `L = (I - A)^-1`.
-Footprints: `diag(q/x) L Y` (by origin) and `(q/x) L diag(y)` (by final product);
-TiVA: `(v/x) L e` for gross exports `e` of each exporter. Direct emissions of
+Footprints: `diag(q/x) L Y` (by production side) and `(q/x) L diag(y)` (by final product).
+For scripts only, the engine also offers value added embodied in gross exports
+(`type = "exports"`, OECD TiVA style: `(v/x) L e`). Direct emissions of
 households (GLORIA `YQ`) are optionally added to the region where they occur.
 
 Parsed files per year (`parsed/<year>/`): `Z.rds` (sparse), `Y.rds`, `V.rds`

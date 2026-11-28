@@ -10,17 +10,13 @@ result_type_choices <- c(
   "Overview: production- vs. consumption-based"     = "overview",
   "Production-based (territorial) account"          = "production"
 )
-result_type_expert <- c(
-  "Expert: embodied in gross exports (OECD TiVA style)" = "exports"
-)
 
 result_type_help <- list(
   footprint = paste(
     "Everything that final demand causes along the whole global supply chain.",
     "Works the same for every indicator: materials, emissions, land, jobs or value added",
     "(the value-added footprint is the 'trade in value added' of final demand).",
-    "In step 4 you choose how to split it: where the pressure occurs, which final",
-    "products are bought, and who buys them."),
+    "In step 4 you split it by production side (where, what) and consumption side (where, what, who)."),
   overview = paste(
     "One line per region with three numbers: production-based (what happens inside the",
     "region), consumption-based (footprint of its final demand) and the difference",
@@ -28,12 +24,7 @@ result_type_help <- list(
   production = paste(
     "Pressure where it physically happens (territorial principle), e.g. emissions of all",
     "factories, farms and households located in a country. This is what national",
-    "inventories usually report."),
-  exports = paste(
-    "EXPERT. Indicator embodied in a country's GROSS exports (all exports, including",
-    "intermediate goods), split into domestic and foreign origin - the classic OECD TiVA",
-    "view. Goods that cross borders several times are counted more than once, so the",
-    "numbers are larger than footprints. For 'who causes what' use the footprint.")
+    "inventories usually report.")
 )
 
 # Headings of the three breakdown blocks in step 4, per result type
@@ -41,9 +32,7 @@ dimension_labels <- list(
   footprint  = c(production = "PRODUCTION SIDE - where the pressure occurs",
                  consumption = "CONSUMPTION SIDE - final demand that causes it"),
   overview   = c(production = "Regions (production and consumption side)", consumption = ""),
-  production = c(production = "PRODUCTION SIDE - where the pressure occurs", consumption = ""),
-  exports    = c(production = "Origin of the embodied value/pressure",
-                 consumption = "Exports: Where = partner (importing) country, What = exporting sector, region where made = exporting country")
+  production = c(production = "PRODUCTION SIDE - where the pressure occurs", consumption = "")
 )
 
 output_format_choices <- c(
@@ -106,10 +95,7 @@ describe_spec <- function(sp, meta) {
     overview = sprintf("Production-based vs. consumption-based totals per region (%s).",
                        dim_txt(sp$production_region, "none")),
     production = sprintf("Production-based (territorial) totals by %s.",
-                         dim_txt(sp$production_region, sp$production_sector)),
-    exports = sprintf("Embodied in gross exports: exporter (%s) to partner (%s), domestic/foreign origin%s.",
-                      dim_txt(sp$product_made_in, sp$consumption_product), nice_name(sp$consumption_region),
-                      if (!identical(sp$production_region, "none")) paste0(" by ", nice_name(sp$production_region)) else "")
+                         dim_txt(sp$production_region, sp$production_sector))
   )
   div(class = "alert alert-light",
       tags$b("You are about to calculate: "), txt, tags$br(),

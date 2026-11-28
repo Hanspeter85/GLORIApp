@@ -30,7 +30,7 @@
 #   "production"  q: direct pressure where it happens (territorial account).
 #   "overview"    per region: production-based vs. consumption-based total
 #                 and the difference (net imports).
-#   "exports"     expert: indicator embodied in GROSS exports (OECD TiVA
+#   "exports"     scripts only (not in the app): embodied in GROSS exports (OECD TiVA
 #                 style, exporter -> partner, domestic/foreign origin).
 # =============================================================================
 
@@ -286,7 +286,7 @@ calc_overview <- function(info, year, meta, sp) {
 }
 
 # -----------------------------------------------------------------------------
-# EXPERT: indicator embodied in GROSS exports (OECD TiVA style)
+# SCRIPTS ONLY (not offered in the app): indicator embodied in GROSS exports
 # -----------------------------------------------------------------------------
 # NOTE: the value-added FOOTPRINT (indicator "Value added" with the normal
 # footprint) is the consumption-based TiVA measure ("value added in final

@@ -243,7 +243,7 @@ doc <- stat(doc, 9.6, 2.4, 3.2, paste(va_top[1]), "largest foreign source", col$
 doc <- add_text(doc, 0.8, 4.9, 11.7, 1.15,
                 par(tx("Same calculation as a carbon or material footprint: ", 15, col$text, TRUE),
                     tx(sprintf("the indicator is value added instead of emissions. Next largest sources: %s. ", paste(va_top[2:3], collapse = ", ")), 15),
-                    tx("Experts can also compute value added in gross exports (OECD TiVA style) - see expert options in step 1.", 15, col$muted)),
+                    tx("It answers: who earns the income behind a country's consumption?", 15, col$muted)),
                 bg = col$light, label = "Message box")
 
 # 10 Exercises
@@ -265,7 +265,7 @@ pit <- list(c("Units", "kt vs Mt, tonnes, 1000 ha, persons, 1000 USD at current 
             c("Recent years", "after ~2022 GLORIA nowcasts and projects - use for trends, with care"),
             c("Rest-of-world regions", "four regions bundle many small countries of mixed income"),
             c("Direct household emissions", "heating and private cars: included only if ticked in step 5"),
-            c("Gross exports (expert)", "embodied in gross exports double counts multi-border trade"))
+            c("Value added", "1000 USD at current prices - value-added footprints include inflation and exchange rates"))
 for (i in seq_along(pit)) {
   doc <- step(doc, if (i <= 3) 0.8 else 6.9, 2.1 + ((i - 1) %% 3) * 1.6, 5.6, "!", pit[[i]][1], pit[[i]][2])
 }

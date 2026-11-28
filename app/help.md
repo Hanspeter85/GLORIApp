@@ -29,7 +29,7 @@ Footprint = `s * L * Y`
 
 Splitting both sides at once gives a detailed from-to table, e.g. *How much Chinese coal power is in cars bought by German households?* (slower).
 
-Other result types: **Overview** (production-based, consumption-based and net imports per region) and **Production-based** (territorial account). Under *Show expert options* you also find **Embodied in gross exports** (OECD TiVA style, domestic vs. foreign content of exports).
+Other result types: **Overview** (production-based, consumption-based and net imports per region) and **Production-based** (territorial account).
 
 ### Good to know
 

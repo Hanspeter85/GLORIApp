@@ -108,7 +108,6 @@ Start the app (see the README or ask your colleague who installed it). It opens 
 - **Footprint (consumption-based)**: the standard choice.
 - **Overview**: one line per region with the production-based account, the footprint and the net imports.
 - **Production-based (territorial) account**: pressures where they occur.
-- *Show expert options* adds **Embodied in gross exports** (OECD TiVA style): how much value added or pressure is contained in a country's exports, split into domestic and foreign origin. Gross exports count goods that cross borders several times more than once, so these numbers are larger than footprints. For "who causes what" use the footprint.
 
 ## Step 2 - Indicators
 

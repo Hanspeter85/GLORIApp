@@ -76,8 +76,7 @@ ui <- page_sidebar(
       accordion_panel(
         "1. What do you want to calculate?", value = "step1",
         radioButtons("type", NULL, choices = result_type_choices, selected = "footprint"),
-        uiOutput("type_help"),
-        checkboxInput("expert_types", "Show expert options", FALSE)
+        uiOutput("type_help")
       ),
 
       # --- Step 2: indicators -------------------------------------------------------
@@ -123,12 +122,12 @@ ui <- page_sidebar(
           class = "border rounded p-2 mb-2",
           sub_head(uiOutput("lab_production", inline = TRUE)),
           selectInput("production_region", "Where: region", choices = NULL),
-          conditionalPanel("input.type != 'exports' && input.type != 'overview'",
+          conditionalPanel("input.type != 'overview'",
                            selectInput("production_sector", "What: sector", choices = NULL))
         ),
-        # Consumption side: who buys what where (footprint) / exports (expert)
+        # Consumption side: who buys what where (footprint only)
         conditionalPanel(
-          "input.type == 'footprint' || input.type == 'exports'",
+          "input.type == 'footprint'",
           tags$div(
             class = "border rounded p-2 mb-2",
             sub_head(uiOutput("lab_consumption", inline = TRUE)),
@@ -211,13 +210,6 @@ server <- function(input, output, session) {
   # Expert mode: the list of all satellite rows is loaded on the server side
   # (much faster than sending it all to the browser at once)
   updateSelectizeInput(session, "sat_rows", choices = sat_choices, server = TRUE)
-
-  # Expert result type (indicators embodied in gross exports) only when asked for
-  observeEvent(input$expert_types, {
-    ch <- if (isTRUE(input$expert_types)) c(result_type_choices, result_type_expert) else result_type_choices
-    sel <- if (input$type %in% ch) input$type else "footprint"
-    updateRadioButtons(session, "type", choices = ch, selected = sel)
-  }, ignoreInit = TRUE)
 
   # Short explanation of the chosen result type
   output$type_help <- renderUI(helpText(result_type_help[[input$type]]))
@@ -323,9 +315,9 @@ server <- function(input, output, session) {
          indicators = c(input$indicators, if (isTRUE(input$expert)) input$sat_rows),
          years = as.integer(input$years),
          production_region = input$production_region,
-         production_sector = if (input$type == "exports") "none" else input$production_sector,
-         product_made_in = if (input$type %in% c("footprint", "exports")) input$product_made_in else "none",
-         consumption_product = if (input$type %in% c("footprint", "exports")) input$consumption_product else "none",
+         production_sector = if (input$type == "overview") "none" else input$production_sector,
+         product_made_in = if (input$type == "footprint") input$product_made_in else "none",
+         consumption_product = if (input$type == "footprint") input$consumption_product else "none",
          consumption_region = input$consumption_region,
          by_fd = isTRUE(input$by_fd) && input$type == "footprint",
          fd_codes = as.integer(input$fd_codes),
@@ -343,9 +335,7 @@ server <- function(input, output, session) {
       need(length(sp$indicators) > 0, "Please choose at least one indicator (step 2)."),
       need(length(sp$years) > 0, "Please choose at least one year (step 3)."),
       need(length(sp$fd_codes) > 0 || sp$type == "production",
-           "Please choose at least one final demand category (step 5)."),
-      need(sp$type != "exports" || !identical(sp$product_made_in, "none"),
-           "For exports please choose how to group the exporting countries (step 4).")
+           "Please choose at least one final demand category (step 5).")
     )
     t0 <- Sys.time()
     res <- withProgress(message = "Calculating", value = 0, {

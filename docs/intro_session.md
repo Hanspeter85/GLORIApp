@@ -19,7 +19,7 @@ Participants need: the app running on their PC (or a shared PC), Excel or R.
 1. **Production-based** = what happens inside a country. **Consumption-based (footprint)** = what a country's final demand causes worldwide. The difference is the *net import* of a pressure.
 2. Every pressure ends up in some final demand: the global sum of all footprints equals the global sum of all production-based accounts.
 3. A footprint has two sides, both split by **where** and **what**: the production side (where does the pressure happen, in which sector?) and the consumption side (where are the consumers, what do they buy, and **who** buys: households, government, investment). All splits give the same total.
-4. **Value added is an indicator like any other**: its footprint shows where the income behind consumption is earned (trade in value added of final demand). Expert option: value added in gross exports (double counts goods crossing borders several times).
+4. **Value added is an indicator like any other**: its footprint shows where the income behind consumption is earned (trade in value added of final demand).
 5. Years after the latest statistics (roughly 2023+) are **nowcasts/projections**. Use them for trends with care, not for precise numbers.
 
 ## Input-output in one picture
@@ -54,7 +54,6 @@ Step 6: define a group "EU27" from the 27 member states (everything else becomes
 **Exercise 5 - value-added footprint.**
 Step 1 *Footprint*, indicator *Value added (total)*, year 2019, production side where *Countries/regions*, consumption side where *Countries/regions*.
 - Which share of the value added behind Austrian (or German) final demand is earned abroad, and where?
-- Expert: tick *Show expert options* and compare with *Embodied in gross exports* for Germany. Why are the gross-export numbers larger?
 
 ## Pitfalls checklist
 

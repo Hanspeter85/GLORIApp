@@ -176,7 +176,7 @@ res <- run_calculation(list(
 
 | Field | Meaning | Default |
 |---|---|---|
-| `type` | `"footprint"`, `"overview"`, `"production"`, `"exports"` | - |
+| `type` | `"footprint"`, `"overview"`, `"production"`; `"exports"` only in scripts (not in the app) | - |
 | `indicators` | catalogue ids (`input/indicator_catalogue.csv`) or `"sat:<code>"` for a raw satellite row | - |
 | `years` | integer vector | - |
 | `production_region`, `production_sector` | production side: where (region) and what (sector), or `"none"` | `"region_name"`, `"none"` |
@@ -200,7 +200,7 @@ With $s = q/x$, three cases are distinguished (all give identical totals per con
 
 Direct emissions of final users (`QY`) are added with origin = consumer region and the sector/product label `DIRECT_LABEL`.
 
-`calc_overview` combines `calc_production` and `calc_footprint` per region. `calc_exports` computes $\mathrm{diag}(s) L e_c$ for the gross exports $e_c$ of each exporter (`E.rds`) and splits domestic/foreign origin.
+`calc_overview` combines `calc_production` and `calc_footprint` per region. `calc_exports` (scripts only, deliberately not offered in the app) computes $\mathrm{diag}(s) L e_c$ for the gross exports $e_c$ of each exporter (`E.rds`) and splits domestic/foreign origin. It uses `product_made_in` as exporter, `consumption_product` as exporting sector, `consumption_region` as partner and `production_region` as origin.
 
 Caching: `load_var()` keeps small objects of all years in memory but only one big matrix (`L.f32` or `LY.f32`). Loop over years in the outer loop (as `run_calculation` does).
 
