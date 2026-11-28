@@ -193,6 +193,7 @@ ui <- page_sidebar(
       uiOutput("download_ui"),
       DT::DTOutput("table")
     ),
+    charts_ui(),
     nav_panel("Indicator explanations", DT::DTOutput("catalogue")),
     update_ui(),
     nav_panel("How it works", includeMarkdown(file.path(root, "app", "help.md")))
@@ -206,6 +207,10 @@ server <- function(input, output, session) {
 
   # Tab "Data & updates" (see app/update_tab.R)
   update_server(input, output, session, root)
+
+  # Tab "Charts" (see app/charts_tab.R) - uses result() defined further below;
+  # reactives are evaluated lazily, so it can be referenced here.
+  charts_server(input, output, session, reactive(result()))
 
   # Expert mode: the list of all satellite rows is loaded on the server side
   # (much faster than sending it all to the browser at once)

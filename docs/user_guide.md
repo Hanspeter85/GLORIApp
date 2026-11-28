@@ -7,7 +7,7 @@ subtitle: "Footprints with the GLORIA global input-output database, without prog
 
 GLORIApp calculates **footprints**: the environmental, social and economic pressures that the consumption of a country (or group of countries) causes along the whole global supply chain. It uses **GLORIA**, a global multi-regional input-output database for 164 countries and regions, 120 sectors and the years 1990-2029, developed at the University of Sydney for the UN International Resource Panel.
 
-You choose indicators, years, how regions and sectors are grouped, and how the result is split. The app calculates the table and you download it as a csv file for Excel, R, Python or any other tool. The app shows no charts on purpose.
+You choose indicators, years, how regions and sectors are grouped, and how the result is split. The app calculates the table and you download it as a csv file for Excel, R, Python or any other tool. The tab *Charts* gives a quick interactive look at the result.
 
 Typical questions:
 
@@ -152,6 +152,16 @@ Define your own groups, e.g. "EU27" from 27 countries or "Food" from the agricul
 - **Wide format**: a cross table with one column per year (or per indicator), handy for a quick look in Excel.
 
 Click **Calculate**. The result appears as a preview (first 1,000 rows) and can be downloaded as csv with **Download csv**. The column *unit* gives the unit of every value.
+
+## Charts
+
+After *Calculate*, the tab **Charts** shows the result as an interactive chart. Hover over it for exact values; the camera icon saves a PNG.
+
+- **Ranking (bars)**: the largest groups of one column (e.g. production regions), for one year.
+- **Time series (lines)**: one line per group over all calculated years.
+- **Composition (stacked bars)**: one column on the axis, another as colour (e.g. consumer regions by production sector).
+
+Choose the indicator, the column to show (*Show by*), optionally a filter (e.g. only `consumption_region = Austria`) and the number of groups; smaller groups are combined into *Other*. The charts are for a quick look; for publication-quality figures use the csv in your own tool.
 
 # Reading the results correctly
 

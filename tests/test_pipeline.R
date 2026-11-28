@@ -127,7 +127,7 @@ ok(nrow(a) == nrow(b) && near(a$v, b$v), "origin x product summed over origins =
 # (relative to the size of the accounts: L Y is stored as float32, ~7 digits)
 ok(ov[account == "net_imports", abs(sum(value))] <= 1e-5 * ov[account == "production_based", sum(abs(value))],
    "net imports sum to zero globally")
-E <- readRDS(file.path(paths$parsed, 2020, "E.rds"))
+E <- gross_exports(2020, meta)
 ok(near(tv[, sum(value)], sum(E)), "exports: domestic + foreign VA = gross exports")
 ok(near(chk$output_reproduced_by_L, 1), "L reproduces gross output")
 w <- to_wide(fo, "year"); ok(nrow(w) > 0, "wide format works")

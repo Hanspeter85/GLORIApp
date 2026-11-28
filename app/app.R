@@ -5,8 +5,8 @@
 #   Open GLORIApp.Rproj in RStudio, open this file and click "Run App",
 #   or run in the console:   shiny::runApp("app")
 #
-# The app does NOT show charts on purpose. It produces clean csv tables that
-# can be used in Excel, R, Python, Tableau, ...
+# The main output are clean csv tables for Excel, R, Python, Tableau, ...;
+# the tab "Charts" (app/charts_tab.R) gives a quick interactive look at them.
 #
 # STRUCTURE OF THIS FILE
 #   1. Setup: load settings, helper functions and metadata
@@ -36,6 +36,7 @@ source(file.path(root, "R", "texts.R"), local = TRUE)
 
 source(file.path(root, "R", "update.R"), local = TRUE)
 source(file.path(root, "app", "update_tab.R"), local = TRUE)
+source(file.path(root, "app", "charts_tab.R"), local = TRUE)
 
 # Metadata created by the parser (labels, concordances, indicator catalogue).
 meta_file <- file.path(paths$meta, "meta.rds")

@@ -11,7 +11,7 @@ GLORIApp has three layers that can be used independently:
 2. **Engine** (`R/engine.R`): all footprint calculations on the parsed data. Pure R functions, no Shiny, usable from any script.
 3. **App** (`app/`): Shiny user interface on top of the engine, plus the update function (`R/update.R`, `update/update_gloria.R`).
 
-Dependencies: R >= 4.3 with `data.table`, `Matrix`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT`, `markdown` (app), `googledrive` (updates), `officer`, `mschart` (slides only). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
+Dependencies: R >= 4.3 with `data.table`, `Matrix`, `arrow`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT`, `markdown`, `plotly` (app), `googledrive` (updates), `officer`, `mschart` (slides only). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
 
 # Architecture at a glance
 
@@ -75,6 +75,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | change how raw data are read | `parser/03_parse_year.R` |
 | change paths or the data folder | `config.R` or the environment variable `GLORIA_DATA_ROOT` |
 | change the download/update | `R/update.R`, `update/update_gloria.R`, `app/update_tab.R` |
+| change or add a chart | `app/charts_tab.R` (plotly; uses the result table only, no extra calculation) |
 
 # Repository layout
 
@@ -90,7 +91,7 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | `parser/03_parse_year.R` | parses one year |
 | `parser/run_parser.R` | parses all available years (resumable), cleans up raw data |
 | `update/update_gloria.R` | download + parse a release year by year (background process) |
-| `app/app.R`, `app/full_app.R`, `app/update_tab.R` | Shiny app |
+| `app/app.R`, `app/full_app.R`, `app/update_tab.R`, `app/charts_tab.R` | Shiny app (main UI, update tab, charts tab) |
 | `input/` | ReadMe of the GLORIA version, concordances, indicator catalogue |
 | `tests/test_pipeline.R` | end-to-end test on a synthetic mini GLORIA |
 | `docs/` | user/developer guides (Markdown sources, Word output), slides |
@@ -134,23 +135,22 @@ Same as the original GLORIA-MRIO_Parser:
 
 | File | Content | Format |
 |---|---|---|
-| `Z.f32` or `Z.rds` | inter-industry flows | float32 if dense (>30% non-zeros), else sparse `dgCMatrix`; read with `read_Z(year)` |
+| `Z.arrow` or `Z.rds` | inter-industry flows | float32 Arrow file if dense (>30% non-zeros), else sparse `dgCMatrix`; read with `read_Z(year)` |
 | `Y.rds` | final demand 19,680 × 984 | dense matrix |
 | `V.rds` | value added 6 × 19,680 | dense matrix, row names = components |
 | `x.rds` | gross output | vector |
 | `Q.rds`, `QY.rds` | all satellite rows (industries / final demand) | sparse `dgCMatrix` |
-| `E.rds` | gross exports 19,680 × 164 partners | dense matrix |
-| `L.f32` | Leontief inverse | float32 |
-| `LY.f32` | $L\,Y$ (19,680 × 984) | float32 |
-| `M.rds` | multipliers $s\,L$ of all catalogue indicators | dense matrix, row names = indicator ids |
+| `L.arrow` | Leontief inverse | float32 Arrow file; read with `read_matrix()` (~1 s) |
 | `checks.csv` | balance checks, e.g. `output_reproduced_by_L` (must be 1) | csv |
 | `_DONE` | marker: year complete | empty file |
 
 `meta/meta.rds` holds a list with `regions`, `sectors`, `fd`, `va`, `satellites`, `idx_Z` (region/sector code of each of the 19,680 rows), `idx_Y` (region/category of each of the 984 final demand columns), `catalogue` (indicator presets with the satellite rows they sum) and `raw_index`.
 
-**float32 format** (`write_f32` / `read_f32`): 4 bytes `GLF4`, nrow and ncol as int32 little endian, then the data column-major as float32. In Python: `np.fromfile(f, "<f4", offset=12).reshape((ncol, nrow)).T`.
+Only these **standard matrices** are stored; no products of $L$ (such as $L\,Y$ or multipliers) are saved. All footprints are calculated by the engine when they are requested.
 
-A parsed year needs ~3.3 GB; 1990-2029 ~124 GB.
+**float32 Arrow format** (`write_matrix` / `read_matrix` in `R/functions_io.R`): an Apache Arrow IPC file with one float32 column `v` holding the matrix column by column; `nrow` and `ncol` are stored in the file metadata. Arrow converts float32 to R doubles in fast C++ code (~1 s for $L$, versus ~12 s with base R `readBin`). In Python: `t = pyarrow.ipc.open_file(f).read_all(); L = t["v"].to_numpy().reshape((-1, int(t.schema.metadata[b"nrow"]))).T`. Data parsed with an older version (`*.f32` files) are converted with `parser/convert_parsed_to_arrow.R`.
+
+A parsed year needs ~3.2 GB; 1990-2029 ~125 GB.
 
 ## Running the parser
 
@@ -194,19 +194,21 @@ Grouping values are column names of `meta$regions` / `meta$sectors` (i.e. of the
 
 With $s = q/x$, three cases are distinguished (all give identical totals per consumer):
 
-1. **Origin split only**: $F = \mathrm{diag}(s)\,(LY)$ using the pre-computed `LY.f32`; rows and columns are aggregated with sparse 0/1 matrices (`agg_matrix`). ~1 s per year and indicator.
-2. **Final product split only**: $F = (sL) \circ Y$ using the multipliers `M.rds` (catalogue indicators) or $sL$ computed from `L.f32` (raw satellite rows).
-3. **Production side × final product**: $F_{o,p,c} = \sum_{i\in o}\sum_{j\in p} s_i L_{ij} y_{jc}$. Implementation: $A_1 = G_o'\,\mathrm{diag}(s)\,L$ (origins × n), then for every consumer group $c$: $A_1\,\mathrm{diag}(y_c)\,G_p$. Needs `L.f32`; ~10-60 s per year.
+1. **Production side split only**: $F = G_o'\,\mathrm{diag}(s)\,L\,Y_c$, with final demand first aggregated to the consumer groups ($Y_c = Y G_c$). If there are at most as many consumer groups as production groups, $L\,Y_c$ is computed first and cached for the year and grouping (`L_times()`), so further indicators of the same run cost almost nothing; otherwise $G_o'\,\mathrm{diag}(s)\,L$ is computed first. ~3-6 s per year (mostly loading $L$), further indicators ~0.1 s.
+2. **Final product split only**: $F = (sL) \circ Y$; the multiplier $sL$ is a vector-matrix product (~0.4 s).
+3. **Production side × final product**: $F_{o,p,c} = \sum_{i\in o}\sum_{j\in p} s_i L_{ij} y_{jc}$. Implementation: $A_1 = G_o'\,\mathrm{diag}(s)\,L$ (origins × n), then for every consumer group $c$: $A_1\,\mathrm{diag}(y_c)\,G_p$. ~2-60 s per year depending on the number of groups.
+
+All aggregations use sparse 0/1 matrices (`agg_matrix`), so a matrix product is only computed where it is needed and on the smallest possible matrices.
 
 Direct emissions of final users (`QY`) are added with origin = consumer region and the sector/product label `DIRECT_LABEL`.
 
-`calc_overview` combines `calc_production` and `calc_footprint` per region. `calc_exports` (scripts only, deliberately not offered in the app) computes $\mathrm{diag}(s) L e_c$ for the gross exports $e_c$ of each exporter (`E.rds`) and splits domestic/foreign origin. It uses `product_made_in` as exporter, `consumption_product` as exporting sector, `consumption_region` as partner and `production_region` as origin.
+`calc_overview` combines `calc_production` and `calc_footprint` per region. `calc_exports` (scripts only, deliberately not offered in the app) computes $\mathrm{diag}(s) L e_c$ for the gross exports $e_c$ of each exporter (calculated on the fly from $Z$ and $Y$ by `gross_exports()`) and splits domestic/foreign origin. It uses `product_made_in` as exporter, `consumption_product` as exporting sector, `consumption_region` as partner and `production_region` as origin.
 
-Caching: `load_var()` keeps small objects of all years in memory but only one big matrix (`L.f32` or `LY.f32`). Loop over years in the outer loop (as `run_calculation` does).
+Caching: `load_var()` keeps small objects of all years in memory but only one $L$ (of the current year) and the products $L\,Y_c$ of that year. Loop over years in the outer loop (as `run_calculation` does).
 
 ## Extending
 
-- **New indicator preset**: add a row to `input/indicator_catalogue.csv` (`head` = satellite head indicator, `pattern` = regex on the indicator name, optional `material_group`; `VALUE_ADDED` for value-added components). Re-run the parser for `M.rds`, or use the indicator directly; non-catalogue indicators fall back to $sL$ from `L.f32`.
+- **New indicator preset**: add a row to `input/indicator_catalogue.csv` (`head` = satellite head indicator, `pattern` = regex on the indicator name, optional `material_group`; `VALUE_ADDED` for value-added components). Then rebuild `meta.rds` with `build_meta()` from `parser/02_build_meta.R`; the years do not need to be parsed again.
 - **New region or sector grouping**: add a column to `input/concordances/regions.csv` or `sectors.csv`. It appears in the app automatically (give it a nice label in `nice_name()` in `app/full_app.R`).
 - **World Bank classification year**: `wb_fiscal_year` in `parser/01_build_concordances.R`.
 - **New result type**: write `calc_<name>(info, year, meta, sp)` returning a `data.table` with dimension columns and `value`, add it to the `switch` in `run_calculation`, and add texts in `R/texts.R`.
@@ -233,7 +235,7 @@ Builds a synthetic GLORIA (3 regions × 4 sectors) in the same raw format, runs 
 
 # Other languages
 
-The parsed files can be read without R: `.f32` with the snippet above, `.rds` via `pyreadr` (dense) or by re-exporting from R. For heavy use from Python, adding a parquet export to `parser/03_parse_year.R` is straightforward.
+The parsed files can be read without R: `.arrow` files with `pyarrow` (snippet above), `.rds` via `pyreadr` (dense) or by re-exporting from R.
 
 # Portable version
 

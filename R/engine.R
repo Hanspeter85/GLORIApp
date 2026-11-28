@@ -37,23 +37,67 @@
 # -----------------------------------------------------------------------------
 # Loading parsed data (with a small cache, because L is 3 GB in memory)
 # -----------------------------------------------------------------------------
+# The parser stores only the standard matrices (Z, Y, V, x, Q, QY, L).
+# Everything else is calculated here at run time. To stay fast, the cache
+#   - keeps small objects (Y, Q, x, ...) of all years used so far,
+#   - keeps the big Leontief inverse L of ONE year only,
+#   - keeps products L %*% Y(grouped) of that year, so that they are computed
+#     only once per year and grouping and reused for all indicators.
 .cache <- new.env()
 
 year_file <- function(year, name) file.path(paths$parsed, year, name)
+
+# Remove the big objects (L and products with L) of all other years
+drop_big <- function(keep_year) {
+  for (k in ls(.cache)) {
+    if (grepl("_(L[.]arrow|LY_.*)$", k) && !startsWith(k, paste0(keep_year, "_"))) {
+      rm(list = k, envir = .cache)
+    }
+  }
+  gc(verbose = FALSE)
+}
 
 load_var <- function(year, name) {
   key <- paste(year, name, sep = "_")
   if (!is.null(.cache[[key]])) return(.cache[[key]])
   f <- year_file(year, name)
   if (!file.exists(f)) stop("Parsed file missing: ", f, " - has this year been parsed?")
-  val <- if (grepl("\\.f32$", name)) read_f32(f) else readRDS(f)
-  # Keep small objects of all years, but only ONE big matrix (L or LY) at a time
-  if (name %in% c("L.f32", "LY.f32")) {
-    for (k in ls(.cache)) if (grepl("_(L|LY)\\.f32$", k)) rm(list = k, envir = .cache)
-    gc(verbose = FALSE)
-  }
+  if (name == "L.arrow") drop_big(year)
+  val <- if (grepl("[.]arrow$", name)) read_matrix(f) else readRDS(f)
   .cache[[key]] <- val
   val
+}
+
+# L %*% Yc for final demand already aggregated to consumer groups (n x groups).
+# `key` identifies the grouping, so the product is computed once per year and
+# grouping and then reused for every indicator.
+L_times <- function(year, Yc, key) {
+  k <- paste(year, "LY", key, sep = "_")
+  if (is.null(.cache[[k]])) .cache[[k]] <- load_var(year, "L.arrow") %*% Yc
+  .cache[[k]]
+}
+
+
+# Short fingerprint of a grouping (which column belongs to which group), used
+# as cache key for products like L %*% Yc
+digest_key <- function(keys) {
+  g <- match(keys, unique(keys))
+  paste(length(keys), max(g), sum(as.numeric(g) * seq_along(g)),
+        sum(nchar(unique(keys))), sep = "-")
+}
+
+# Gross exports by partner region (n x 164), computed from Z and Y when needed
+# (only used by the script-only function calc_exports).
+gross_exports <- function(year, meta) {
+  k <- paste(year, "E", sep = "_")
+  if (!is.null(.cache[[k]])) return(.cache[[k]])
+  Z <- read_Z(year)
+  E <- agg_cols(Z, meta$idx_Z$region_code, meta$regions$region_code) +
+       agg_cols(load_var(year, "Y.rds"), meta$idx_Y$region_code, meta$regions$region_code)
+  rm(Z); gc(verbose = FALSE)
+  E[cbind(seq_len(nrow(E)), match(meta$idx_Z$region_code, meta$regions$region_code))] <- 0
+  .cache[[k]] <- E
+  E
 }
 
 available_years <- function() {
@@ -107,14 +151,10 @@ intensity <- function(info, year) {
   ifelse(x > 0, q / x, 0)
 }
 
-# Total multiplier m = s L. Catalogue indicators are pre-computed by the parser
-# (fast); other indicators need L (slower, ~5-10 s per year for loading L).
+# Total multiplier m = s L: pressure along the whole supply chain per unit of
+# final product (a vector-matrix product, ~0.4 billion operations).
 multiplier <- function(info, year) {
-  if (info$in_catalogue) {
-    M <- load_var(year, "M.rds")
-    return(M[info$id, ])
-  }
-  as.vector(intensity(info, year) %*% load_var(year, "L.f32"))
+  as.vector(intensity(info, year) %*% load_var(year, "L.arrow"))
 }
 
 
@@ -190,10 +230,14 @@ DIRECT_LABEL <- "Direct emissions of final users (households etc.)"
 #                       (consumption_category = households, government, ...)
 # Full detail:  F[o, p, j] = s_o * L[o, p] * Y[p, j]
 #
-# Three cases, from fast to slower:
-#   1) origin split only    F = s * (L Y)        uses the pre-computed L Y
-#   2) product split only   F = (s L) * Y        uses pre-computed multipliers
-#   3) origin AND product   loops over consumer groups, needs L (1.5 GB)
+# Three cases; matrix products are only computed where needed and in the
+# cheapest order (n = 19 680 region-sectors):
+#   1) production side split only:  F = Go' diag(s) L Yc
+#      - few consumer groups: L Yc first (n x groups), computed once per year
+#        and grouping and reused for all indicators of the run
+#      - many consumer groups: (Go' diag(s) L) first, then times Yc
+#   2) final product split only:    F = (s L) * Y      (vector-matrix product)
+#   3) production side AND product: loops over consumer groups (slowest)
 # All three give the same totals per consumer.
 calc_footprint <- function(info, year, meta, sp) {
   fd_sel <- meta$idx_Y$fd_code %in% sp$fd_codes
@@ -201,24 +245,40 @@ calc_footprint <- function(info, year, meta, sp) {
   p_keys <- keys_rs(meta, sp$product_made_in, sp$consumption_product, "product_made_in", "consumption_product")
   c_keys <- keys_fd(meta, sp$consumption_region, isTRUE(sp$by_fd))[fd_sel]
 
+  # final demand aggregated to the consumer groups (n x consumer groups)
+  ck <- key_string(c_keys, nrow(c_keys)); cl <- unique(ck)
+  Gc <- agg_matrix(ck, cl)
+  Yc_fun <- function() as.matrix(load_var(year, "Y.rds")[, fd_sel, drop = FALSE] %*% Gc)
+
   if (ncol(p_keys) == 0) {
-    # --- case 1: by origin ---------------------------------------------------
-    F <- intensity(info, year) * load_var(year, "LY.f32")[, fd_sel, drop = FALSE]
-    res <- aggregate_long(F, o_keys, c_keys)
+    # --- case 1: by production side ----------------------------------------
+    s  <- intensity(info, year)
+    ok <- key_string(o_keys, meta$n$rs); ol <- unique(ok)
+    Go <- agg_matrix(ok, ol)
+    if (length(cl) <= length(ol)) {
+      key <- digest_key(ck)
+      LYc <- L_times(year, Yc_fun(), key)                     # n x consumer groups
+      v <- as.matrix(crossprod(Go, s * LYc))                   # origins x consumer groups
+    } else {
+      A1 <- as.matrix(crossprod(Go, s * load_var(year, "L.arrow")))   # origins x n
+      v <- A1 %*% Yc_fun()
+    }
+    res <- data.table(.o = rep(ol, times = length(cl)), .c = rep(cl, each = length(ol)),
+                      value = as.vector(v))
+    res <- split_key(res, ".o", names(o_keys))
+    res <- split_key(res, ".c", names(c_keys))
   } else if (ncol(o_keys) == 0) {
-    # --- case 2: by final product ------------------------------------------
+    # --- case 2: by final product -------------------------------------------
     F <- multiplier(info, year) * load_var(year, "Y.rds")[, fd_sel, drop = FALSE]
     res <- aggregate_long(F, p_keys, c_keys)
   } else {
-    # --- case 3: origin x final product (expert, slower) -------------------
-    L  <- load_var(year, "L.f32")
+    # --- case 3: production side x final product (slower) -------------------
     s  <- intensity(info, year)
     ok <- key_string(o_keys, meta$n$rs); ol <- unique(ok)
     pk <- key_string(p_keys, meta$n$rs); pl <- unique(pk)
-    ck <- key_string(c_keys, nrow(c_keys)); cl <- unique(ck)
     Go <- agg_matrix(ok, ol); Gp <- agg_matrix(pk, pl)
-    A1 <- as.matrix(crossprod(Go, s * L))                      # origins x n
-    Yc <- as.matrix(load_var(year, "Y.rds")[, fd_sel, drop = FALSE] %*% agg_matrix(ck, cl))
+    A1 <- as.matrix(crossprod(Go, s * load_var(year, "L.arrow")))   # origins x n
+    Yc <- Yc_fun()
     res <- rbindlist(lapply(seq_along(cl), function(k) {
       v <- as.matrix(A1 %*% (Yc[, k] * Gp))                    # origins x products
       data.table(.o = rep(ol, times = length(pl)), .p = rep(pl, each = length(ol)),
@@ -300,8 +360,8 @@ calc_overview <- function(info, year, meta, sp) {
 # Dimensions used: exporter = product_made_in (+ consumption_product = exporting
 # sector), partner = consumption_region, origin = production_region.
 calc_exports <- function(info, year, meta, sp) {
-  L <- load_var(year, "L.f32")
-  E <- load_var(year, "E.rds")
+  L <- load_var(year, "L.arrow")
+  E <- gross_exports(year, meta)
   s <- intensity(info, year)
   n_sec <- meta$n$sec
   reg_codes <- meta$regions$region_code

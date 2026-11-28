@@ -22,7 +22,8 @@ What you can do in the app (no programming needed):
   production side (where, what) and consumption side (where, what, who)
 - download the result as **csv** in long format (pivot-ready) or as a wide cross table
 
-The app has no charts on purpose: it produces clean tables for Excel, R, Python, ...
+The main output is a clean csv table for Excel, R, Python, ...; the tab **Charts**
+gives a quick interactive look at the result (ranking, time series, composition).
 
 ---
 
@@ -31,7 +32,7 @@ The app has no charts on purpose: it produces clean tables for Excel, R, Python,
 1. Install **R** (>= 4.3) and **RStudio**.
 2. Install the R packages (once):
    ```r
-   install.packages(c("shiny", "bslib", "DT", "data.table", "Matrix", "openxlsx", "jsonlite", "googledrive", "markdown"))
+   install.packages(c("shiny", "bslib", "DT", "plotly", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown"))
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 
@@ -164,11 +165,11 @@ For scripts only, the engine also offers value added embodied in gross exports
 (`type = "exports"`, OECD TiVA style: `(v/x) L e`). Direct emissions of
 households (GLORIA `YQ`) are optionally added to the region where they occur.
 
-Parsed files per year (`parsed/<year>/`): `Z.rds` (sparse), `Y.rds`, `V.rds`
-(value added by component), `x.rds`, `Q.rds` / `QY.rds` (all satellite accounts,
-sparse), `E.rds` (gross exports by partner), `L.f32` and `LY.f32` (float32 binary,
-readable in Python with `np.fromfile(f, "<f4", offset=12)`), `M.rds` (multipliers
-of the catalogue indicators).
+Parsed files per year (`parsed/<year>/`): only the standard matrices - `Z` (Arrow
+float32 or sparse RDS), `Y.rds`, `V.rds` (value added by component), `x.rds`,
+`Q.rds` / `QY.rds` (all satellite accounts, sparse) and `L.arrow` (Leontief inverse,
+float32 Arrow file, ~1 s to load, also readable with Python/pyarrow). All footprint
+products (L·Y, s·L, ...) are calculated by the engine when they are requested.
 
 World Bank income groups: classification of fiscal year **FY26** (published July 2025,
 based on GNI per capita 2024) from the World Bank historical file

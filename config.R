@@ -55,9 +55,6 @@ paths <- list(
 
 # --- Parser options -----------------------------------------------------------
 parser_options <- list(
-  # Store the Leontief inverse L? (~1.55 GB per year as float32).
-  # The app needs L for product-based footprints of expert indicators and TiVA.
-  store_L = TRUE,
   # Delete the unzipped raw csv files after a year has been parsed (saves space).
   delete_unzipped = TRUE,
   # Skip years that are already parsed (makes the parser resumable).

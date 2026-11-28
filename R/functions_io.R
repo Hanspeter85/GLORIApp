@@ -2,7 +2,7 @@
 # R/functions_io.R  -  Helper functions for reading, writing and aggregating
 # =============================================================================
 # Loaded by the parser (parser/*.R) AND by the app (app/app.R).
-# Only depends on base R, data.table and Matrix.
+# Depends on data.table, Matrix and arrow.
 # =============================================================================
 
 suppressPackageStartupMessages({
@@ -11,32 +11,44 @@ suppressPackageStartupMessages({
 })
 
 # -----------------------------------------------------------------------------
-# float32 binary format for big dense matrices (mainly the Leontief inverse L)
+# float32 storage of big dense matrices (Leontief inverse L, Z)
 # -----------------------------------------------------------------------------
 # R stores numbers as 8-byte doubles. L has 19 680 x 19 680 entries, i.e.
-# 3.1 GB as double. Saved as 4-byte float it needs 1.55 GB, with ~7 significant
+# 3.1 GB as double. Stored as 4-byte float it needs 1.55 GB, with ~7 significant
 # digits of precision (more than enough for input-output analysis).
 #
-# File layout:  "GLF4" (4 bytes) | nrow (int32) | ncol (int32) | data column-wise
-# The file can also be read in Python:
-#   np.fromfile(f, dtype="<f4", offset=12).reshape((ncol, nrow)).T
+# Format: Apache Arrow IPC file (".arrow") with one float32 column "v" holding
+# the matrix column by column; the dimensions are stored in the file metadata.
+# Arrow converts float32 to R's double in fast C++ code (~1 s for L), and the
+# files can be read directly in Python:
+#   import pyarrow.ipc as ipc
+#   t = ipc.open_file(f).read_all(); n = int(t.schema.metadata[b"nrow"])
+#   L = t["v"].to_numpy().reshape((-1, n)).T
 # -----------------------------------------------------------------------------
 
-write_f32 <- function(m, file) {
+write_matrix <- function(m, file) {
   stopifnot(is.matrix(m))
-  con <- file(file, "wb")
-  on.exit(close(con))
-  writeBin(charToRaw("GLF4"), con)
-  writeBin(as.integer(dim(m)), con, size = 4, endian = "little")
-  # Write in column blocks so that as.vector() never copies the whole matrix
+  # convert in column blocks so that the whole matrix is never copied at once
   step <- max(1L, floor(5e7 / nrow(m)))
-  for (j in seq(1L, ncol(m), by = step)) {
+  chunks <- lapply(seq(1L, ncol(m), by = step), function(j) {
     jj <- j:min(ncol(m), j + step - 1L)
-    writeBin(as.vector(m[, jj]), con, size = 4, endian = "little")
-  }
+    arrow::Array$create(as.vector(m[, jj]), type = arrow::float32())
+  })
+  tab <- arrow::arrow_table(v = arrow::chunked_array(!!!chunks, type = arrow::float32()))
+  tab$metadata <- list(nrow = as.character(nrow(m)), ncol = as.character(ncol(m)))
+  arrow::write_ipc_file(tab, file, compression = "uncompressed")
   invisible(file)
 }
 
+read_matrix <- function(file) {
+  tab <- arrow::read_ipc_file(file, as_data_frame = FALSE)
+  x <- tab$v$as_vector()
+  dim(x) <- c(as.integer(tab$metadata$nrow), as.integer(tab$metadata$ncol))
+  x
+}
+
+# Older parser versions wrote a simple binary format ("GLF4" header + float32);
+# kept to be able to read/convert such files.
 read_f32 <- function(file) {
   con <- file(file, "rb")
   on.exit(close(con))
@@ -48,11 +60,11 @@ read_f32 <- function(file) {
   x
 }
 
-# Read the parsed inter-industry matrix Z of a year (stored as Z.rds or Z.f32)
+# Read the parsed inter-industry matrix Z of a year (Z.arrow or sparse Z.rds)
 read_Z <- function(year, parsed_dir = paths$parsed) {
   f_rds <- file.path(parsed_dir, year, "Z.rds")
   if (file.exists(f_rds)) return(readRDS(f_rds))
-  read_f32(file.path(parsed_dir, year, "Z.f32"))
+  read_matrix(file.path(parsed_dir, year, "Z.arrow"))
 }
 
 # -----------------------------------------------------------------------------

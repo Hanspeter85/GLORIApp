@@ -12,16 +12,13 @@
 # All in basic prices ("Markup001").
 #
 # Output in <parsed>/<year>/ :
-#   Z.rds    inter-industry flows (product x industry, 19 680 x 19 680), sparse
+#   Z.arrow/.rds inter-industry flows (product x industry, 19 680 x 19 680)
 #   Y.rds    final demand (19 680 x 984)
 #   V.rds    value added by component (6 x 19 680)
 #   x.rds    gross output (19 680)
 #   Q.rds    satellite accounts of industries (5 982 x 19 680), sparse
 #   QY.rds   satellite accounts of final demand (5 982 x 984), sparse
-#   L.f32    Leontief inverse (19 680 x 19 680), float32 (see R/functions_io.R)
-#   LY.f32   L %*% Y (19 680 x 984): output needed for each final demand column
-#   M.rds    total multipliers of all catalogue indicators (n_cat x 19 680)
-#   E.rds    gross exports by partner region (19 680 x 164)
+#   L.arrow  Leontief inverse (19 680 x 19 680), float32 (see R/functions_io.R)
 #   checks.csv  plausibility checks (balances, min of L, ...)
 #   _DONE    marker file: the year is complete
 #
@@ -180,33 +177,22 @@ parse_year <- function(year, meta, logfile = NULL) {
   x <- rowSums(Z) + rowSums(Y)                  # output by product (row view)
   x_ind <- colSums(Z) + colSums(V)              # output by industry (column view)
 
-  # --- 6) Gross exports by partner region ----------------------------------------------
-  # E[i, p] = everything sector i (of region r) delivers to region p != r,
-  # as intermediate input (Z) or final product (Y).
-  reg_of_Zcol <- meta$idx_Z$region_code
-  reg_of_Ycol <- meta$idx_Y$region_code
-  E <- agg_cols(Z, reg_of_Zcol, meta$regions$region_code) +
-       agg_cols(Y, reg_of_Ycol, meta$regions$region_code)
-  own <- cbind(seq_len(nrow(E)), match(meta$idx_Z$region_code, meta$regions$region_code))
-  E[own] <- 0
-
   # Save the basic variables now (frees memory before the inversion)
-  L_("saving Z, Y, V, x, Q, QY, E")
+  L_("saving Z, Y, V, x, Q, QY")
   # Z: store as sparse matrix if it has few non-zero cells, otherwise as
-  # float32 (a sparse matrix needs 12 bytes per non-zero cell, float32 needs
+  # float32 Arrow file (a sparse matrix needs 12 bytes per non-zero cell, float32 needs
   # 4 bytes per cell, so sparse only pays off below ~30% non-zeros).
   # Read it with read_Z(year) from R/functions_io.R in both cases.
   if (mean(Z != 0) < 0.3) {
     saveRDS(Matrix(Z, sparse = TRUE), file.path(out_dir, "Z.rds"))
   } else {
-    write_f32(Z, file.path(out_dir, "Z.f32"))
+    write_matrix(Z, file.path(out_dir, "Z.arrow"))
   }
   saveRDS(Y,  file.path(out_dir, "Y.rds"))
   saveRDS(V,  file.path(out_dir, "V.rds"))
   saveRDS(x,  file.path(out_dir, "x.rds"))
   saveRDS(Q,  file.path(out_dir, "Q.rds"))
   saveRDS(QY, file.path(out_dir, "QY.rds"))
-  saveRDS(E,  file.path(out_dir, "E.rds"))
 
   # --- 7) Technical coefficients and Leontief inverse ---------------------------------
   # A = Z / x (column-wise). Sectors without output (x = 0) get coefficients 0.
@@ -218,39 +204,25 @@ parse_year <- function(year, meta, logfile = NULL) {
   L <- solve(Z)
   rm(Z); gc(verbose = FALSE)
 
-  # --- 8) Pre-computed products for the app --------------------------------------------
-  L_("computing LY and catalogue multipliers")
-  LY <- L %*% Y                                  # output triggered by each fd column
-
-  # Direct intensities (pressure per unit of output) of all catalogue
-  # indicators, then total multipliers M = S %*% L
-  cat_tab <- meta$catalogue
-  S <- t(vapply(seq_len(nrow(cat_tab)), function(k) {
-    r <- cat_tab$rows[[k]]
-    v <- if (cat_tab$source[k] == "VA") colSums(V[r, , drop = FALSE]) else colSums(Q[r, , drop = FALSE])
-    v * xinv
-  }, numeric(ncol(L))))
-  rownames(S) <- cat_tab$id
-  M <- S %*% L
-  saveRDS(M, file.path(out_dir, "M.rds"))
-  write_f32(LY, file.path(out_dir, "LY.f32"))
-  if (isTRUE(parser_options$store_L)) {
-    L_("saving L (float32)")
-    write_f32(L, file.path(out_dir, "L.f32"))
-  }
+  # --- 8) Save L ----------------------------------------------------------------------------
+  # Only the standard matrices are stored. All footprint calculations (L Y,
+  # s L, ...) are done at run time by the engine (R/engine.R).
+  L_("saving L (float32)")
+  write_matrix(L, file.path(out_dir, "L.arrow"))
 
   # --- 9) Plausibility checks -----------------------------------------------------------
   checks <- data.table(
     year = year,
     total_output = sum(x),
     max_rel_diff_output_row_vs_col = max(abs(x - x_ind) / pmax(x, 1)),
-    output_reproduced_by_L = sum(LY) / sum(x),      # should be 1
+    # L times total final demand must give back gross output (should be 1)
+    output_reproduced_by_L = sum(L %*% rowSums(Y)) / sum(x),
     min_L = min(L),
     n_negative_Y = sum(Y < 0),
     seconds = as.numeric(difftime(Sys.time(), t0, units = "secs"))
   )
   fwrite(checks, file.path(out_dir, "checks.csv"))
-  rm(L, LY); gc(verbose = FALSE)
+  rm(L); gc(verbose = FALSE)
 
   # --- 10) Clean up ----------------------------------------------------------------------
   if (isTRUE(parser_options$delete_unzipped) && src != paths$raw) {
