@@ -11,6 +11,7 @@ local({
   }
   assign("server", server, envir = app_env)
   assign("ui", ui, envir = app_env)
+  assign("how_it_works_panel", how_it_works_panel, envir = app_env)
 })
 
 test_that("the user interface can be built", {
@@ -21,6 +22,11 @@ test_that("the user interface can be built", {
   expect_true(grepl("docs/GLORIApp_developer_guide.docx", html, fixed = TRUE))
   expect_true(grepl("Hanspeter Wieland", html, fixed = TRUE))
   expect_true(grepl("CC BY-NC 3.0 AU", html, fixed = TRUE))
+  # GLORIA release notes are linked when they are in the data folder
+  writeLines("x", file.path(paths$meta, "GLORIA_ReleaseNotes_060.pdf"))
+  html2 <- as.character(app_env$how_it_works_panel())
+  expect_true(grepl("gloria_docs/GLORIA_ReleaseNotes_060.pdf", html2, fixed = TRUE))
+  unlink(file.path(paths$meta, "GLORIA_ReleaseNotes_060.pdf"))
 })
 
 test_that("clicking Calculate produces a result with passing checks", {

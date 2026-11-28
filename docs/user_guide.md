@@ -101,7 +101,7 @@ In GLORIApp the real tables have 164 × 120 = 19,680 rows and columns. The princ
 
 # Using the app
 
-Start the app (see the README or ask your colleague who installed it). It opens in the web browser. The left sidebar contains seven steps; the main area shows the result, explanations of all indicators, the data update tab and a short help page.
+Start the app (see the README or ask your colleague who installed it). It opens in the web browser. The left sidebar contains seven steps; the main area shows the result, explanations of all indicators, the data update tab and a short help page. The tab *How it works* links this guide, the developer guide, the slides, and the **release notes** (PDF) and **ReadMe** (Excel with all regions, sectors and indicators) of the GLORIA version in use.
 
 ## Step 1 - What do you want to calculate?
 

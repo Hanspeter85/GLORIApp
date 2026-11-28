@@ -10,6 +10,6 @@
 library(testthat)
 res <- test_dir("tests/testthat", reporter = "summary", stop_on_failure = FALSE)
 df <- as.data.frame(res)
-cat(sprintf("\n%d tests: %d passed, %d failed, %d skipped\n",
-            sum(df$nb), sum(df$nb) - sum(df$failed) - sum(df$skipped), sum(df$failed), sum(df$skipped)))
+cat(sprintf("\n%d checks: %d passed, %d failed, %d skipped, %d test blocks with errors\n",
+            sum(df$nb), sum(df$nb) - sum(df$failed) - sum(df$skipped), sum(df$failed), sum(df$skipped), sum(df$error)))
 if (sum(df$failed) > 0 || any(df$error)) quit(status = 1)

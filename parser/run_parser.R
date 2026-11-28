@@ -61,6 +61,12 @@ log_msg("GLORIA v", gloria_version, ": years ", min(gloria_years), "-", max(glor
 log_msg("Building metadata (labels, indicator catalogue)", file = logfile)
 meta <- build_meta()
 
+# Keep the GLORIA documentation of this version (release notes, ReadMe) next to
+# the parsed data, so that the app can show it (tab "How it works")
+gdocs <- list.files(c(paths$raw, paths$input), sprintf("GLORIA_(ReadMe|ReleaseNotes)_0%d[.](xlsx|pdf)$", gloria_version),
+                    recursive = TRUE, full.names = TRUE)
+if (length(gdocs)) file.copy(gdocs, paths$meta, overwrite = FALSE)
+
 # --- Step 3: loop over years -------------------------------------------------------
 all_checks <- list()
 for (year in gloria_years) {

@@ -224,6 +224,7 @@ Caching: `load_var()` keeps small objects of all years in memory but only one $L
 - `result()` runs `run_calculation()` on *Calculate*, with a progress bar (percentage and remaining time); `result_formatted()` applies long/wide.
 - `output$checks_ui` shows the plausibility checks; `output$download` / `save_result` write the result (`R/export.R`).
 - `charts_server()` (`app/charts_tab.R`) draws the interactive plotly charts and exports static ggplot2 versions (PNG, JPEG, SVG, PDF).
+- `how_it_works_panel()` (`app/how_it_works.R`) links the guides (served from `docs/`) and the GLORIA release notes and ReadMe of the active version (served from `parsed/meta`, where `parser/run_parser.R` copies them).
 - `update_server()` (`app/update_tab.R`) handles the data folders, option A (compiled GLORIA from a folder, `R/share.R`) and option B (Google Drive download, `R/update.R`).
 
 ## Update function
