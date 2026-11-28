@@ -11,7 +11,70 @@ GLORIApp has three layers that can be used independently:
 2. **Engine** (`R/engine.R`): all footprint calculations on the parsed data. Pure R functions, no Shiny, usable from any script.
 3. **App** (`app/`): Shiny user interface on top of the engine, plus the update function (`R/update.R`, `update/update_gloria.R`).
 
-Dependencies: R >= 4.3 with `data.table`, `Matrix`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT` (app), `googledrive` (updates), `officer`, `mschart` (slides only). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
+Dependencies: R >= 4.3 with `data.table`, `Matrix`, `openxlsx`, `jsonlite` (parser/engine), `shiny`, `bslib`, `DT`, `markdown` (app), `googledrive` (updates), `officer`, `mschart` (slides only). The parser uses the `tar.exe` that ships with Windows 10+ to read zip files larger than 4 GB.
+
+# Architecture at a glance
+
+This chapter explains how the pieces fit together. It assumes R knowledge but **no Shiny knowledge**.
+
+## Data flow: from Google Drive to the csv file
+
+![Data flow of GLORIApp](fig_dataflow.png){width=100%}
+
+The work is split into two phases that are completely separate:
+
+1. **Preparation (once per GLORIA release, hours).** The parser reads the huge raw tables, computes the Leontief inverse $L$ and other matrices, and writes them to the data folder (`parsed/<year>/`). After that the raw data are deleted. This is the slow, memory-hungry part (~3 minutes and ~15 GB RAM per year).
+2. **Analysis (every time a user clicks Calculate, seconds).** The engine only *reads* the prepared files and does comparatively cheap matrix products and aggregations. It never touches the raw data.
+
+Because of this split, the engine can also be used without the app, from any R script (see *The engine*), and other tools (Python, Excel via csv) can work on the parsed files.
+
+The small, human-editable files that define *labels and groupings* live in the repository folder `input/` (concordances, indicator catalogue, GLORIA ReadMe). They are used by the parser (labels) and read again by the app at start-up, so a new grouping column added there appears in the app without re-parsing.
+
+## What runs where
+
+![Processes and components at run time](fig_runtime.png){width=100%}
+
+- The **web browser** only displays the user interface. It holds no data and does no calculation.
+- One **R process** runs the Shiny server. It is started with `shiny::runApp("app")` in RStudio or by `Start GLORIApp.exe` in the portable version. All calculations happen here, in `R/engine.R`.
+- Downloading and compiling a new GLORIA release runs in a **second, separate R process** (`update/update_gloria.R`). That way it can take hours without blocking the app, and it keeps running if the app is closed. The two processes only communicate through files: the data folder, and a log file that the app displays.
+
+## Shiny in five minutes
+
+Shiny is an R package that turns R code into a web application. A Shiny app consists of two parts:
+
+- **`ui`** (user interface): an R object that describes the web page, e.g. `selectInput("years", ...)` creates a drop-down whose current value is available in R as `input$years`, and `DT::DTOutput("table")` reserves space for a table called `table`. In GLORIApp the UI is defined in `app/full_app.R` (sidebar with the 7 steps, result tab, explanation tabs) and `app/update_tab.R` (tab *Data & updates*).
+- **`server`**: an R function `function(input, output, session)` that runs once for every browser window. It reads `input$...` values and fills outputs, e.g. `output$table <- DT::renderDT({ ... })`.
+
+The glue between the two is **reactivity**: Shiny remembers which inputs an expression uses and re-runs it automatically when one of them changes. GLORIApp uses three kinds of reactive building blocks:
+
+| Building block | Example in `app/full_app.R` | Behaviour |
+|---|---|---|
+| `reactive()` | `spec()` | collects all sidebar inputs into one list; recomputed whenever an input changes |
+| `eventReactive()` | `result()` | runs `run_calculation(spec())` **only** when the *Calculate* button is clicked |
+| `render...()` | `output$table`, `output$description` | produce what the browser shows; re-run when their inputs change |
+
+## What happens when the user clicks *Calculate*
+
+1. The browser sends the button click to the R process (`input$go` changes).
+2. `result()` reads `spec()`: a plain R list such as `list(type = "footprint", indicators = "ghg_edgar", years = 2019, origin_region = "world_region_7", ...)`.
+3. `result()` calls `run_calculation(spec, meta)` from `R/engine.R`. The engine loops over years and indicators, loads the needed files of each year from the data folder (with a small cache), calculates, aggregates with the chosen groupings and returns a long `data.table`.
+4. `result_formatted()` optionally reshapes it to wide format (`to_wide()`).
+5. `output$status`, `output$table` and `output$download_ui` re-run automatically. The browser shows the preview and the download button. *Download csv* writes the full table with `data.table::fwrite()`.
+
+The engine does not know about Shiny. Anything you can click in the app can be done in a script with the same specification list. This is the main design rule of the code: **user interface in `app/`, calculations in `R/engine.R`, texts in `R/texts.R`**.
+
+## Where to change what
+
+| I want to ... | File |
+|---|---|
+| change a label or help text in the app | `R/texts.R` (result types, help texts) or `nice_name()` in `app/full_app.R` |
+| add a recommended indicator | `input/indicator_catalogue.csv` |
+| add a region or sector grouping | new column in `input/concordances/regions.csv` / `sectors.csv` |
+| change or add a calculation | `R/engine.R` (and a test in `tests/test_pipeline.R`) |
+| add an input to the sidebar | UI part of `app/full_app.R` plus the field in `spec()` |
+| change how raw data are read | `parser/03_parse_year.R` |
+| change paths or the data folder | `config.R` or the environment variable `GLORIA_DATA_ROOT` |
+| change the download/update | `R/update.R`, `update/update_gloria.R`, `app/update_tab.R` |
 
 # Repository layout
 
