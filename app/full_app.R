@@ -379,17 +379,19 @@ server <- function(input, output, session) {
     head_txt <- if (n_fail > 0) sprintf("Plausibility checks: %d FAILED, %d passed", n_fail, n_ok)
                 else sprintf("Plausibility checks: all %d passed%s", n_ok,
                              if (n_skip > 0) sprintf(" (%d not applicable)", n_skip) else "")
-    tab <- copy(chk)[, `:=`(expected = signif(expected, 8), calculated = signif(calculated, 8),
-                            rel_difference = signif(rel_difference, 2))]
+    num <- function(v) vapply(v, function(z) if (is.na(z)) "-" else
+      format(signif(z, 8), big.mark = ",", scientific = FALSE, trim = TRUE), "")
+    tab <- chk[, .(Check = check, Year = ifelse(is.na(year), "all", as.character(year)), Indicator = indicator,
+                   Expected = num(expected), Calculated = num(calculated),
+                   `Rel. difference` = ifelse(is.na(rel_difference), "-", formatC(rel_difference, format = "e", digits = 1)),
+                   Status = status, Note = note)]
     div(class = cls,
         tags$details(
           tags$summary(tags$b(head_txt), " - click for details"),
           tags$p(class = "small mt-2",
                  "Input-output identities that must hold if the calculation is correct, e.g. the footprints of all",
                  "consumers add up to the total of the satellite account. Tolerance: 0.01 %."),
-          renderTable(tab[, .(Check = check, Year = year, Indicator = indicator, Expected = expected,
-                              Calculated = calculated, `Rel. difference` = rel_difference,
-                              Status = status, Note = note)], digits = 8)
+          div(class = "bg-white text-dark p-2 rounded small", renderTable(tab, striped = TRUE))
         ))
   })
 
