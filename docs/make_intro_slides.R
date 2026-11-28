@@ -169,13 +169,14 @@ ch <- chart_theme(ch, legend_position = "n", grid_major_line_y = fp_border(width
                   axis_text_y = fp_text(font.size = 13, color = col$text, font.family = BODY))
 ch <- chart_ax_x(ch, rotation = 0); ch <- chart_ax_y(ch, num_fmt = "0")
 doc <- ph_with(doc, ch, location = loc(0.8, 2.0, 7.6, 5.0, label = "Chart"))
-doc <- add_text(doc, 8.9, 2.4, 3.8, 3.6,
+doc <- add_text(doc, 8.9, 2.4, 3.9, 3.0,
                 par(tx("How to get this table", 17, col$dark, TRUE)),
-                par(tx("Result type: Footprint, where it happens", 14)),
+                par(tx("Step 1: Footprint", 14)),
                 par(tx("Indicator: Greenhouse gases (EDGAR)", 14)),
                 par(tx(paste("Year:", yr), 14)),
-                par(tx("Origin: 7 world regions; consumer: countries", 14)),
-                par(tx("Filter the csv for to_region = Austria", 14)),
+                par(tx("Production side, where: 7 world regions", 14)),
+                par(tx("Consumption side, where: countries", 14)),
+                par(tx("Filter consumption_region = Austria (Charts tab: Ranking)", 14)),
                 bg = col$light, label = "Recipe")
 
 # 6 Chart: income groups net imports
