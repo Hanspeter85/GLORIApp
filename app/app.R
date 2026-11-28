@@ -60,4 +60,14 @@ if (data_ready) {
   server <- function(input, output, session) update_server(input, output, session, root)
 }
 
+# Portable version (started by "Start GLORIApp.exe"): stop R when the browser
+# tab is closed, otherwise R would keep running invisibly in the background.
+if (identical(Sys.getenv("GLORIAPP_PORTABLE"), "1")) {
+  app_server <- server
+  server <- function(input, output, session) {
+    session$onSessionEnded(function() stopApp())
+    app_server(input, output, session)
+  }
+}
+
 shinyApp(ui, server)

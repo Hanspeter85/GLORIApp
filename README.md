@@ -31,7 +31,7 @@ The app has no charts on purpose: it produces clean tables for Excel, R, Python,
 1. Install **R** (>= 4.3) and **RStudio**.
 2. Install the R packages (once):
    ```r
-   install.packages(c("shiny", "bslib", "DT", "data.table", "Matrix", "openxlsx", "jsonlite", "googledrive"))
+   install.packages(c("shiny", "bslib", "DT", "data.table", "Matrix", "openxlsx", "jsonlite", "googledrive", "markdown"))
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 
@@ -107,6 +107,17 @@ shiny::runApp("app")
 or open `app/app.R` and click **Run App**. Results are computed on the fly; a
 footprint for one indicator and year takes a few seconds (the very detailed
 origin x final product breakdown 10-60 seconds).
+
+
+### Portable version (no R installation needed)
+
+`source("portable/build_portable.R")` builds the folder `../GLORIApp_portable`
+(and a zip of it, ~210 MB) with a copy of R, all needed packages, the app and a
+small launcher `Start GLORIApp.exe` (compiled from `portable/launcher.cs` with the
+C# compiler that ships with Windows). Users unpack the zip and double click the
+exe; the app opens in the browser and R stops when the browser tab is closed.
+The GLORIA data are not part of the bundle: copy the data folder to
+`C:/Users/<user>/Data/GLORIA` or use the tab *Data & updates*.
 
 ## 4. Repository structure
 

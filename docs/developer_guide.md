@@ -170,3 +170,7 @@ Builds a synthetic GLORIA (3 regions × 4 sectors) in the same raw format, runs 
 # Other languages
 
 The parsed files can be read without R: `.f32` with the snippet above, `.rds` via `pyreadr` (dense) or by re-exporting from R. For heavy use from Python, adding a parquet export to `parser/03_parse_year.R` is straightforward.
+
+# Portable version
+
+`portable/build_portable.R` copies the running R installation (R on Windows is relocatable), all packages the app needs with their dependencies (`tools::package_dependencies`), the app files and the guides into `../GLORIApp_portable`, compiles `portable/launcher.cs` into `Start GLORIApp.exe` with `csc.exe` (.NET Framework 4, part of Windows) and zips the folder. The launcher starts `R/bin/x64/Rscript.exe` with `R_LIBS_USER` pointing into the bundle and `GLORIAPP_PORTABLE=1`; in that mode `app/app.R` stops R when the browser session ends. Rebuild the bundle after every change to the app or after updating R/packages.
