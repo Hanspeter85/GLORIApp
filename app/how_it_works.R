@@ -31,6 +31,9 @@ how_it_works_panel <- function() {
         ),
         tags$b(sprintf("GLORIA v%d (data source)", gloria_version)),
         tags$ul(
+          tags$li(actionLink("goto_about", "About GLORIA (tab)"), " - what GLORIA is, who builds it (Global MRIO Lab, IELab), ",
+                  "and the two plain-English chapters of the release notes on MRIO-building and MRIO-based footprinting ",
+                  "by the GLORIA team (Lenzen et al.), as text in the app"),
           gloria_link(sprintf("GLORIA_ReleaseNotes_0%d.pdf", gloria_version), "Release notes (PDF)",
                       "methods, data sources, changes of this GLORIA version, licence and citation"),
           gloria_link(sprintf("GLORIA_ReadMe_0%d.xlsx", gloria_version), "ReadMe (Excel)",

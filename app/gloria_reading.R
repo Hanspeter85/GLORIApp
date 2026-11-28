@@ -6,15 +6,16 @@
 #    Ecology Virtual Laboratory (IELab), written for GLORIApp (based on the
 #    GLORIA release notes and the GLORIA publications).
 # 2. Three sections of the GLORIA release notes written by the GLORIA team
-#    (Manfred Lenzen et al., University of Sydney), shown as images of the
-#    original pages:
-#      "General explainer and disclaimer"
-#      "A plain-English short philosophy of MRIO-building"
+#    (Manfred Lenzen et al., University of Sydney), with full attribution:
+#      "A plain-English short philosophy of MRIO-building" and
 #      "A plain-English explanation of MRIO-based footprinting"
-#    They are NOT copied into GLORIApp: at start-up the app finds the pages in
-#    the release notes PDF of the GLORIA version in use (data folder,
-#    parsed/meta) and renders them once to PNG (parsed/meta/release_notes_pages/).
-#    Needs the R package pdftools; otherwise only a link to the PDF is shown.
+#        -> as text: verbatim copy of release 060 in app/gloria_plain_english.md
+#           (CC BY-NC 3.0 AU, reproduced with attribution)
+#      "General explainer and disclaimer" (many figures)
+#        -> as images of the original pages: at start-up the app finds the
+#           pages in the release notes PDF of the GLORIA version in use
+#           (parsed/meta) and renders them once to PNG
+#           (parsed/meta/release_notes_pages/). Needs the R package pdftools.
 # =============================================================================
 
 gloria_notes_file <- sprintf("GLORIA_ReleaseNotes_0%d.pdf", gloria_version)
@@ -47,7 +48,7 @@ gloria_reading_pages <- local({
   if (length(sections$building$pages) == 0) sections$building$pages <- b
   dir <- file.path(paths$meta, "release_notes_pages")
   dir.create(dir, showWarnings = FALSE)
-  for (p in unique(unlist(lapply(sections, `[[`, "pages")))) {
+  for (p in sections$explainer$pages) {        # the two chapters are shown as text
     png <- file.path(dir, sprintf("page_%02d.png", p))
     if (!file.exists(png)) {
       try(suppressWarnings(pdftools::pdf_convert(f, format = "png", pages = p, dpi = 130,
@@ -105,47 +106,57 @@ gloria_intro <- function() {
   )
 }
 
+# The two plain-English chapters as text (verbatim, from release 060; see
+# app/gloria_plain_english.md). The "General explainer and disclaimer" has many
+# figures and is shown as images of the original pages.
+gloria_text_file <- file.path(root, "app", "gloria_plain_english.md")
+
 gloria_reading_ui <- function() {
   sec <- gloria_reading_pages$sections
-  sec <- sec[vapply(sec, function(s) length(s$pages) > 0, TRUE)]
-  pages_txt <- if (length(sec)) paste(range(unlist(lapply(sec, `[[`, "pages"))), collapse = "-") else ""
-  src_note <- tags$p(class = "small text-muted mb-0",
-    sprintf(paste("Source of the pages below: Lenzen, M., Li, M., Wei, L., Fry, J. (ISA, The University of",
-                  "Sydney): GLORIA MRIO database, Release 0%d - release notes%s. Global MRIO Lab (University",
-                  "of Sydney, CSIRO, WU Vienna, UNSW Sydney), Creative Commons Attribution-NonCommercial",
-                  "(CC BY-NC 3.0 AU). These texts were written by the GLORIA team, not by the authors of",
-                  "GLORIApp - please cite them as such."),
-            gloria_version, if (nzchar(pages_txt)) paste0(", pages ", pages_txt) else ""),
-    if (file.exists(file.path(paths$meta, gloria_notes_file)))
-      tags$a(href = paste0("gloria_docs/", gloria_notes_file), target = "_blank",
-             "Open the complete release notes (PDF)."))
+  expl <- sec$explainer$pages
+  has_pdf <- file.exists(file.path(paths$meta, gloria_notes_file))
+  pdf_link <- if (has_pdf) tags$a(href = paste0("gloria_docs/", gloria_notes_file), target = "_blank",
+                                  "Open the complete release notes (PDF).")
+  src_note <- function(what) tags$p(class = "small text-muted mb-0",
+    tags$b("Source: "), what, " Lenzen, M., Li, M., Wei, L., Fry, J. (Integrated Sustainability Analysis,",
+    "The University of Sydney): GLORIA MRIO database, Release 060 (December 2024) - release notes.",
+    "Global MRIO Lab (University of Sydney, CSIRO, WU Vienna, UNSW Sydney). Licence: Creative Commons",
+    "Attribution-NonCommercial (CC BY-NC 3.0 AU). Reproduced unchanged with attribution - these texts were",
+    tags$b("written by the GLORIA team, not by the authors of GLORIApp;"), "please cite them as such.", pdf_link)
   page_img <- function(p) {
     tags$img(src = sprintf("gloria_docs/release_notes_pages/page_%02d.png", p),
              alt = sprintf("GLORIA release notes, page %d", p), class = "mb-4",
              style = "width: 100%; max-width: 900px; display: block; margin: auto; box-shadow: 0 1px 6px rgba(0,0,0,.15);")
   }
+  toc <- tags$ul(
+    tags$li(tags$a(href = "#gloria_sec_text", "A plain-English short philosophy of MRIO-building"), " (release notes p. 22-23)"),
+    tags$li(tags$a(href = "#gloria_sec_text", "A plain-English explanation of MRIO-based footprinting"), " (release notes p. 23-24)"),
+    if (length(expl))
+      tags$li(tags$a(href = "#gloria_sec_explainer", "General explainer and disclaimer"),
+              sprintf(" (release notes p. %s, shown as original pages)", paste(unique(range(expl)), collapse = "-"))))
   nav_panel(
     "About GLORIA",
     div(style = "max-width: 950px;",
       div(class = "alert alert-light", gloria_intro()),
-      if (length(sec) == 0) {
-        div(class = "alert alert-warning",
-            "The GLORIA release notes (or the R package pdftools) are not available, so the background",
-            "texts by the GLORIA team cannot be shown here.", src_note)
-      } else tagList(
-        div(class = "alert alert-light",
-            h4("Background reading by the GLORIA team"),
-            p("The GLORIA release notes contain short, very readable introductions written by the developers",
-              "of GLORIA. They are shown below as pages of the original document:"),
-            tags$ul(lapply(names(sec), function(s)
-              tags$li(tags$a(href = paste0("#gloria_sec_", s), sec[[s]]$title),
-                      sprintf(" (page%s %s)", if (length(sec[[s]]$pages) > 1) "s" else "",
-                              paste(unique(range(sec[[s]]$pages)), collapse = "-"))))),
-            src_note),
-        lapply(names(sec), function(s) tags$div(id = paste0("gloria_sec_", s),
-                                                lapply(sec[[s]]$pages, page_img))),
-        div(class = "alert alert-light", src_note)
-      )
+      div(class = "alert alert-light",
+          h4("Background reading by the GLORIA team"),
+          p("The GLORIA release notes contain short, very readable introductions written by the developers",
+            "of GLORIA:"), toc,
+          src_note("The following sections are taken from")),
+      if (file.exists(gloria_text_file))
+        div(id = "gloria_sec_text", class = "card card-body mb-3",
+            style = "border-left: 4px solid #8aa; background: #fbfcfc;",
+            p(class = "small text-muted", "Text by the GLORIA team (Lenzen et al.), GLORIA release notes,",
+              "Release 060, pages 22-24:"),
+            includeMarkdown(gloria_text_file),
+            src_note("")),
+      if (length(expl))
+        div(id = "gloria_sec_explainer",
+            h4("General explainer and disclaimer"),
+            p(class = "small text-muted", sprintf("Original pages %s of the GLORIA release notes (GLORIA team):",
+                                                 paste(unique(range(expl)), collapse = "-"))),
+            lapply(expl, page_img),
+            div(class = "alert alert-light", src_note("")))
     )
   )
 }

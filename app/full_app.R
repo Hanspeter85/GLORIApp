@@ -191,6 +191,7 @@ ui <- page_sidebar(
 
   # --- Main area: result and documentation ------------------------------------------
   navset_card_tab(
+    id = "main_tabs",
     nav_panel(
       "Result",
       uiOutput("description"),
@@ -217,6 +218,9 @@ server <- function(input, output, session) {
 
   # Tab "Data & updates" (see app/update_tab.R)
   update_server(input, output, session, root)
+
+  # Link in "How it works" -> tab "About GLORIA"
+  observeEvent(input$goto_about, nav_select("main_tabs", "About GLORIA"))
 
   # Tab "Charts" (see app/charts_tab.R) - uses result() defined further below;
   # reactives are evaluated lazily, so it can be referenced here.

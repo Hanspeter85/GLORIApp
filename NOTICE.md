@@ -23,6 +23,12 @@ https://creativecommons.org/licenses/by-nc/4.0/.
 ## GLORIA data
 
 GLORIApp does not contain GLORIA data; users obtain them from the GLORIA team.
+Exception: the file `app/gloria_plain_english.md` reproduces, unchanged and with
+attribution, two sections of the GLORIA release notes (Release 060, pages 22-24:
+"A plain-English short philosophy of MRIO-building" and "A plain-English
+explanation of MRIO-based footprinting"), written by the GLORIA team (Lenzen, M.,
+Li, M., Wei, L., Fry, J., ISA, The University of Sydney). This text is not covered
+by the GLORIApp licence; it remains under the licence of GLORIA (CC BY-NC 3.0 AU).
 GLORIA is created in the Global MRIO Lab (University of Sydney, CSIRO,
 Wirtschaftsuniversität Wien, UNSW Sydney) and is made available under a
 **Creative Commons Attribution-NonCommercial licence (CC BY-NC 3.0 AU,
