@@ -1,43 +1,63 @@
 # =============================================================================
-# R/update.R  -  Helper functions to download and compile new GLORIA releases
+# R/update.R  -  Download and compile new GLORIA releases from Google Drive
 # =============================================================================
 # Used by the "Data & updates" tab of the app and by update/update_gloria.R.
+# Only R packages are needed (googledrive from CRAN) - no extra programs.
 #
 # HOW AN UPDATE WORKS
 #   1. The GLORIA team publishes each release in a Google Drive folder
 #      (links on https://ielab.info/labs/ielab-gloria). The user pastes the
-#      link of the release folder.
-#   2. rclone (free tool, https://rclone.org) downloads ONLY the needed parts
-#      (MRIO in basic prices + satellite accounts + ReadMe) into
-#      <data_root>/v<version>/raw. Interrupted downloads simply continue.
-#   3. The parser (parser/run_parser.R) compiles all years.
-#   4. The new version becomes the active version of the app.
-# Steps 2-4 run in a separate background R process, so the app stays usable.
+#      link of the release folder into the app.
+#   2. The user connects the app to Google Drive once (browser login, read
+#      only). The login is stored on this PC (folder <data_root>/.google_token)
+#      so that the background process can use it too.
+#   3. Only the needed files are downloaded (MRIO tables in basic prices =
+#      part I, satellite accounts = part III, ReadMe, release notes) into
+#      <data_root>/v<version>/raw. Finished files are skipped, so an
+#      interrupted download simply continues when started again.
+#   4. The parser (parser/run_parser.R) compiles all years, deletes the raw
+#      files afterwards, and the new version becomes the active version.
+# Steps 3-4 run in a separate background R process, so the app stays usable.
 # Progress is written to a log file that the app displays.
-#
-# ONE-TIME SETUP (see README.md)
-#   - rclone.exe in C:/Users/<user>/Tools/ (or set RCLONE_EXE in ~/.Renviron)
-#   - Google Drive login for rclone:
-#       rclone config create gdrive drive scope=drive.readonly
 # =============================================================================
 
-rclone_path <- function() {
-  if (nzchar(download$rclone_exe) && file.exists(download$rclone_exe)) return(download$rclone_exe)
-  p <- Sys.which("rclone")
-  if (nzchar(p)) p else NA_character_
+# Where the Google login token is cached (shared by app and background process)
+google_token_dir <- function() file.path(data_root, ".google_token")
+
+# Configure googledrive: read-only access, token cache on this PC
+google_setup <- function(email = TRUE) {
+  if (!requireNamespace("googledrive", quietly = TRUE)) {
+    stop("The R package 'googledrive' is missing: install.packages(\"googledrive\")")
+  }
+  dir.create(google_token_dir(), recursive = TRUE, showWarnings = FALSE)
+  options(gargle_oauth_cache = google_token_dir(),
+          gargle_oauth_email = email)
 }
 
-# Is rclone installed and is the Google Drive remote configured?
-rclone_status <- function() {
-  exe <- rclone_path()
-  if (is.na(exe)) return(list(ok = FALSE, msg = "rclone not found. See README.md, section 'Updates'."))
-  remotes <- tryCatch(system2(exe, "listremotes", stdout = TRUE, stderr = TRUE), error = function(e) "")
-  if (!any(remotes == paste0(download$rclone_remote, ":"))) {
-    return(list(ok = FALSE, msg = sprintf(
-      "rclone found, but no Google Drive connection named '%s'. Run once in a terminal:  %s config create %s drive scope=drive.readonly",
-      download$rclone_remote, exe, download$rclone_remote)))
+# Interactive login (opens the browser). Call from the app or the console.
+google_login <- function() {
+  google_setup(email = NULL)
+  googledrive::drive_auth(scopes = "https://www.googleapis.com/auth/drive.readonly",
+                          cache = google_token_dir())
+  googledrive::drive_user()$emailAddress
+}
+
+# Non-interactive login with the cached token (background process).
+# Returns the e-mail address, or NA if there is no valid stored login.
+google_login_cached <- function() {
+  # no stored token at all -> not connected (and never open a browser here)
+  if (!dir.exists(google_token_dir()) || length(list.files(google_token_dir())) == 0) {
+    return(NA_character_)
   }
-  list(ok = TRUE, msg = "rclone and Google Drive connection are ready.")
+  google_setup(email = TRUE)
+  op <- options(rlang_interactive = FALSE)   # never start the browser login here
+  on.exit(options(op), add = TRUE)
+  ok <- tryCatch({
+    googledrive::drive_auth(scopes = "https://www.googleapis.com/auth/drive.readonly",
+                            cache = google_token_dir(), email = TRUE)
+    googledrive::drive_has_token()
+  }, error = function(e) FALSE)
+  if (isTRUE(ok)) googledrive::drive_user()$emailAddress else NA_character_
 }
 
 # Extract the folder id from a Google Drive link (or accept a bare id)
@@ -49,46 +69,84 @@ drive_folder_id <- function(link) {
   NA_character_
 }
 
-drive_remote <- function(folder_id) {
-  sprintf("%s,root_folder_id=%s:", download$rclone_remote, folder_id)
+# List all files below a Drive folder with their relative path and size.
+# max_depth limits the recursion (GLORIA releases are at most 2-3 levels deep).
+drive_list_files <- function(folder_id, path = "", max_depth = 4) {
+  items <- googledrive::drive_ls(googledrive::as_id(folder_id))
+  if (nrow(items) == 0) return(data.table(path = character(), id = character(), size = numeric()))
+  mime <- vapply(items$drive_resource, function(r) r$mimeType, "")
+  size <- vapply(items$drive_resource, function(r) as.numeric(r$size %||% NA), 0)
+  is_folder <- mime == "application/vnd.google-apps.folder"
+  files <- data.table(path = file.path(path, items$name[!is_folder]),
+                      id = as.character(items$id[!is_folder]), size = size[!is_folder])
+  files[, path := sub("^/", "", path)]
+  if (max_depth > 0) {
+    for (k in which(is_folder)) {
+      files <- rbind(files, drive_list_files(items$id[k], file.path(path, items$name[k]), max_depth - 1))
+    }
+  }
+  files
+}
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+# Which files of a release are needed? ReadMe, release notes, part I and III
+# of the given version (a folder may contain several versions, e.g. 059a + 060)
+needed_files <- function(files, version) {
+  v <- sprintf("0%d", version)
+  files[grepl(sprintf("GLORIA_(ReadMe|ReleaseNotes)_%s", v), basename(path)) |
+          grepl(sprintf("Loop%s_part_(I|III)_", v), path)]
 }
 
-# List the files of a release folder on Google Drive and detect the version
+# Look into a release folder: which version, which files, how big?
 inspect_drive_folder <- function(folder_id) {
-  exe <- rclone_path()
-  out <- system2(exe, c("lsf", shQuote(drive_remote(folder_id)), "-R", "--max-depth", "2",
-                        "--format", "sp", "--separator", shQuote(";")),
-                 stdout = TRUE, stderr = TRUE)
-  st <- attr(out, "status")
-  if (!is.null(st) && st != 0) stop(paste(out, collapse = "\n"))
-  files <- data.table::fread(text = paste(out, collapse = "\n"), sep = ";", header = FALSE,
-                             col.names = c("size", "path"))
-  # A folder may contain several releases (e.g. 059a and 060): take the newest
+  files <- drive_list_files(folder_id)
   v <- regmatches(files$path, regexpr("GLORIA_ReadMe_0\\d+", files$path))
   version <- if (length(v)) max(as.integer(sub("GLORIA_ReadMe_0", "", v))) else NA_integer_
-  vv <- sprintf("0%d", version)
-  files[, needed := grepl(sprintf("GLORIA_(ReadMe|ReleaseNotes)_%s", vv), path) |
-          grepl(sprintf("Loop%s_part_(I|III)_", vv), path)]
-  list(version = version, files = files,
-       download_gb = round(sum(files$size[files$needed & files$size > 0]) / 1e9, 1))
+  need <- if (is.na(version)) files[0] else needed_files(files, version)
+  list(version = version, files = files, needed = need,
+       download_gb = round(sum(need$size, na.rm = TRUE) / 1e9, 1))
+}
+
+# Download a set of files (rows of drive_list_files) into raw_dir.
+# - files that already exist with the right size are skipped (resume)
+# - each file is first written as *.partial and renamed when complete
+# - every file is tried up to 3 times
+download_files <- function(files, raw_dir, log = message) {
+  for (i in seq_len(nrow(files))) {
+    f <- files[i]
+    dest <- file.path(raw_dir, f$path)
+    if (file.exists(dest) && (is.na(f$size) || file.size(dest) == f$size)) next
+    dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
+    tmp <- paste0(dest, ".partial")
+    for (attempt in 1:3) {
+      log(sprintf("downloading %s (%.2f GB), attempt %d", f$path, f$size / 1e9, attempt))
+      ok <- tryCatch({
+        googledrive::drive_download(googledrive::as_id(f$id), path = tmp, overwrite = TRUE, verbose = FALSE)
+        is.na(f$size) || file.size(tmp) == f$size
+      }, error = function(e) { log("  error: ", conditionMessage(e)); FALSE })
+      if (ok) { file.rename(tmp, dest); break }
+      Sys.sleep(10 * attempt)
+    }
+    if (!file.exists(dest)) stop("Download failed three times: ", f$path, ". Start the update again later.")
+  }
+  invisible(TRUE)
 }
 
 # Installed (parsed) versions in data_root
 installed_versions <- function() {
   d <- list.dirs(data_root, full.names = FALSE, recursive = FALSE)
   d <- d[grepl("^v\\d+$", d)]
-  if (length(d) == 0) return(data.table::data.table())
-  active <- gloria_version
-  data.table::rbindlist(lapply(d, function(v) {
+  if (length(d) == 0) return(data.table())
+  rbindlist(lapply(d, function(v) {
     p <- file.path(data_root, v, "parsed")
     yrs <- suppressWarnings(as.integer(list.dirs(p, full.names = FALSE, recursive = FALSE)))
     yrs <- yrs[!is.na(yrs)]
     yrs <- yrs[file.exists(file.path(p, yrs, "_DONE"))]
-    data.table::data.table(
+    data.table(
       version = as.integer(sub("v", "", v)),
       parsed_years = if (length(yrs)) sprintf("%d (%d-%d)", length(yrs), min(yrs), max(yrs)) else "none",
       ready_for_app = file.exists(file.path(p, "meta", "meta.rds")) && length(yrs) > 0,
-      active = as.integer(sub("v", "", v)) == active)
+      active = as.integer(sub("v", "", v)) == gloria_version)
   }))
 }
 

@@ -1,8 +1,9 @@
 # =============================================================================
 # app/update_tab.R  -  Tab "Data & updates": install new GLORIA releases
 # =============================================================================
-# UI and server part of the update function. The work itself is done by
-# update/update_gloria.R in a background R process (see R/update.R).
+# UI and server part of the update function. The download and compilation
+# run in a background R process (update/update_gloria.R, see R/update.R).
+# Only R packages are used (googledrive), no extra programs.
 # =============================================================================
 
 update_ui <- function() {
@@ -16,15 +17,22 @@ update_ui <- function() {
     p("New GLORIA releases are published by the Industrial Ecology Virtual Laboratory",
       "(University of Sydney) as Google Drive folders, see",
       tags$a("ielab.info/labs/ielab-gloria", href = "https://ielab.info/labs/ielab-gloria", target = "_blank"),
-      ". Paste the link of the release folder below. Only the needed parts are downloaded",
-      "(MRIO tables in basic prices and satellite accounts, roughly 50-100 GB),",
-      "then all years are compiled. Downloading and compiling take several hours;",
-      "the app can be used (or closed) meanwhile. If the process is interrupted,",
-      "just start it again: finished downloads and years are skipped."),
-    uiOutput("upd_rclone"),
-    textInput("upd_link", "Google Drive link of the release folder", width = "100%",
+      ". Only the needed parts are downloaded (MRIO tables in basic prices and satellite",
+      "accounts, about 5.5 GB per year). The release is processed year by year",
+      "(download, compile, delete the raw files), so at most ~10 GB of raw data are",
+      "on disk at any time. A full release takes several hours; the app can be used",
+      "(or closed) meanwhile. If the process is interrupted, start it again:",
+      "finished years are skipped."),
+    tags$b("Step 1: connect to Google Drive (once per PC)"),
+    uiOutput("upd_google"),
+    actionButton("upd_login", "Connect Google Drive", icon = icon("google")),
+    tags$p(class = "small text-muted mt-1",
+           "Opens the Google login in your browser. Read-only access; the login is stored in",
+           code(file.path(data_root, ".google_token")), "."),
+    tags$b("Step 2: paste the link of the release folder"),
+    textInput("upd_link", NULL, width = "100%",
               placeholder = "https://drive.google.com/drive/folders/..."),
-    actionButton("upd_check", "1. Check folder", icon = icon("magnifying-glass")),
+    actionButton("upd_check", "Check folder", icon = icon("magnifying-glass")),
     uiOutput("upd_check_result"),
     hr(),
     h4("Progress of the latest update"),
@@ -33,7 +41,7 @@ update_ui <- function() {
 }
 
 update_server <- function(input, output, session, repo_root) {
-  rv <- reactiveValues(check = NULL, log = NULL, refresh = 0)
+  rv <- reactiveValues(check = NULL, log = NULL, refresh = 0, email = NULL)
 
   output$upd_versions <- renderTable({
     rv$refresh
@@ -59,18 +67,36 @@ update_server <- function(input, output, session, repo_root) {
                      type = "message", duration = NULL)
   })
 
-  output$upd_rclone <- renderUI({
-    st <- rclone_status()
-    div(class = if (st$ok) "alert alert-success" else "alert alert-warning",
-        st$msg, tags$br(), sprintf("Free disk space for the data folder (%s): %s GB",
-                                   data_root, free_disk_gb()))
+  # --- Google Drive connection ----------------------------------------------------------
+  output$upd_google <- renderUI({
+    rv$refresh
+    if (!requireNamespace("googledrive", quietly = TRUE)) {
+      return(div(class = "alert alert-warning",
+                 "The R package 'googledrive' is missing. Run in the R console: install.packages(\"googledrive\")"))
+    }
+    email <- if (!is.null(rv$email)) rv$email else google_login_cached()
+    if (is.na(email)) div(class = "alert alert-warning", "Not connected to Google Drive yet.")
+    else div(class = "alert alert-success",
+             sprintf("Connected to Google Drive as %s. Free disk space: %s GB", email, free_disk_gb()))
+  })
+  observeEvent(input$upd_login, {
+    res <- tryCatch(google_login(), error = function(e) {
+      showNotification(paste("Google login failed:", conditionMessage(e)), type = "error", duration = NULL)
+      NA_character_
+    })
+    rv$email <- res
+    rv$refresh <- rv$refresh + 1
   })
 
-  # Step 1: look into the Drive folder (which version? how big?)
+  # --- Look into the Drive folder (which version? how big?) -----------------------------
   observeEvent(input$upd_check, {
     id <- drive_folder_id(input$upd_link)
     if (is.na(id)) {
       rv$check <- list(error = "This does not look like a Google Drive folder link.")
+      return()
+    }
+    if (is.na(google_login_cached())) {
+      rv$check <- list(error = "Please connect to Google Drive first (step 1).")
       return()
     }
     rv$check <- withProgress(message = "Reading the Drive folder ...", {
@@ -82,23 +108,23 @@ update_server <- function(input, output, session, repo_root) {
   output$upd_check_result <- renderUI({
     ck <- rv$check
     if (is.null(ck)) return(NULL)
-    if (!is.null(ck$error)) return(div(class = "alert alert-danger", ck$error))
-    if (is.na(ck$version)) return(div(class = "alert alert-danger",
+    if (!is.null(ck$error)) return(div(class = "alert alert-danger mt-2", ck$error))
+    if (is.na(ck$version)) return(div(class = "alert alert-danger mt-2",
                                       "No GLORIA ReadMe found in this folder - is it a GLORIA release?"))
     inst <- installed_versions()
     already <- nrow(inst) > 0 && ck$version %in% inst$version
     tagList(
-      div(class = "alert alert-info",
-          sprintf("Found GLORIA version %d. Files to download: %d (about %s GB).",
-                  ck$version, sum(ck$files$needed), ck$download_gb),
-          if (already) tags$p(tags$b("This version is already (partly) installed: only missing files and years will be processed."))),
-      actionButton("upd_start", sprintf("2. Download and compile v%d", ck$version),
+      div(class = "alert alert-info mt-2",
+          sprintf("Found GLORIA version %d. Files to download: %d (about %s GB in total, processed year by year).",
+                  ck$version, nrow(ck$needed), ck$download_gb),
+          if (already) tags$p(tags$b("This version is already (partly) installed: only missing years will be processed."))),
+      actionButton("upd_start", sprintf("Step 3: download and compile v%d", ck$version),
                    class = "btn-primary", icon = icon("download")),
-      checkboxInput("upd_download_only", "Download only (compile later)", FALSE)
+      checkboxInput("upd_download_only", "Download only (compile later with parser/run_parser.R)", FALSE)
     )
   })
 
-  # Step 2: start the background process
+  # Start the background process
   observeEvent(input$upd_start, {
     ck <- rv$check
     rv$log <- start_update(ck$id, ck$version, repo_root = repo_root,

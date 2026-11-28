@@ -31,7 +31,7 @@ The app has no charts on purpose: it produces clean tables for Excel, R, Python,
 1. Install **R** (>= 4.3) and **RStudio**.
 2. Install the R packages (once):
    ```r
-   install.packages(c("shiny", "bslib", "DT", "data.table", "Matrix", "openxlsx", "jsonlite"))
+   install.packages(c("shiny", "bslib", "DT", "data.table", "Matrix", "openxlsx", "jsonlite", "googledrive"))
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 
@@ -56,74 +56,59 @@ C:/Users/<user>/Data/GLORIA/
 To use another folder, add `GLORIA_DATA_ROOT=D:/somewhere/GLORIA` to the file
 `~/.Renviron` (in R: `usethis::edit_r_environ()` or `file.edit("~/.Renviron")`).
 
-## 2. Getting the GLORIA data
+## 2. Getting and compiling the GLORIA data
 
 GLORIA releases are distributed as Google Drive folders by the Industrial Ecology
 Virtual Laboratory (https://ielab.info/labs/ielab-gloria). Only two parts are needed:
-**part I** (MRIO tables in basic prices) and **part III** (satellite accounts).
+**part I** (MRIO tables in basic prices, ~5.5 GB per year) and **part III**
+(satellite accounts).
 
-Downloads are done with **rclone**, a free command line tool that handles huge
-Google Drive folders reliably (the browser download often breaks):
+Everything is done inside the app (tab **Data & updates**), using only the R
+package `googledrive` - no extra programs:
 
-1. Download `rclone-current-windows-amd64.zip` from https://rclone.org/downloads/ ,
-   unzip it and put `rclone.exe` into `C:/Users/<user>/Tools/`
-   (other location: set `RCLONE_EXE=...` in `~/.Renviron`).
-2. Connect rclone to Google Drive once (opens a browser window for the login):
-   ```powershell
-   C:\Users\<user>\Tools\rclone.exe config create gdrive drive scope=drive.readonly
-   ```
-3. Then either use the app (tab **Data & updates**, see below) or download by hand:
-   ```powershell
-   C:\Users\<user>\Tools\rclone.exe copy "gdrive,root_folder_id=<FOLDER-ID>:" "C:\Users\<user>\Data\GLORIA\v60\raw" --progress --transfers 4 --drive-acknowledge-abuse --include "GLORIA_ReadMe_060*.xlsx" --include "*Loop060_part_I_*/**" --include "*Loop060_part_III_*/**"
-   ```
-   `<FOLDER-ID>` is the part of the Drive link after `/folders/`. If the download
-   breaks, run the same command again: finished files are skipped.
+1. **Connect Google Drive** (once per PC): opens the Google login in the browser,
+   read-only access. The login is stored in `<data>/.google_token`.
+2. Paste the link of the release folder and click **Check folder** (shows the
+   version found and the download size).
+3. Click **Download and compile**. The release is processed year by year in a
+   background R process: download one year, compile it, delete its raw files.
+   So at most ~10 GB of raw data are on disk at any time. A full release takes
+   several hours (mostly download time; compiling takes ~3 minutes per year).
+   Progress is shown in the tab; logs are in `<data>/v<version>/logs/`.
+4. When all years are done, the new version becomes the active version; restart
+   the app. Several versions can be installed side by side and switched in the tab.
 
-## 3. Compiling (parsing) the data
+If the process is interrupted (PC off, network), just start it again: finished
+years are skipped and interrupted downloads restart.
 
-In RStudio (working directory = repo root):
+The same works without the app (after connecting Google Drive once):
 
-```r
-source("parser/run_parser.R")
+```powershell
+Rscript update/update_gloria.R <FOLDER-ID> <VERSION>
 ```
 
-This takes roughly 10-20 minutes per year (all 39 years: one night). The parser
-is resumable: finished years are skipped, so it can be interrupted and restarted.
-Plausibility checks for every year are written to `parsed/checks_all_years.csv`
-(e.g. `output_reproduced_by_L` must be 1).
+If the raw zip files are already on disk (e.g. downloaded by hand into
+`<data>/v<version>/raw`), compile them in RStudio with
+`source("parser/run_parser.R")`. Finished years are skipped, plausibility checks
+for every year are written to `parsed/checks_all_years.csv`
+(`output_reproduced_by_L` must be 1), and the raw files are deleted when all years
+are done.
 
-## 4. Running the app
+If a new release changes the regions or sectors, the concordances in
+`input/concordances/` are rebuilt automatically. New satellite indicators can be
+added to the recommended list in `input/indicator_catalogue.csv`.
+
+## 3. Running the app
 
 ```r
 shiny::runApp("app")
 ```
 
 or open `app/app.R` and click **Run App**. Results are computed on the fly; a
-footprint for one indicator and year takes a few seconds.
+footprint for one indicator and year takes a few seconds (the very detailed
+origin x final product breakdown 10-60 seconds).
 
-## 5. Updating to a new GLORIA release
-
-In the app, tab **Data & updates**:
-
-1. paste the Google Drive link of the new release folder and click **Check folder**
-   (shows the version found and the download size),
-2. click **Download and compile**. Download and parsing run in the background
-   (several hours); progress is shown in the tab, the log file is in
-   `<data>/v<version>/logs/`,
-3. when finished, the new version is activated; restart the app.
-
-Several versions can be installed side by side and switched in the same tab.
-The same is possible without the app:
-
-```powershell
-Rscript update/update_gloria.R <FOLDER-ID> <VERSION>
-```
-
-If a new release changes the regions or sectors, the concordances in
-`input/concordances/` are rebuilt automatically. New satellite indicators can be
-added to the recommended list in `input/indicator_catalogue.csv`.
-
-## 6. Repository structure
+## 4. Repository structure
 
 | Path | Content |
 |---|---|
@@ -134,7 +119,7 @@ added to the recommended list in `input/indicator_catalogue.csv`.
 | `R/engine.R` | all calculations (footprints, TiVA, aggregation); usable without the app |
 | `R/functions_io.R` | reading/writing helpers, aggregation helpers |
 | `R/texts.R` | all explanatory texts of the app |
-| `R/update.R` | download helpers (rclone) |
+| `R/update.R` | Google Drive download helpers (package googledrive) |
 | `parser/` | parser: concordances, metadata, one year, run all years |
 | `update/update_gloria.R` | download + parse + activate a release (command line) |
 | `input/concordances/regions.csv` | region groupings - **add a column to get a new aggregation in the app** |
@@ -144,7 +129,7 @@ added to the recommended list in `input/indicator_catalogue.csv`.
 | `legacy/` | original v059 scripts of GLORIA-MRIO_Parser |
 | `docs/` | material for the introduction session |
 
-## 7. Using the engine from R scripts
+## 5. Using the engine from R scripts
 
 ```r
 source("config.R"); source("R/functions_io.R"); source("R/engine.R")
@@ -157,7 +142,7 @@ res <- run_calculation(list(
 fwrite(res, "my_footprints.csv")
 ```
 
-## 8. Method in brief
+## 6. Method in brief
 
 Standard environmentally-extended MRIO analysis, same as in `GLORIA-MRIO_Parser`:
 `Z` = use block of the GLORIA supply-use table (products x industries, treated as

@@ -53,28 +53,6 @@ paths <- list(
   input     = Sys.getenv("GLORIA_INPUT_DIR", unset = "input")
 )
 
-# --- Download settings (used by the update function) ---------------------------------
-download <- list(
-  # rclone = free command line tool for Google Drive downloads (https://rclone.org).
-  # Path to rclone.exe; if empty, rclone must be on the system PATH.
-  rclone_exe = Sys.getenv("RCLONE_EXE",
-                          unset = file.path(Sys.getenv("USERPROFILE"), "Tools", "rclone.exe")),
-  # Name of the rclone remote for Google Drive (created once with
-  #   rclone config create gdrive drive scope=drive.readonly )
-  rclone_remote = "gdrive",
-  # Only these parts of a GLORIA release are needed (rclone filter rules):
-  # part I = MRIO tables in basic prices, part III = satellite accounts,
-  # plus ReadMe (xlsx) and release notes (pdf) of THIS version only.
-  # A pattern without leading "/" matches at any folder depth; "**" = any sub path.
-  include = function(version) {
-    v <- sprintf("0%d", version)
-    c(sprintf("GLORIA_ReadMe_%s*.xlsx", v),
-      sprintf("GLORIA_ReleaseNotes_%s*.pdf", v),
-      sprintf("*Loop%s_part_I_*/**", v),  sprintf("*Loop%s_part_I_*.zip", v),
-      sprintf("*Loop%s_part_III_*/**", v), sprintf("*Loop%s_part_III_*.zip", v))
-  }
-)
-
 # --- Parser options -----------------------------------------------------------
 parser_options <- list(
   # Store the Leontief inverse L? (~1.55 GB per year as float32).
