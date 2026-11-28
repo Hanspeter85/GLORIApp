@@ -59,7 +59,7 @@ The glue between the two is **reactivity**: Shiny remembers which inputs an expr
 2. `result()` reads `spec()`: a plain R list such as `list(type = "footprint", indicators = "ghg_edgar", years = 2019, production_region = "world_region_7", ...)`.
 3. `result()` calls `run_calculation(spec, meta)` from `R/engine.R`. The engine loops over years and indicators, loads the needed files of each year from the data folder (with a small cache), calculates, aggregates with the chosen groupings and returns a long `data.table`.
 4. `result_formatted()` optionally reshapes it to wide format (`to_wide()`).
-5. `output$status`, `output$table` and `output$download_ui` re-run automatically. The browser shows the preview and the download button. *Download csv* writes the full table with `data.table::fwrite()`.
+5. `output$status`, `output$table` and `output$download_ui` re-run automatically. The browser shows the preview and the download button. *Download* writes the full table in the chosen format with `write_result_file()` (`R/export.R`); *Save in folder* writes it directly into the folder of step 7. The plausibility checks (`attr(res, "checks")`) are shown below the result, and the tab *Charts* (`app/charts_tab.R`) plots the same table.
 
 The engine does not know about Shiny. Anything you can click in the app can be done in a script with the same specification list. This is the main design rule of the code: **user interface in `app/`, calculations in `R/engine.R`, texts in `R/texts.R`**.
 
@@ -86,7 +86,8 @@ The engine does not know about Shiny. Anything you can click in the app can be d
 | `R/engine.R` | calculation engine (footprints, production, overview, gross exports) |
 | `R/texts.R` | all user-facing texts of the app |
 | `R/export.R` | writing results as csv, csv for German Excel, xlsx or tab-separated text |
-| `R/update.R` | Google Drive helpers, installed versions, background update start |
+| `R/update.R` | Google Drive helpers, data folders, installed versions, background update start |
+| `R/share.R` | sharing a compiled GLORIA: manifest, folder detection, completeness check |
 | `parser/01_build_concordances.R` | builds `input/concordances/regions.csv` and `sectors.csv` |
 | `parser/02_build_meta.R` | builds `meta.rds` (labels, index tables, indicator catalogue) |
 | `parser/03_parse_year.R` | parses one year |
@@ -220,7 +221,10 @@ Caching: `load_var()` keeps small objects of all years in memory but only one $L
 
 - `spec()` collects all inputs into the engine specification; `describe_spec()` (R/texts.R) shows it in plain language.
 - `meta_r()` adds the column `own_grouping` to regions/sectors from the groups defined in step 6 (stored as a table kind/group/member, saved/loaded as csv).
-- `result()` runs `run_calculation()` with a progress bar on *Calculate*; `result_formatted()` applies long/wide.
+- `result()` runs `run_calculation()` on *Calculate*, with a progress bar (percentage and remaining time); `result_formatted()` applies long/wide.
+- `output$checks_ui` shows the plausibility checks; `output$download` / `save_result` write the result (`R/export.R`).
+- `charts_server()` (`app/charts_tab.R`) draws the interactive plotly charts and exports static ggplot2 versions (PNG, JPEG, SVG, PDF).
+- `update_server()` (`app/update_tab.R`) handles the data folders, option A (compiled GLORIA from a folder, `R/share.R`) and option B (Google Drive download, `R/update.R`).
 
 ## Update function
 

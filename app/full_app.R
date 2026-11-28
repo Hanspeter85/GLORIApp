@@ -201,7 +201,7 @@ ui <- page_sidebar(
     charts_ui(),
     nav_panel("Indicator explanations", DT::DTOutput("catalogue")),
     update_ui(),
-    nav_panel("How it works", includeMarkdown(file.path(root, "app", "help.md")))
+    how_it_works_panel()
   )
 )
 

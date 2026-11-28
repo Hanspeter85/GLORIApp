@@ -10,7 +10,7 @@
 #
 # STRUCTURE OF THIS FILE
 #   1. Setup: load settings, helper functions and metadata
-#   2. User interface (UI): the sidebar with the 6 steps and the result tabs
+#   2. User interface (UI): see app/full_app.R (sidebar with 7 steps, tabs)
 #   3. Server: reacts to the user's choices, runs the calculation, offers
 #      the download
 # The actual calculations are in R/engine.R.
@@ -39,6 +39,7 @@ source(file.path(root, "R", "update.R"), local = TRUE)
 source(file.path(root, "R", "share.R"), local = TRUE)
 source(file.path(root, "app", "update_tab.R"), local = TRUE)
 source(file.path(root, "app", "charts_tab.R"), local = TRUE)
+source(file.path(root, "app", "how_it_works.R"), local = TRUE)
 
 # Metadata created by the parser (labels, concordances, indicator catalogue).
 meta_file <- file.path(paths$meta, "meta.rds")
@@ -59,7 +60,7 @@ if (data_ready) {
       "from Box - option A) or download and compile it from Google Drive (option B; or run",
       tags$code("parser/run_parser.R"), "if the raw data are already downloaded).")),
     update_ui(),
-    nav_panel("How it works", includeMarkdown(file.path(root, "app", "help.md")))
+    how_it_works_panel()
   )
   server <- function(input, output, session) update_server(input, output, session, root)
 }

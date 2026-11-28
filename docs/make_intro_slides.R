@@ -275,8 +275,9 @@ doc <- new_slide(doc, dark = TRUE)
 doc <- title(doc, "Getting started", dark = TRUE)
 doc <- add_text(doc, 0.8, 1.8, 11.7, 4.5,
                 par(tx("Start the app: ", 18, col$moss, TRUE), tx("open GLORIApp.Rproj in RStudio, then shiny::runApp(\"app\")", 18, col$white)),
-                par(tx("New GLORIA release: ", 18, col$moss, TRUE), tx("tab 'Data & updates' - paste the Google Drive link, download and compile run in the background", 18, col$white)),
-                par(tx("Own aggregations: ", 18, col$moss, TRUE), tx("add a column to input/concordances/regions.csv or sectors.csv", 18, col$white)),
+                par(tx("GLORIA data: ", 18, col$moss, TRUE), tx("tab 'Data & updates' - point to a compiled GLORIA folder (e.g. from Box) or download and compile from Google Drive", 18, col$white)),
+                par(tx("Results: ", 18, col$moss, TRUE), tx("csv, Excel or text; charts as PNG, SVG or PDF; plausibility checks below every result", 18, col$white)),
+                par(tx("Own aggregations: ", 18, col$moss, TRUE), tx("in the app (step 6) or as a new column in input/concordances/regions.csv or sectors.csv", 18, col$white)),
                 par(tx("Scripts: ", 18, col$moss, TRUE), tx("R/engine.R works without the app - see README.md", 18, col$white)),
                 label = "Getting started")
 doc <- add_text(doc, 0.8, 6.4, 11.7, 0.6,

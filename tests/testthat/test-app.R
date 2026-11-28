@@ -5,7 +5,7 @@ local({
   root <- REPO
   meta_file <- file.path(paths$meta, "meta.rds")
   suppressPackageStartupMessages({ library(shiny); library(bslib) })
-  for (f in c("R/texts.R", "R/export.R", "app/update_tab.R", "app/charts_tab.R", "app/full_app.R")) {
+  for (f in c("R/texts.R", "R/export.R", "app/update_tab.R", "app/charts_tab.R", "app/how_it_works.R", "app/full_app.R")) {
     source(file.path(REPO, f), local = environment())
   }
   assign("server", server, envir = app_env)
@@ -14,6 +14,10 @@ local({
 
 test_that("the user interface can be built", {
   expect_s3_class(app_env$ui, "shiny.tag.list")
+  # links to the documentation in the tab "How it works"
+  html <- as.character(app_env$ui)
+  expect_true(grepl("docs/GLORIApp_user_guide.docx", html, fixed = TRUE))
+  expect_true(grepl("docs/GLORIApp_developer_guide.docx", html, fixed = TRUE))
 })
 
 test_that("clicking Calculate produces a result with passing checks", {

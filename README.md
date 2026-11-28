@@ -33,6 +33,7 @@ gives a quick interactive look at the result (ranking, time series, composition)
 2. Install the R packages (once):
    ```r
    install.packages(c("shiny", "bslib", "DT", "plotly", "ggplot2", "data.table", "Matrix", "arrow", "openxlsx", "jsonlite", "googledrive", "markdown"))
+   # optional: install.packages(c("testthat", "officer", "mschart"))  # tests and intro slides
    ```
 3. Clone this repository and open `GLORIApp.Rproj` in RStudio.
 
@@ -148,19 +149,22 @@ The GLORIA data are not part of the bundle: copy the data folder to
 |---|---|
 | `config.R` | all paths and settings (single place to change) |
 | `app/app.R`, `app/full_app.R` | Shiny user interface and server |
+| `app/charts_tab.R` | tab "Charts" (interactive charts, image export) |
 | `app/update_tab.R` | tab "Data & updates" |
 | `app/help.md` | "How it works" page of the app |
 | `R/engine.R` | all calculations (footprints, production, overview, aggregation, plausibility checks); usable without the app |
 | `R/export.R` | download formats (csv, csv for German Excel, xlsx, txt) |
 | `R/functions_io.R` | reading/writing helpers, aggregation helpers |
 | `R/texts.R` | all explanatory texts of the app |
-| `R/update.R` | Google Drive download helpers (package googledrive) |
+| `R/update.R` | Google Drive download helpers (package googledrive), data folders |
+| `R/share.R` | using/sharing an already compiled GLORIA (manifest, completeness check) |
 | `parser/` | parser: concordances, metadata, one year, run all years |
 | `update/update_gloria.R` | download + parse + activate a release (command line) |
 | `input/concordances/regions.csv` | region groupings - **add a column to get a new aggregation in the app** |
 | `input/concordances/sectors.csv` | sector groupings - same |
 | `input/indicator_catalogue.csv` | recommended indicators with explanations |
 | `tests/run_tests.R`, `tests/testthat/` | unit tests (testthat) on a mini GLORIA (3 regions x 4 sectors) |
+| `portable/` | build script and launcher for the portable version (no R installation needed) |
 | `legacy/` | original v059 scripts of GLORIA-MRIO_Parser |
 | `docs/` | user and developer guides (Markdown + Word via `docs/build_docs.R`), intro slides and exercises |
 
